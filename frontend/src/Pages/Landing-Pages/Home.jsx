@@ -1,4 +1,4 @@
-import '../../Styles/Pages/Landing-Pages/Home.less';
+import '../../Styles/Pages/Landing-Pages/Home.css';
 
 export const Home = () => {
     return (

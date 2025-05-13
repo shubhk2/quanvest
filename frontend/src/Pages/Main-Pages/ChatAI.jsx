@@ -1,4 +1,4 @@
-import '../../Styles/Pages/Main-Pages/ChatAI.less';
+import '../../Styles/Pages/Main-Pages/ChatAI.css';
 
 export const ChatAI = () => {
     return (

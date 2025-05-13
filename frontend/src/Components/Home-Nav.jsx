@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom"
-import '../Styles/Components/Home-Nav.less';
+import '../Styles/Components/Home-Nav.css';
 
 export const HomeNav = () => {
     return (
         <div className="home-nav">
             <Link to={"/"}>
-                <button>Quinvest</button>
+                <button>Quanvest</button>
             </Link>
             <Link to={"/signin"}>
                 <button>

@@ -1,4 +1,4 @@
-import '../../Styles/Pages/Landing-Pages/Signup.less';
+import '../../Styles/Pages/Landing-Pages/Signup.css';
 
 export const Signup = () => {
     return (

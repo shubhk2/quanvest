@@ -1,4 +1,4 @@
-import '../../Styles/Pages/Landing-Pages/Signout.less';
+import '../../Styles/Pages/Landing-Pages/Signout.css';
 
 export const Signout = () => {
     return (

@@ -1,0 +1,6 @@
+button {
+    background-color: var(--surface-secondary);
+    color: var(--color-text);
+    padding: 10px 20px;
+    border-radius: 5px;
+}

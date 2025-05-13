@@ -1,4 +1,4 @@
-import '../../Styles/Pages/Landing-Pages/Signin.less';
+import '../../Styles/Pages/Landing-Pages/Signin.css';
 
 export const Signin = () => {
     return (
