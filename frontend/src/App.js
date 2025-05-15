@@ -1,11 +1,9 @@
-import { HomeNav } from './Components/Home-Nav';
-import { HomeRoutes } from './Routes/HomeRoutes';
+import { AppRoutes } from './Routes/AppRoutes';
 
 function App() {
     return (
         <div className="app">
-            <HomeNav />
-            <HomeRoutes />
+            <AppRoutes />
         </div>
     );
 }
