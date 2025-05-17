@@ -1,0 +1,26 @@
+h=[('Macrotech Devel', 'Macrotech Developers', 1), ('Adani Green', 'Adani Green Energy', 2), ('Varun Beverages', 'Varun Beverages Limited', 3), ('Jio Financial', 'Reliance Jio Financial Services', 4), ('IndusInd Bank', 'IndusInd Bank', 5), ('Cholaman.Inv.&Fn', 'Cholamandalam Investment & Finance', 7), ('Jindal Steel', 'Jindal Steel & Power', 8), ('ICICI Pru Life', 'ICICI Prudential Life Insurance', 10), ('I O C L', 'Indian Oil Corporation Limited', 11), ('Zomato Ltd', 'Zomato Limited', 16), ('Ambuja Cements', 'Ambuja Cements Limited', 17), ('CG Power & Ind', 'CG Power and Industrial Solutions', 19), ('TVS Motor Co', 'TVS Motor Company', 21), ('Bank of Baroda', 'Bank of Baroda', 22), ('United Spirits', 'United Spirits Limited', 23), ('UltraTech Cem', 'UltraTech Cement', 24), ('Avenue Super', 'Avenue Supermarts', 26), ('Zydus Lifesci', 'Zydus Lifesciences', 28), ('Grasim Inds', 'Grasim Industries', 30), ('Abbott India', 'Abbott India Limited', 31), ('Tata Power Co', 'Tata Power Company Limited', 32), ('Punjab Natl.Bank', 'Punjab National Bank', 33), ('Samvardh. Mothe', 'Samvardhana Motherson', 35), ('Bosch', 'Bosch Limited', 37), ('I R F C', 'Indian Railway Catering and Tourism Corporation', 38), ('Havells India', 'Havells India Limited', 39), ('Shriram Finance', 'Shriram Transport Finance', 41), ('Info Edg.(India)', 'Info Edge (India)', 42), ('Tata Steel', 'Tata Steel Limited', 43), ('JSW Steel', 'JSW Steel Limited', 44), ('Hindalco Inds', 'Hindalco Industries', 45), ('M & M', 'Mahindra & Mahindra', 47), ('SBI Life Insuran', 'SBI Life Insurance', 49), ('Torrent Pharma', 'Torrent Pharmaceuticals', 51), ('Hero Motocorp', 'Hero MotoCorp Limited', 52), ('REC Ltd', 'REC Limited', 53), ('Canara Bank', 'Canara Bank', 54), ('Trent', 'Trent Limited', 56), ('JSW Energy', 'JSW Energy Limited', 57), ('Bajaj Auto', 'Bajaj Auto Limited', 60), ('Power Fin.Corpn', 'Power Finance Corporation', 61), ('Bajaj Finance', 'Bajaj Finance Limited', 62), ('Bharat Electron', 'Bharat Electronics Limited', 63), ('Power Grid Corpn', 'Power Grid Corporation of India', 64), ('Hyundai Motor I', 'Hyundai Motor India', 66), ('Indian Hotels Co', 'Indian Hotels Company Limited', 68), ('B P C L', 'Bharat Petroleum Corporation Limited', 69), ('Shree Cement', 'Shree Cement Limited', 70), ('LTIMindtree', 'L&T Infotech', 71), ('Tata Consumer', 'Tata Consumer Products', 72), ('Bajaj Housing', 'Bajaj Housing Finance', 73), ('ICICI Lombard', 'ICICI Lombard General Insurance', 75), ('Siemens', 'Siemens Limited', 76), ('HDFC Life Insur', 'HDFC Life Insurance', 77), ('Wipro', 'Wipro Limited', 78), ('DLF', 'DLF Limited', 79), ('Nestle India', 'Nestlé India Limited', 80), ('Life Insurance', 'Life Insurance Corporation', 81), ('Pidilite Inds', 'Pidilite Industries', 82), ('Vedanta', 'Vedanta Limited', 83), ('Adani Energy Sol', 'Adani Green Energy', 84), ('GAIL (India)', 'GAIL (India) Limited', 85), ('Godrej Consumer', 'Godrej Consumer Products', 86), ('Bajaj Holdings', 'Bajaj Holdings & Investment', 88), ('Adani Ports', 'Adani Ports and Special Economic Zone', 89), ('Hind.Aeronautics', 'Hindustan Aeronautics Limited', 90), ('Divi', 'Divi’s Laboratories', 91), ('HCL Technologies', 'HCL Technologies Limited', 92), ('Apollo Hospitals', 'Apollo Hospitals Enterprise', 93), ('Swiggy', 'Swiggy', 94), ('Dr Reddy', "Dr. Reddy's Laboratories", 95), ('Bajaj Finserv', 'Bajaj Finserv Limited', 96), ('Dabur India', 'Dabur India Limited', 97), ('Interglobe Aviat', 'InterGlobe Aviation', 98), ('ULTRACEMCO', 'UltraTech Cement', 102), ('HINDALCO', 'Hindalco Industries', 103), ('SBILIFE', 'SBI Life Insurance', 104), ('NESTLEIND', 'Nestlé India Limited', 105), ('WIPRO', 'Wipro Limited', 106), ('JIOFIN', 'Reliance Jio Financial Services', 109), ('ADANIPORTS', 'Adani Ports and Special Economic Zone', 110), ('BAJAJ-AUTO', 'Bajaj Auto Limited', 111), ('POWERGRID', 'Power Grid Corporation of India', 113), ('TRENT', 'Trent Limited', 116), ('TATASTEEL', 'Tata Steel Limited', 118), ('HEROMOTOCO', 'Hero MotoCorp Limited', 120), ('HCLTECH', 'HCL Technologies Limited', 122), ('BAJFINANCE', 'Bajaj Finance Limited', 126), ('APOLLOHOSP', 'Apollo Hospitals Enterprise', 128), ('JSWSTEEL', 'JSW Steel Limited', 129), ('GRASIM', 'Grasim Industries', 130), ('ETERNAL', 'Eternal', 131), ('INDUSINDBK', 'IndusInd Bank', 132), ('SHRIRAMFIN', 'Shriram Finance', 135), ('BAJAJFINSV', 'Bajaj Finserv Limited', 137), ('DRREDDY', "Dr. Reddy's Laboratories", 139), ('M&M', 'Mahindra & Mahindra', 141), ('HDFCLIFE', 'HDFC Life Insurance', 142), ('TATACONSUM', 'Tata Consumer Products', 146), ('BEL', 'Bharat Electronics Limited', 147)]
+full_name_to_id = {}
+current_id = 27
+new_h = []
+
+for alias, full_name, _ in h:
+    if full_name not in full_name_to_id:
+        full_name_to_id[full_name] = current_id
+        current_id += 1
+    new_h.append((alias, full_name, full_name_to_id[full_name]))
+
+# Verify all same full_names have same ID and sequential numbering
+verification = {}
+for alias, full, num in new_h:
+    if full in verification:
+        assert verification[full] == num, f"Conflict: {full}"
+    else:
+        verification[full] = num
+
+assert sorted(set(verification.values())) == list(range(27, current_id)), "Non-sequential IDs"
+
+# Print formatted output
+print("[")
+for entry in new_h:
+    print(f"    {entry},")
+print("]")

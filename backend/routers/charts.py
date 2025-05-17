@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 from pydantic import BaseModel
-from app.services.chart_service import generate_parameter_chart, generate_ratio_chart
+from backend.services.chart_service import generate_parameter_chart, generate_ratio_chart
 
 router = APIRouter()
 
