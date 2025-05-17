@@ -1,0 +1,118 @@
+.main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: var(--surface-primary);
+    border-bottom: 1px solid var(--border-input);
+    position: sticky;
+    top: 0;
+    z-index: 9;
+    white-space: nowrap;
+}
+
+.main-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.main-nav a {
+    text-decoration: none;
+}
+
+.main-nav button {
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 1rem;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+}
+
+.main-nav button:hover {
+    background-color: var(--hover-dropdown-item);
+    color: var(--text-primary);
+}
+
+.main-nav button:focus-visible {
+    outline: 2px solid var(--border-high-contrast);
+    outline-offset: 2px;
+}
+
+.main-nav .settings {
+    position: relative
+}
+
+.main-nav .settings:hover .settings-dropdown {
+    display: flex;
+    background-color: var(--surface-primary);
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.main-nav .settings .settings-dropdown button {
+    padding: 0px;
+    width: 100%;
+}
+
+.main-nav .settings .settings-dropdown>* {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.main-nav .settings .settings-dropdown>*:hover {
+    background-color: var(--hover-dropdown-item);
+}
+
+.main-nav .settings .settings-dropdown {
+    display: none;
+    position: absolute;
+    z-index: 99;
+    top: 100%;
+    right: 0;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.main-nav .theme-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.main-nav .theme-toggle-container .modes {
+    color: var(--text-primary);
+}
+
+.main-nav .theme-toggler {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 20px;
+    border-radius: 30px;
+    position: relative;
+    background: var(--border-high-contrast);
+}
+
+.main-nav .theme-toggler .toggle {
+    position: absolute;
+    width: 13px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.3s ease-in-out;
+    color: var(--text-primary);
+    background: var(--surface-secondary);
+}
+
+.main-nav .theme-toggler.light-theme .toggle {
+    left: 8%;
+}
+
+.main-nav .theme-toggler.dark-theme .toggle {
+    left: calc(92% - 13px);
+}
