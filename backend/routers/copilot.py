@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
-from app.services.copilot_service import get_copilot_response
+from backend.services.copilot_service import get_copilot_response
 
 router = APIRouter()
 

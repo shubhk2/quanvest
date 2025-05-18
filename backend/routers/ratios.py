@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 from pydantic import BaseModel
-from app.services.ratio_service import get_predefined_ratios, calculate_custom_ratio
+from backend.services.ratio_service import get_predefined_ratios, calculate_custom_ratio
 
 router = APIRouter()
 

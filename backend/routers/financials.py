@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
-from app.services.financial_service import get_financial_data, get_financial_periods
+from backend.services.financial_service import get_financial_data, get_financial_periods
 
 router = APIRouter()
 

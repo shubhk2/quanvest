@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict, Any
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from app.db_setup import connect_to_db
+from backend.db_setup import connect_to_db
 
 def get_predefined_ratios(company_ids: List[int], ratio_types: Optional[List[str]], start_year: Optional[int] = None, end_year: Optional[int] = None) -> Dict[str, Any]:
     """

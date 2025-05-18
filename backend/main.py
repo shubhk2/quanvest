@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 import glob
 from datetime import datetime
 # from app.classifier import classify_text
-from db_mongo import save_to_mongodb, get_classified_data
+# from db_mongo import save_to_mongodb, get_classified_data
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -12,7 +12,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 # Import our modules
-from db_setup import connect_to_db, create_tables, load_data
+from backend.db_setup import connect_to_db, create_tables, load_data
 
 # Load environment variables
 load_dotenv()
