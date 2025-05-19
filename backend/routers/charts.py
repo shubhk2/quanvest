@@ -6,7 +6,7 @@ from backend.services.chart_service import generate_parameter_chart, generate_ra
 router = APIRouter()
 
 class ChartRequest(BaseModel):
-    company_ids: List[int]
+    company_numbers: List[int]
     parameters: List[str]
     start_year: Optional[int] = None
     end_year: Optional[int] = None
@@ -26,7 +26,7 @@ async def chart_parameters(request: ChartRequest):
     """
     try:
         chart_data = generate_parameter_chart(
-            request.company_ids,
+            request.company_numbers,
             request.parameters,
             request.start_year,
             request.end_year,
@@ -50,7 +50,7 @@ async def chart_ratios(request: ChartRequest):
     """
     try:
         chart_data = generate_ratio_chart(
-            request.company_ids,
+            request.company_numbers,
             request.parameters,
             request.start_year,
             request.end_year,

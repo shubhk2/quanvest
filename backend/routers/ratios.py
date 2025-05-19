@@ -6,14 +6,14 @@ from backend.services.ratio_service import get_predefined_ratios, calculate_cust
 router = APIRouter()
 
 class CustomRatioRequest(BaseModel):
-    company_ids: List[int]
+    company_numbers: List[int]
     numerator: str
     denominator: str
     year: Optional[int] = None
 
 @router.get("/predefined")
 async def get_ratios(
-    company_ids: List[int] = Query(...),
+    company_numbers: List[int] = Query(...),
     ratio_types: Optional[List[str]] = Query(None),
     start_year: Optional[int] = None,
     end_year: Optional[int] = None
@@ -28,7 +28,7 @@ async def get_ratios(
     - end_year: End year for data filter
     """
     try:
-        ratios = get_predefined_ratios(company_ids, ratio_types, start_year, end_year)
+        ratios = get_predefined_ratios(company_numbers, ratio_types, start_year, end_year)
         return ratios
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -46,7 +46,7 @@ async def calculate_ratio(request: CustomRatioRequest):
     """
     try:
         result = calculate_custom_ratio(
-            request.company_ids,
+            request.company_numbers,
             request.numerator,
             request.denominator,
             request.year
