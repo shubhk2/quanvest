@@ -18,7 +18,7 @@ click~=8.1.8
 httpcore~=1.0.8
 idna~=3.10
 httpx~=0.28.1
-pyasn1_modules~=0.4.2
+pyasn1-modules==0.2.8
 cachetools~=5.5.2
 certifi~=2025.1.31
 urllib3~=2.4.0
