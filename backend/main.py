@@ -18,6 +18,7 @@ from backend.db_setup import connect_to_db, create_tables, load_data
 load_dotenv()
 
 from backend.routers import home, financials, ratios, overview, charts, copilot
+from backend.routers import search  # add this import
 
 
 app = FastAPI(title="Financial Data API")
@@ -37,6 +38,7 @@ app.include_router(ratios.router, prefix="/ratios")
 app.include_router(overview.router, prefix="/overview")
 app.include_router(charts.router, prefix="/charts")
 app.include_router(copilot.router, prefix="/copilot")
+app.include_router(search.router)  # add this line
 
 
 
@@ -74,4 +76,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
