@@ -90,7 +90,7 @@ def get_table_for_parameter(parameter: str) -> str:
     else:
         # Default to profit_and_loss or consider raising an error
         logger.warning(f"Parameter '{parameter}' not found in any parameter list, defaulting to profit_and_loss")
-        return "profit_and_loss"
+        return "oh my god, this is not in any table"
 
 def generate_parameter_chart(
     company_numbers: List[int],
