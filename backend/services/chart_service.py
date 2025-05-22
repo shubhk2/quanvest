@@ -139,7 +139,7 @@ def generate_parameter_chart(
                         SELECT report_date, value 
                         FROM {table}
                         WHERE company_id IN ({placeholders})
-                        AND parameter = %s
+                        AND lower(parameter) = %s
                         """
                     if start_year:
                         query += " AND EXTRACT(YEAR FROM report_date) >= %s"
@@ -405,7 +405,7 @@ if __name__ == "__main__":
     
     # Example usage
     company_ids = [1, 2, 3]
-    parameters = ["Net Profit", "Borrowings","Land"]
+    parameters = ["Net Profit", "Borrowings","Land","sales"]
     ratios = ["Gross Margin", "Net Margin"]
     
     logger.info("Running test with example data")
