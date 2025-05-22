@@ -16,7 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
-docker run -d -p 8000:8000 --name Quanvest --restart unless-stopped --env-file ./.env quanvest-app
 
 # Create output directory
 RUN mkdir -p output
