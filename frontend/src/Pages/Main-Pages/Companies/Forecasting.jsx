@@ -1,4 +1,4 @@
-import '../../Styles/Pages/Main-Pages/Forecasting.css';
+import '../../../Styles/Pages/Main-Pages/Forecasting.css';
 
 export const Forecasting = () => {
     return (
