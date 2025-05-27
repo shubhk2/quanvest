@@ -20,9 +20,11 @@ def get_company_overview(company_number):
     finally:
         conn.close()
 
+
 def get_company_stats(company_number):
     """
-    Fetch metrics from the various *_metrics tables for the given company_number
+    Fetch metrics from the various *_metrics tables for the given company_number,
+    grouped by table name.
     """
     conn = connect_to_db()
     try:
@@ -36,10 +38,8 @@ def get_company_stats(company_number):
                 "financial_health_metrics",
                 "growth_cagr_metrics"
             ]
-            stats = {
-                "columns": ["metric", "value", "unit", "as_of"],
-                "values": []
-            }
+            stats = {}  # Initialize as an empty dictionary
+
             for table in table_names:
                 query = f"""
                     SELECT metric, value, unit, as_of
@@ -48,13 +48,23 @@ def get_company_stats(company_number):
                 """
                 cursor.execute(query, (company_number,))
                 rows = cursor.fetchall()
+
+                table_values = []
                 for row in rows:
-                    stats["values"].append([
+                    table_values.append([
                         row["metric"],
                         float(row["value"]) if row["value"] is not None else None,
                         row["unit"] or "",
                         row["as_of"].strftime("%Y-%m-%d") if row["as_of"] else None
                     ])
+
+                # Add data for the current table to the stats dictionary
+                # Only add if there are values for that table
+                if table_values:
+                    stats[table] = {
+                        "columns": ["metric", "value", "unit", "as_of"],
+                        "values": table_values
+                    }
             return stats
     finally:
         conn.close()
@@ -62,9 +72,14 @@ def get_company_stats(company_number):
 
 if __name__ == "__main__":
     # Example usage
-    company_number = 10
+    company_number = 10  # Example company number
     overview = get_company_overview(company_number)
+    print("Company Overview:")
     print(overview)
 
+    print("\nCompany Stats:")
     stats = get_company_stats(company_number)
     print(stats)
+    import json
+
+    # print(json.dumps(stats, indent=4))
