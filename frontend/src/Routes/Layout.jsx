@@ -4,12 +4,12 @@ import { MainNav } from '../Components/Main-Nav';
 
 export const Layout = ({ children }) => {
     const location = useLocation();
-    const homePaths = ['/', '/signin', '/signup', '/signout'];
-    const isHomeRoute = homePaths.includes(location.pathname);
-    console.log(isHomeRoute)
+    const companyPath = ['/company', '/company/overview', '/company/financial', '/company/forecasting', '/company/investor-info'];
+    const isCompanyPath = companyPath.includes(location.pathname);
     return (
         <>
-            {isHomeRoute ? <HomeNav /> : <MainNav />}
+            <HomeNav />
+            {isCompanyPath && <MainNav />}
             {children}
         </>
     );

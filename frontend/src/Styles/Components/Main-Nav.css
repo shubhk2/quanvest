@@ -1,14 +1,19 @@
 .main-nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 10px 15px;
     background-color: var(--surface-primary);
     border-bottom: 1px solid var(--border-input);
     position: sticky;
-    top: 0;
+    top: 32.8px;
     z-index: 9;
+    gap: 20px;
     white-space: nowrap;
+}
+
+.main-nav>* {
+    text-align: center;
 }
 
 .main-nav::-webkit-scrollbar {
@@ -40,79 +45,75 @@
     outline-offset: 2px;
 }
 
-.main-nav .settings {
-    position: relative
-}
-
-.main-nav .settings:hover .settings-dropdown {
-    display: flex;
-    background-color: var(--surface-primary);
-    border-radius: 5px;
-    padding: 5px;
-}
-
-.main-nav .settings .settings-dropdown button {
-    padding: 0px;
-    width: 100%;
-}
-
-.main-nav .settings .settings-dropdown>* {
+.main-nav input {
     padding: 10px;
-    border-radius: 5px;
+    border: 1px solid var(--border-input);
+    border-radius: 8px;
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.main-nav .settings .settings-dropdown>*:hover {
+.main-nav input:focus {
+    border-color: var(--border-high-contrast);
+    box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
+}
+
+.main-nav .searched-companies-container {
+    position: absolute;
+    top: 100%;
+    width: 500px;
+    background-color: var(--surface-primary);
+    border: 1px solid var(--border-input);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    margin-top: 4px;
+    padding: 8px 0;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.main-nav .searched-companies {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-nav .searched-companies li {
+    padding: 8px 16px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.main-nav .searched-companies li a {
+    text-decoration: none;
+    color: var(--text-primary);
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.main-nav .searched-companies li:hover {
     background-color: var(--hover-dropdown-item);
 }
 
-.main-nav .settings .settings-dropdown {
-    display: none;
-    position: absolute;
-    z-index: 99;
-    top: 100%;
-    right: 0;
-    justify-content: center;
-    flex-direction: column;
+.main-nav .searched-companies li a:focus {
+    outline: none;
+    background-color: var(--active-dropdown-item);
+    border-radius: 6px;
 }
 
-.main-nav .theme-toggle-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
 
-.main-nav .theme-toggle-container .modes {
-    color: var(--text-primary);
-}
-
-.main-nav .theme-toggler {
-    display: flex;
-    align-items: center;
-    width: 40px;
-    height: 20px;
-    border-radius: 30px;
-    position: relative;
-    background: var(--border-high-contrast);
-}
-
-.main-nav .theme-toggler .toggle {
-    position: absolute;
-    width: 13px;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: left 0.3s ease-in-out;
-    color: var(--text-primary);
-    background: var(--surface-secondary);
-}
-
-.main-nav .theme-toggler.light-theme .toggle {
-    left: 8%;
-}
-
-.main-nav .theme-toggler.dark-theme .toggle {
-    left: calc(92% - 13px);
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
