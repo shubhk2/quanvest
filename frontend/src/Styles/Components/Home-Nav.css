@@ -10,6 +10,15 @@
     border-bottom: 1px solid var(--border-input);
     z-index: 1000;
     padding: 10px 15px;
+    transition: .5s ease-in-out;
+}
+
+.home-nav.compressed {
+    padding: 3px 15px;
+}
+
+.home-nav.compressed button {
+    padding: 3px 10px;
 }
 
 .home-nav>div:nth-child(2) {
@@ -31,7 +40,9 @@
     border-radius: 6px;
     transition: background-color 0.2s ease, color 0.2s ease;
     cursor: pointer;
+    transition: .5s ease-in-out;
 }
+
 .home-nav>div:nth-child(2) button {
     width: 100px;
 }

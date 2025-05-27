@@ -1,30 +1,29 @@
-import { Link, NavLink } from "react-router-dom"
+import { Link, NavLink, useLocation } from "react-router-dom"
 import '../Styles/Components/Home-Nav.css';
 import { useThemeMode } from '../Hooks/useThemeMode';
 import { IoMdSettings } from "react-icons/io";
 import { FaRegSun, FaRegMoon } from "react-icons/fa";
-import { useActivePage } from "../Hooks/useActivePage";
 
 export const HomeNav = () => {
     const { mode, toggleTheme } = useThemeMode();
-    const activePage = useActivePage();
-    console.log(activePage);
+    const location = useLocation();
+    const isCompanyPage = location.pathname.startsWith("/company");
 
     return (
-        <div className="home-nav">
+        <div className={`home-nav ${isCompanyPage && 'compressed'}`}>
             <div></div>
             <div>
-                <NavLink className={activePage === "dashboard" ? "active" : ""} to={"/dashboard"}><button>Dashboard</button></NavLink>
-                <NavLink className={activePage === "companies" ? "active" : ""} to={"/companies"}><button>Companies</button></NavLink>
-                <NavLink to={"/"}><button><img src="" /></button></NavLink>
-                <NavLink className={activePage === "market" ? "active" : ""} to={"/market"}><button>Market</button></NavLink>
-                <NavLink className={activePage === "news" ? "active" : ""} to={"/news"}><button>News</button></NavLink>
+                <NavLink tabIndex={-1} to={"dashboard"}><button>Dashboard</button></NavLink>
+                <NavLink tabIndex={-1} to={"company"}><button>Company</button></NavLink>
+                <NavLink tabIndex={-1} to={""}><button>Quanvest</button></NavLink>
+                <NavLink tabIndex={-1} to={"market"}><button>Market</button></NavLink>
+                <NavLink tabIndex={-1} to={"news"}><button>News</button></NavLink>
             </div>
             <div>
                 <div className='settings'>
                     <button><IoMdSettings /></button>
                     <div className='settings-dropdown'>
-                        <Link to={"/account"}>
+                        <Link to={"account"}>
                             <button>Account</button>
                         </Link>
                         <div className='theme-toggle-container' onClick={toggleTheme}>

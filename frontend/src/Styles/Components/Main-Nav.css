@@ -6,14 +6,13 @@
     background-color: var(--surface-primary);
     border-bottom: 1px solid var(--border-input);
     position: sticky;
-    top: 0;
+    top: 32.8px;
     z-index: 9;
     gap: 20px;
     white-space: nowrap;
 }
 
-.main-nav>*{
-    width: 200px;
+.main-nav>* {
     text-align: center;
 }
 
@@ -44,4 +43,77 @@
 .main-nav button:focus-visible {
     outline: 2px solid var(--border-high-contrast);
     outline-offset: 2px;
+}
+
+.main-nav input {
+    padding: 10px;
+    border: 1px solid var(--border-input);
+    border-radius: 8px;
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.main-nav input:focus {
+    border-color: var(--border-high-contrast);
+    box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
+}
+
+.main-nav .searched-companies-container {
+    position: absolute;
+    top: 100%;
+    width: 500px;
+    background-color: var(--surface-primary);
+    border: 1px solid var(--border-input);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    margin-top: 4px;
+    padding: 8px 0;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.main-nav .searched-companies {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-nav .searched-companies li {
+    padding: 8px 16px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.main-nav .searched-companies li a {
+    text-decoration: none;
+    color: var(--text-primary);
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.main-nav .searched-companies li:hover {
+    background-color: var(--hover-dropdown-item);
+}
+
+.main-nav .searched-companies li a:focus {
+    outline: none;
+    background-color: var(--active-dropdown-item);
+    border-radius: 6px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
