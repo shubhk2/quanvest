@@ -1,8 +1,10 @@
 FROM python:3.12.3
 
 # Install system dependencies including build tools and curl
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates git && rm -rf /var/lib/apt/lists/*
-
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential curl ca-certificates git && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 # Install Rust using rustup-init
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
