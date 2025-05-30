@@ -138,5 +138,4 @@ dataclasses-json>=0.6.7
 pydantic-settings>=2.9.1
 mypy_extensions>=1.1.0
 httpx-sse>=0.4.0
-sentence-transformers>=4.1.0
 langchain-google-genai>=2.1.5

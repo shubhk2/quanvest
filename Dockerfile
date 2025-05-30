@@ -8,17 +8,19 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 WORKDIR /app
 
 COPY backend/requirements.txt .
-RUN pip install --upgrade pip
 
-# Install all requirements EXCEPT torch
-RUN grep -v '^torch' requirements.txt > temp_requirements.txt && \
+# Install all requirements EXCEPT torch and transformers
+RUN sed '/^torch/d' requirements.txt | sed '/^transformers/d' > temp_requirements.txt && \
     pip install --no-cache-dir -r temp_requirements.txt && \
     rm temp_requirements.txt
 
 RUN apt-get clean
 
-# Install torch separately
-RUN pip install --no-cache-dir torch==2.7.0
+# Install transformers (which might have torch as a dependency)
+RUN pip install --no-cache-dir transformers>=4.52.3
+
+# Install sentence-transformers (which also depends on torch)
+RUN pip install --no-cache-dir sentence-transformers==4.1.0
 
 COPY . .
 
