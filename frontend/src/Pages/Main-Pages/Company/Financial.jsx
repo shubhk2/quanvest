@@ -2,6 +2,6 @@ import '../../../Styles/Pages/Main-Pages/Financial.css';
 
 export const Financial = () => {
     return (
-        <div>Financial</div>
+        <div className='financial'>Financial</div>
     )
 }

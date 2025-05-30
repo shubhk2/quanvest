@@ -7,7 +7,7 @@ import { FaRegSun, FaRegMoon } from "react-icons/fa";
 export const HomeNav = () => {
     const { mode, toggleTheme } = useThemeMode();
     const location = useLocation();
-    const isCompanyPage = location.pathname.startsWith("/company");
+    const isCompanyPage = location.pathname.startsWith("/company/");
 
     return (
         <div className={`home-nav ${isCompanyPage && 'compressed'}`}>

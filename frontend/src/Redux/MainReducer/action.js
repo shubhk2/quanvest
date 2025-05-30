@@ -1,14 +1,24 @@
 import axios from "axios";
-import { GET_OVERVIEW_DATA, RESET_SEARCH_RESULTS, SEARCH_COMPANY, SET_SEARCHED_COMPANY } from "./actionTypes";
+import { CREATE_TAB, ERROR, GET_OVERVIEW_DATA, LOADING, REMOVE_ERROR, REMOVE_TAB, RESET_SEARCH_RESULTS, SEARCH_COMPANY, SET_ACTIVE_TAB, STOP_LOADING } from "./actionTypes";
 
 export const loading = () => {
     return {
-        type: "LOADING",
+        type: LOADING,
     };
+}
+export const stopLoading = () => {
+    return {
+        type: STOP_LOADING,
+    }
 }
 export const error = () => {
     return {
-        type: "ERROR",
+        type: ERROR,
+    }
+}
+export const removeError = () => {
+    return {
+        type: REMOVE_ERROR,
     }
 }
 export const searchCompany = (payload) => {
@@ -22,15 +32,27 @@ export const resetSearchResults = () => {
         type: RESET_SEARCH_RESULTS
     }
 }
-export const setSearchedCompany = (payload) => {
-    return {
-        type: SET_SEARCHED_COMPANY,
-        payload
-    }
-}
 export const getOverviewData = (payload) => {
     return {
         type: GET_OVERVIEW_DATA,
+        payload
+    }
+}
+export const createTab = (payload) => {
+    return {
+        type: CREATE_TAB,
+        payload
+    }
+}
+export const removeTab = (payload) => {
+    return {
+        type: REMOVE_TAB,
+        payload
+    }
+}
+export const setActiveTab = (payload) => {
+    return {
+        type: SET_ACTIVE_TAB,
         payload
     }
 }
@@ -58,10 +80,11 @@ export const getOverviewDataFunc = id => dispatch => {
     }
     return axios(request)
         .then((res) => {
+            console.log("Successfully fetched overview data");
             dispatch(getOverviewData(res.data));
         })
         .catch((err) => {
-            console.error(err);
             dispatch(error());
+            throw new Error(err);
         });
 }
