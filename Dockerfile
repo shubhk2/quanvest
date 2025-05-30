@@ -11,6 +11,8 @@ WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY backend/requirements.txt .
+RUN apt-get clean
+
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
