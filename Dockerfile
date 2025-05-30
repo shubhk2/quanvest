@@ -1,4 +1,5 @@
-FROM python:3.12.3
+# --- Builder Stage ---
+FROM python:3.12.3 AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates git && rm -rf /var/lib/apt/lists/*
 
@@ -8,23 +9,22 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 WORKDIR /app
 
 COPY backend/requirements.txt .
-
-# Install all requirements EXCEPT torch and transformers
-RUN sed '/^torch/d' requirements.txt | sed '/^transformers/d' > temp_requirements.txt && \
-    pip install --no-cache-dir -r temp_requirements.txt && \
-    rm temp_requirements.txt
-
-RUN apt-get clean
-
-# Install transformers (which might have torch as a dependency)
-RUN pip install --no-cache-dir transformers>=4.52.3
-
-# Install sentence-transformers (which also depends on torch)
-RUN pip install --no-cache-dir sentence-transformers==4.1.0
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p output
+# --- Final Stage ---
+FROM python:3.12.3 AS final
+
+WORKDIR /app
+
+# Copy only the necessary artifacts from the builder stage
+COPY --from=builder /app ./
+
+# Install only the runtime dependencies (you might need a separate requirements_runtime.txt if it's different)
+COPY backend/requirements.txt ./backend/
+RUN pip install --no-cache-dir -r ./backend/requirements.txt
 
 EXPOSE 8000
 
