@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 from backend.services.financial_service import get_financial_data, get_financial_periods
+from fastapi.concurrency import run_in_threadpool
 
 router = APIRouter()
 
@@ -21,7 +22,13 @@ async def get_financials(
     - end_year: End year for data filter (optional)
     """
     try:
-        data = get_financial_data(company_number, statement_type, start_year, end_year)
+        data = await run_in_threadpool(
+            get_financial_data,
+            company_number,
+            statement_type,
+            start_year,
+            end_year
+        )
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -30,7 +37,11 @@ async def get_financials(
 async def get_periods(company_number: int, statement_type: str = Query(..., enum=["balance_sheet", "profit_and_loss", "cashflow", "quarterly_results"])):
     """Get available time periods for a company's financial statements"""
     try:
-        periods = get_financial_periods(company_number, statement_type)
+        periods = await run_in_threadpool(
+            get_financial_periods,
+            company_number,
+            statement_type
+        )
         return {"periods": periods}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

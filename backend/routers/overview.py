@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from backend.services.overview_service import get_company_overview, get_company_stats
+from fastapi.concurrency import run_in_threadpool
 
 router = APIRouter()
 
@@ -7,16 +8,11 @@ router = APIRouter()
 async def company_overview(company_number: int):
     """
     Get textual overview and stats for a company
-    
-    Parameters:
-    - company_id: Company ID
     """
     try:
-        # Get company textual overview
-        overview = get_company_overview(company_number)
-        
-        # Get company stats (market cap, EBITDA, margins, etc.)
-        stats = get_company_stats(company_number)
+        # Wrap blocking calls in threadpool
+        overview = await run_in_threadpool(get_company_overview, company_number)
+        stats = await run_in_threadpool(get_company_stats, company_number)
         
         return {
             "overview": overview,

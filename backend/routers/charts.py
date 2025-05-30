@@ -3,6 +3,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 from backend.services.chart_service import generate_parameter_chart, generate_ratio_chart
 import logging
+from fastapi.concurrency import run_in_threadpool  # add
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -38,7 +39,9 @@ async def chart_parameters(request: ChartRequest):
             logger.warning("No parameters provided in request")
             raise HTTPException(status_code=400, detail="No parameters provided")
             
-        chart_data = generate_parameter_chart(
+        # Wrap the blocking chart generation in thread pool
+        chart_data = await run_in_threadpool(
+            generate_parameter_chart,
             request.company_numbers,
             request.parameters,
             request.start_year,
@@ -73,7 +76,9 @@ async def chart_ratios(request: ChartRequest):
             logger.warning("No parameters provided in request")
             raise HTTPException(status_code=400, detail="No parameters provided")
             
-        chart_data = generate_ratio_chart(
+        # Wrap the blocking ratio chart generation in thread pool
+        chart_data = await run_in_threadpool(
+            generate_ratio_chart,
             request.company_numbers,
             request.parameters,
             request.start_year,
