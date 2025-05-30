@@ -27,10 +27,10 @@ export const AppRoutes = () => {
                 <Route path="/chat-ai" element={<ChatAI />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/company" element={<Company />} >
-                    <Route path="overview" element={<Overview />} />
-                    <Route path="financial" element={<Financial />} />
-                    <Route path="forecasting" element={<Forecasting />} />
-                    <Route path="investor-info" element={<InvestorInfo />} />
+                    <Route path=":compId/overview" element={<Overview />} />
+                    <Route path=":compId/financial" element={<Financial />} />
+                    <Route path=":compId/forecasting" element={<Forecasting />} />
+                    <Route path=":compId/investor-info" element={<InvestorInfo />} />
                 </Route>
                 <Route path="/ratio-analysis" element={<RatioAnalysis />} />
                 <Route path="/valuation-modeling" element={<ValuationModeling />} />

@@ -1,5 +1,11 @@
 @import './Styles/Global/root.css';
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     --color-contrast: var(--color-black);
@@ -27,7 +33,7 @@ body {
     --active-dropdown-item: var(--color-gray-3);
     --menu-item-hover: var(--color-gray-2);
     background-color: var(--surface-base);
-    font-family: var(--dynamic-font-family)
+    font-family: var(--font-family);
 }
 
 [app-color-schema=dark] body {
@@ -50,4 +56,209 @@ body {
     --hover-dropdown-item: var(--color-dark-7);
     --active-dropdown-item: var(--color-dark-9);
     --menu-item-hover: var(--color-dark-6)
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #aaa transparent;
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 3px;
+}
+
+/* Hide scrollbar arrows */
+*::-webkit-scrollbar-button {
+    display: none !important;
+    height: 0;
+    width: 0;
+}
+
+/* Base text elements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-family-headings);
+}
+
+body,
+p,
+li,
+span,
+div {
+    color: var(--text-primary);
+}
+
+/* Headings: a bit of extra weight/spacing */
+h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 2rem;
+    line-height: 1.3;
+}
+
+h3 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+}
+
+h4 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+}
+
+h5 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+}
+
+h6 {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Paragraphs */
+p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--text-tertiary-gray);
+}
+
+/* Links */
+a {
+    color: var(--button-green);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover,
+a:focus {
+    color: var(--surface-green);
+    outline: none;
+}
+
+/* Buttons */
+button,
+button[type="button"],
+button[type="submit"] {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--button-green);
+    color: var(--text-contrast);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background-color: var(--surface-green);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    background-color: var(--border-input);
+    color: var(--text-tertiary-gray);
+    cursor: not-allowed;
+}
+
+/* Form controls */
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background-color: var(--surface-primary);
+    border: 1px solid var(--border-input);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--border-high-contrast);
+    box-shadow: 0 0 0 2px rgba(100, 100, 255, 0.2);
+}
+
+/* Placeholder text */
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-tertiary-gray);
+}
+
+/* Tables (basic) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-primary);
+}
+
+th,
+td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-input);
+}
+
+th {
+    background-color: var(--surface-secondary);
+    text-align: left;
+}
+
+/* Blockquotes */
+blockquote {
+    margin: 1rem 0;
+    padding: 1rem 1.25rem;
+    border-left: 4px solid var(--surface-green);
+    background-color: var(--surface-secondary);
+    color: var(--text-primary);
+}
+
+/* Lists */
+ul,
+ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+/* Code blocks and inline code */
+pre,
+code {
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+    background-color: var(--surface-secondary);
+    color: var(--text-primary);
+    border-radius: 4px;
+}
+
+pre {
+    padding: 1rem;
+    overflow: auto;
+}
+
+code {
+    padding: 0.2rem 0.4rem;
 }

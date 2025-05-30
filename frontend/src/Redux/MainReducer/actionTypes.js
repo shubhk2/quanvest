@@ -1,5 +1,7 @@
 export const LOADING = "LOADING";
+export const STOP_LOADING = "STOP_LOADING";
 export const ERROR = "ERROR";
+export const REMOVE_ERROR = "REMOVE_ERROR";
 
 export const SEARCH_COMPANY = "SEARCH_COMPANY";
 export const RESET_SEARCH_RESULTS = "RESET_SEARCH_RESULTS";
@@ -7,3 +9,7 @@ export const SET_SEARCHED_COMPANY = "SET_SEARCHED_COMPANY";
 
 export const GET_OVERVIEW_DATA = "GET_OVERVIEW_DATA";
 export const GET_FINANCIAL_DATA = "GET_FINANCIAL_DATA";
+
+export const CREATE_TAB = "CREATE_TAB";
+export const REMOVE_TAB = "REMOVE_TAB";
+export const SET_ACTIVE_TAB = "SET_ACTIVE_TAB";
