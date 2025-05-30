@@ -12,19 +12,16 @@ COPY backend/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY backend ./backend
 
 # --- Final Stage ---
 FROM python:3.12.3 AS final
 
 WORKDIR /app
 
-# Copy only the necessary artifacts from the builder stage
-COPY --from=builder /app ./
-
-# Install only the runtime dependencies (you might need a separate requirements_runtime.txt if it's different)
-COPY backend/requirements.txt ./backend/
-RUN pip install --no-cache-dir -r ./backend/requirements.txt
+# Copy only the backend code and the installed libraries
+COPY --from=builder /app/backend ./backend
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 EXPOSE 8000
 
