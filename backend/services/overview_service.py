@@ -1,3 +1,9 @@
+import sys
+import os
+
+print("Current working directory:", os.getcwd())
+print("sys.path:", sys.path)
+
 from backend.db_setup import connect_to_db
 from psycopg2.extras import RealDictCursor
 
@@ -72,7 +78,7 @@ def get_company_stats(company_number):
 
 if __name__ == "__main__":
     # Example usage
-    company_number = 10  # Example company number
+    company_number = 5  # Example company number
     overview = get_company_overview(company_number)
     print("Company Overview:")
     print(overview)
