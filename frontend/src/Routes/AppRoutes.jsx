@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { Home } from '../Pages/Landing-Pages/Home';
 import { Signin } from '../Pages/Landing-Pages/Signin';
 import { Signout } from '../Pages/Landing-Pages/Signout';
@@ -15,6 +15,7 @@ import { ReportsDownloads } from '../Pages/Main-Pages/ReportsDownloads';
 import { ChatAI } from '../Pages/Main-Pages/ChatAI';
 import { InvestorInfo } from '../Pages/Main-Pages/Company/InvestorInfo';
 import { Company } from '../Pages/Main-Pages/Company';
+import { NotFound } from '../Styles/Pages/Main-Pages/NotFound';
 
 export const AppRoutes = () => {
     return (
@@ -31,11 +32,13 @@ export const AppRoutes = () => {
                     <Route path=":compId/financial" element={<Financial />} />
                     <Route path=":compId/forecasting" element={<Forecasting />} />
                     <Route path=":compId/investor-info" element={<InvestorInfo />} />
+                    <Route path=":compId/*" element={<Navigate to={"/company"} replace />} />
                 </Route>
                 <Route path="/ratio-analysis" element={<RatioAnalysis />} />
                 <Route path="/valuation-modeling" element={<ValuationModeling />} />
                 <Route path="/peer-comparison" element={<PeerComparison />} />
                 <Route path="/reports-downloads" element={<ReportsDownloads />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Layout>
     );

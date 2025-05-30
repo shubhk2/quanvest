@@ -3,7 +3,8 @@
     top: 0;
     width: 100%;
     box-sizing: border-box;
-    display: flex;
+    display: grid;
+    grid-template-columns: 36px 0fr max-content;
     justify-content: space-between;
     align-items: center;
     background-color: var(--surface-primary);
@@ -36,10 +37,21 @@
     color: var(--text-primary);
     font-size: 1rem;
     padding: 10px;
-    border: none;
     border-radius: 6px;
     transition: background-color 0.2s ease, color 0.2s ease, padding .25s ease-in-out;
     cursor: pointer;
+}
+
+.home-nav .logo-button {
+    width: 150px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: width .25s ease-in-out;
+}
+
+.home-nav.compressed .logo-button {
+    width: 120px !important;
 }
 
 .home-nav>div:nth-child(2) button {
