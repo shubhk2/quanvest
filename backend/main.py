@@ -28,7 +28,7 @@ logger.debug("Environment variables loaded")
 
 from backend.routers import home, financials, ratios, overview, charts, copilot
 from backend.routers import search  # add this import
-from backend.vector_store import db  # <-- add this import
+
 
 logger.info("Starting Financial Data API")
 app = FastAPI(title="Financial Data API")
@@ -62,16 +62,7 @@ async def root():
     return {"message": "Welcome to the Financial Data API"}
 
 
-@app.get("/vector_search")
-def vector_search(query: str = Query(..., description="User's question")):
-    logger.debug(f"Vector search called with query: {query}")
-    results = db.similarity_search(query, k=5)
-    return {
-        "results": [
-            {"score": None, "text": doc.page_content, "metadata": doc.metadata}
-            for doc in results
-        ]
-    }
+
 
 # @app.get("/companies")
 # async def get_companies():
