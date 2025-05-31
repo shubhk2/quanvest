@@ -10,7 +10,8 @@ WORKDIR /app
 
 COPY backend/requirements.txt .
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN mkdir -p /app/tmp1 && TMPDIR=/app/tmp1 pip install --no-cache-dir -r requirements.txt
+
 
 COPY backend ./backend
 
