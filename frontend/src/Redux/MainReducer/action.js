@@ -61,7 +61,7 @@ export const searchCompanyFunc = (searchString, limit = 10) => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL}/search/companies?q=${searchString}&limit=${limit}`
+        url: `${process.env.REACT_APP_BACKEND_URL_LOCAL}/search/companies?q=${searchString}&limit=${limit}`
     }
     return axios(request)
         .then((res) => {
@@ -72,15 +72,30 @@ export const searchCompanyFunc = (searchString, limit = 10) => dispatch => {
             dispatch(error());
         });
 }
+export const getCompanyDetailsById = id => dispatch => {
+    dispatch(loading());
+    const request = {
+        method: "get",
+        url: `${process.env.REACT_APP_BACKEND_URL_LOCAL}/search/companies/${id}`
+    }
+    return axios(request)
+        .then(res => {
+            return res?.data?.result || {};
+        })
+        .catch(err => {
+            console.log(err);
+            dispatch(error());
+            return {};
+        })
+}
 export const getOverviewDataFunc = id => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL}/overview/company/${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL_LOCAL}/overview/company/${id}`
     }
     return axios(request)
         .then((res) => {
-            console.log("Successfully fetched overview data");
             dispatch(getOverviewData(res.data));
         })
         .catch((err) => {

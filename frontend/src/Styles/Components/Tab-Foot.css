@@ -25,6 +25,12 @@
     padding: 5px 10px;
 }
 
+.tabs-footer .tab.active {
+    background-color: var(--surface-primary);
+    border-color: var(--border-high-contrast);
+    box-shadow: 0 0 0 2px var(--border-high-contrast);
+}
+
 .tabs-footer .tab p,
 .tabs-footer .tab {
     width: max-content;

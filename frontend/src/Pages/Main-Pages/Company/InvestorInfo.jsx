@@ -1,4 +1,4 @@
-import '../../../Styles/Pages/Main-Pages/InvestorInfo.css';
+import '../../../Styles/Pages/Main-Pages/Company/InvestorInfo.css';
 
 export const InvestorInfo = () => {
     return (

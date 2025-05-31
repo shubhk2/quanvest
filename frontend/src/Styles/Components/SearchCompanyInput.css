@@ -78,14 +78,3 @@
         transform: translateY(0);
     }
 }
-
-.search-company-input .loading {
-    animation: spin 1s linear infinite;
-    display: inline-block;
-}
-
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
-    }
-}

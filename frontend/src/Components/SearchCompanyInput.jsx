@@ -1,5 +1,5 @@
 // src/components/SearchCompanyInput.js
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { loading, resetSearchResults, searchCompanyFunc } from '../Redux/MainReducer/action';
@@ -16,7 +16,7 @@ export const SearchCompanyInput = () => {
 
     const handleCompanySearch = (event) => {
         dispatch(loading());
-        const searchString = event.target.value;
+        const searchString = event?.target?.value?.trim() || '';
         setSearch(searchString);
 
         clearTimeout(debounceTimeout.current);
@@ -29,16 +29,12 @@ export const SearchCompanyInput = () => {
         }, 500);
     };
 
+    useEffect(() => { dispatch(resetSearchResults()) }, [dispatch])
+    useEffect(() => { setSearch(selectedCompany.companyName || '') }, [selectedCompany]);
+
     return (
         <div className="search-company-input">
-            <input
-                type='text'
-                value={search}
-                onChange={handleCompanySearch}
-                placeholder='Search For Company'
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-            />
+            <input type='text' value={search} onChange={handleCompanySearch} placeholder='Search For Company' onFocus={() => setSearchFocused(true)} onBlur={() => setTimeout(() => setSearchFocused(false), 150)} />
             {
                 searchFocused && <div className="searched-companies-container">
                     {
@@ -47,7 +43,7 @@ export const SearchCompanyInput = () => {
                             <ul className="searched-companies">
                                 {searchedCompanies.map((company) => (
                                     <li key={company.company_number}>
-                                        <Link to={`/company/${company.company_number}/overview`}>
+                                        <Link to={`/company/${company.company_number}`}>
                                             {company.full_name}
                                         </Link>
                                     </li>

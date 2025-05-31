@@ -16,6 +16,7 @@ import { ChatAI } from '../Pages/Main-Pages/ChatAI';
 import { InvestorInfo } from '../Pages/Main-Pages/Company/InvestorInfo';
 import { Company } from '../Pages/Main-Pages/Company';
 import { NotFound } from '../Styles/Pages/Main-Pages/NotFound';
+import { CompanyId } from '../Pages/Main-Pages/Company/CompanyId';
 
 export const AppRoutes = () => {
     return (
@@ -28,11 +29,13 @@ export const AppRoutes = () => {
                 <Route path="/chat-ai" element={<ChatAI />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/company" element={<Company />} >
-                    <Route path=":compId/overview" element={<Overview />} />
-                    <Route path=":compId/financial" element={<Financial />} />
-                    <Route path=":compId/forecasting" element={<Forecasting />} />
-                    <Route path=":compId/investor-info" element={<InvestorInfo />} />
-                    <Route path=":compId/*" element={<Navigate to={"/company"} replace />} />
+                    <Route path=":compId" element={<CompanyId />} >
+                        <Route path="overview" element={<Overview />} />
+                        <Route path="financial" element={<Financial />} />
+                        <Route path="forecasting" element={<Forecasting />} />
+                        <Route path="investor-info" element={<InvestorInfo />} />
+                        <Route path="*" element={<Navigate to={"/company"} replace />} />
+                    </Route>
                 </Route>
                 <Route path="/ratio-analysis" element={<RatioAnalysis />} />
                 <Route path="/valuation-modeling" element={<ValuationModeling />} />

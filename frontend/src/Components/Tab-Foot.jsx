@@ -20,7 +20,7 @@ export const TabFoot = () => {
                     tabCompanyIds.length > 0 && tabCompanyIds.map(companyId => {
                         const tab = userTabs[companyId];
                         return (
-                            <NavLink to={`/company/${tab.companyId}/overview`} key={tab.tabId} className="tab" >
+                            <NavLink to={`/company/${tab.companyId}/overview`} key={tab.tabId} className={`tab ${selectedCompany.tabId === tab.tabId && 'active'}`} >
                                 <p>{tab.companyName}</p>
                                 <span onClick={e => handleTabRemoval(e, tab)} className="remove-tab"><IoCloseCircle /></span>
                             </NavLink>

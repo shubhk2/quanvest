@@ -1,4 +1,4 @@
-import '../../../Styles/Pages/Main-Pages/Financial.css';
+import '../../../Styles/Pages/Main-Pages/Company/Financial.css';
 
 export const Financial = () => {
     return (
