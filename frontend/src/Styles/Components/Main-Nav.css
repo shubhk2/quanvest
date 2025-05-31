@@ -6,7 +6,7 @@
     background-color: var(--surface-primary);
     border-bottom: 1px solid var(--border-input);
     position: sticky;
-    top: 32.8px;
+    top: 47px;
     z-index: 9;
     gap: 20px;
     white-space: nowrap;
@@ -27,7 +27,6 @@
 .main-nav button {
     background: transparent;
     color: var(--text-primary);
-    font-size: 1rem;
     padding: 10px;
     border: none;
     border-radius: 6px;
@@ -43,6 +42,20 @@
 .main-nav button:focus-visible {
     outline: 2px solid var(--border-high-contrast);
     outline-offset: 2px;
+}
+
+.main-nav .search-company-input input {
+    border: none;
+    min-width: 150px;
+    width: max-content;
+    transition: min-width 0.2s ease-in-out;
+}
+
+.main-nav .search-company-input input:focus {
+    min-width: 350px;
+ box-shadow: 0 4px 6px -6px var(--surface-contrast); /* Only bottom shadow */
+    border-bottom: 1px solid var(--border-input);
+    border-radius: 8px 8px 0px 0px;
 }
 
 .main-nav .search-company-input .searched-companies-container {

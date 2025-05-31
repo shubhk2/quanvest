@@ -10,10 +10,10 @@
     border-radius: 8px;
     background-color: var(--surface-primary);
     color: var(--text-primary);
-    font-size: 1rem;
     outline: none;
     text-align: center;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-weight: 500;
 }
 
 .search-company-input input:focus {
@@ -53,7 +53,6 @@
     text-decoration: none;
     color: var(--text-primary);
     display: block;
-    font-size: 0.95rem;
     font-weight: 500;
 }
 

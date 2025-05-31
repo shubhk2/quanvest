@@ -35,7 +35,6 @@
 .home-nav button {
     background: transparent;
     color: var(--text-primary);
-    font-size: 1rem;
     padding: 10px;
     border-radius: 6px;
     transition: background-color 0.2s ease, color 0.2s ease, padding .25s ease-in-out;

@@ -1,4 +1,84 @@
-.overview {
+.overview-container {
     min-height: calc(100vh - 64px - 32.8px - 72.4px);
-    padding: 20px;
+    padding: 15px;
+    display: grid;
+    gap: 15px;
+    grid-template-areas:
+        "overview chart"
+        "statistics chart";
+    width: 100%;
+}
+
+.overview {
+    grid-area: overview;
+    height: 40vh;
+    overflow: hidden;
+    padding: 15px;
+}
+
+.chart {
+    grid-area: chart;
+}
+
+.statistics {
+    grid-area: statistics;
+    display: grid;
+    height: 100%;
+    gap: 10px;
+    grid-template-areas:
+        "profile valuation_ttm growth"
+        "margins valuation_ntm growth"
+        "returns_5yr financial_health growth";
+}
+
+.statistics>*>.stat-category,
+.statistics>*>.stat-item {
+    padding: 5px 3px;
+    margin: 0px 10px;
+    font-size: 12px;
+}
+
+.statistics>*>.stat-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-input);
+}
+
+.statistics>*>.stat-item:last-child {
+    border: none;
+}
+
+.statistics .profile {
+    grid-area: profile;
+    height: fit-content;
+}
+
+.statistics .margins {
+    grid-area: margins;
+    height: fit-content;
+}
+
+.statistics .returns-5yr {
+    grid-area: returns_5yr;
+    height: fit-content;
+}
+
+.statistics .valuation-ttm {
+    grid-area: valuation_ttm;
+    height: fit-content;
+}
+
+.statistics .valuation-ntm {
+    grid-area: valuation_ntm;
+    height: fit-content;
+}
+
+.statistics .financial-health {
+    grid-area: financial_health;
+    height: fit-content;
+}
+
+.statistics .growth {
+    grid-area: growth;
+    height: fit-content;
 }
