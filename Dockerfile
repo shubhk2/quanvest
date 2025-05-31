@@ -10,7 +10,17 @@ WORKDIR /app
 
 COPY backend/requirements.txt .
 RUN pip install --upgrade pip
-RUN mkdir -p /app/tmp1 && TMPDIR=/app/tmp1 pip install --no-cache-dir -r requirements.txt
+# Install smaller dependencies first
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir $(grep -v "torch\|transformers\|sentence-transformers" requirements.txt)
+
+# Install large ML dependencies with custom TMPDIR
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=cache,target=/app/tmp \
+    mkdir -p /app/tmp && \
+    TMPDIR=/app/tmp pip install --no-cache-dir torch torchvision && \
+    TMPDIR=/app/tmp pip install --no-cache-dir transformers sentence-transformers
+
 
 
 COPY backend ./backend
