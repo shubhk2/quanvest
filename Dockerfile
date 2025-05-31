@@ -1,4 +1,4 @@
-# --- Builder Stage ---
+# syntax=docker/dockerfile:1.4
 FROM python:3.12.3 AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates git && rm -rf /var/lib/apt/lists/*
@@ -10,6 +10,7 @@ WORKDIR /app
 
 COPY backend/requirements.txt .
 RUN pip install --upgrade pip
+
 # Install smaller dependencies first
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir $(grep -v "torch\|transformers\|sentence-transformers" requirements.txt)
@@ -20,8 +21,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     mkdir -p /app/tmp && \
     TMPDIR=/app/tmp pip install --no-cache-dir torch torchvision && \
     TMPDIR=/app/tmp pip install --no-cache-dir transformers sentence-transformers
-
-
 
 COPY backend ./backend
 
