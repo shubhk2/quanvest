@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 export const Overview = () => {
     const { compId } = useParams();
     const [fullOverview, setFullOverview] = useState(false);
-    const { data: { overview, stats }, selectedCompany } = useSelector(store => store.mainReducer);
+    const { overview: { data: { overview, stats } }, selectedCompany } = useSelector(store => store.mainReducer);
     const dispatch = useDispatch();
     const processStatsData = (key, statCategory) => {
         if (!stats[key]) {

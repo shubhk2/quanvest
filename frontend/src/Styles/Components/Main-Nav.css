@@ -29,7 +29,6 @@
     background: transparent;
     color: var(--text-primary);
     border: none;
-    border-radius: 6px;
     transition: background-color 0.2s ease, color 0.2s ease;
     cursor: pointer;
 }

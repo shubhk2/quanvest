@@ -31,7 +31,7 @@ export const AppRoutes = () => {
                 <Route path="/company" element={<Company />} >
                     <Route path=":compId" element={<CompanyId />} >
                         <Route path="overview" element={<Overview />} />
-                        <Route path="financial" element={<Financial />} />
+                        <Route path="financial/:type" element={<Financial />} />
                         <Route path="forecasting" element={<Forecasting />} />
                         <Route path="investor-info" element={<InvestorInfo />} />
                         <Route path="*" element={<Navigate to={"/company"} replace />} />

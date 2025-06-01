@@ -1,5 +1,4 @@
 .overview-container {
-    min-height: calc(100vh - 64px - 32.8px - 72.4px);
     padding: 15px;
     display: grid;
     gap: 15px;
@@ -28,7 +27,6 @@
 .chart {
     grid-area: chart;
     width: 50vw;
-
 }
 
 .statistics {

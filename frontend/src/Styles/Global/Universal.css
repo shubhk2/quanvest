@@ -1,5 +1,12 @@
+.app {
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 70px;
+}
+
 .main-nav a.active button,
-.home-nav a.active button {
+.home-nav a.active button,
+.financial-container .body .tabs a.active button {
     background-color: var(--button-green);
     color: var(--text-contrast);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);

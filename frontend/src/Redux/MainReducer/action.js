@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CREATE_TAB, ERROR, GET_OVERVIEW_DATA, LOADING, REMOVE_ERROR, REMOVE_TAB, RESET_SEARCH_RESULTS, SEARCH_COMPANY, SET_ACTIVE_TAB, STOP_LOADING } from "./actionTypes";
+import { CREATE_TAB, ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, REMOVE_ERROR, REMOVE_TAB, RESET_SEARCH_RESULTS, SEARCH_COMPANY, SET_ACTIVE_TAB, STOP_LOADING } from "./actionTypes";
 
 export const loading = () => {
     return {
@@ -38,6 +38,12 @@ export const getOverviewData = (payload) => {
         payload
     }
 }
+export const getFinancialData = (payload) => {
+    return {
+        type: GET_FINANCIAL_DATA,
+        payload
+    }
+}
 export const createTab = (payload) => {
     return {
         type: CREATE_TAB,
@@ -68,7 +74,7 @@ export const searchCompanyFunc = (searchString, limit = 10) => dispatch => {
             dispatch(searchCompany(res.data));
         })
         .catch((err) => {
-            console.error(err);
+            console.error(err?.response?.data || err);
             dispatch(error());
         });
 }
@@ -83,7 +89,7 @@ export const getCompanyDetailsById = id => dispatch => {
             return res?.data?.result || {};
         })
         .catch(err => {
-            console.log(err);
+            console.error(err?.response?.data || err);
             dispatch(error());
             return {};
         })
@@ -96,10 +102,27 @@ export const getOverviewDataFunc = id => dispatch => {
     }
     return axios(request)
         .then((res) => {
-            dispatch(getOverviewData(res.data));
+            dispatch(getOverviewData({ data: res.data }));
         })
         .catch((err) => {
             dispatch(error());
-            throw new Error(err);
+            throw new Error(err?.response?.data || err);
         });
+}
+export const getFinancialDataFunc = (id, type, start='', end='') => dispatch => {
+    dispatch(loading());
+    const request = {
+        method: "get",
+        url: `${process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`
+    }
+    if (start) request.url += `&start_year=${start}`;
+    if (end) request.url += `&end_year=${end}`;
+    axios(request)
+        .then(res => {
+            dispatch(getFinancialData({ type, data: res.data }));
+        })
+        .catch(err => {
+            console.error(err?.response?.data || err);
+            dispatch(error());
+        })
 }

@@ -5,16 +5,21 @@ import { TabFoot } from '../Components/Tab-Foot';
 
 export const Layout = ({ children }) => {
     const location = useLocation();
+
     const companyTabs = ['overview', 'financial', 'forecasting', 'investor-info'];
+
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    const isCompanyPath = companyTabs.includes(lastSegment);
+
+    // Get the second-to-last segment (after companyId) to match company tab pages
+    const tabSegment = pathSegments[2]; // /company/:compId/:tab
+
+    const isCompanyPath = companyTabs.includes(tabSegment);
     return (
         <>
             <HomeNav />
             {isCompanyPath && <MainNav />}
             {children}
-            {isCompanyPath && <TabFoot />}
+            {(isCompanyPath || location.pathname === "/company") && <TabFoot />}
         </>
     );
 };

@@ -1,3 +1,36 @@
-.financial {
-    min-height: calc(100vh - 64px - 32.8px - 72.4px);
+.financial-container {
+    width: 100%;
+    padding: 15px;
+}
+
+.financial-container .body {
+    background-color: var(--surface-primary);
+    border-radius: 8px;
+}
+
+.financial-container .body .tabs {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    gap: 15px;
+}
+
+.financial-container .body .tabs button {
+    min-width: 100px;
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+    padding: 7px 10px;
+}
+
+.financial-container .body .tabs button:hover {
+    background-color: var(--hover-dropdown-item);
+    color: var(--text-primary);
+}
+
+.financial-container .body .tabs button:focus-visible {
+    outline: 2px solid var(--border-high-contrast);
+    outline-offset: 2px;
 }

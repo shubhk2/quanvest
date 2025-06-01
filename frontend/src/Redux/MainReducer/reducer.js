@@ -3,7 +3,16 @@ import { ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, RESET_SEARCH_RES
 const initState = {
     isLoading: false,
     isError: false,
-    data: [],
+    overview: {
+        data: {}
+    },
+    financial: {
+        balance_sheet: {},
+        cashflow: {},
+        profit_and_loss: {},
+        quarterly_results: {},
+        data: []
+    },
     searchedCompanies: [],
     selectedCompany: {},
     userTabs: {}
@@ -38,14 +47,20 @@ export const reducer = (state = initState, { type, payload }) => {
                 ...state,
                 isLoading: false,
                 isError: false,
-                data: payload
+                overview: {
+                    ...state.overview,
+                    data: payload.data || []
+                }
             };
         case GET_FINANCIAL_DATA:
             return {
                 ...state,
                 isLoading: false,
                 isError: false,
-                data: payload
+                financial: {
+                    ...state.financial,
+                    [payload.type]: payload.data || {}
+                }
             };
         case SEARCH_COMPANY:
             return {
@@ -60,8 +75,7 @@ export const reducer = (state = initState, { type, payload }) => {
                 isLoading: false,
                 isError: false,
                 searchedCompanies: [],
-                selectedCompany: {},
-                data: []
+                selectedCompany: {}
             }
         case CREATE_TAB:
             return {

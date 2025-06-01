@@ -9,7 +9,7 @@ export const MainNav = () => {
     return (
         <div className="main-nav">
             <NavLink tabIndex={-1} to={`/company/${companyId}/overview`}><button>Overview</button></NavLink>
-            <NavLink tabIndex={-1} to={`/company/${companyId}/financial`}><button>Financial</button></NavLink>
+            <NavLink tabIndex={-1} to={`/company/${companyId}/financial/balance_sheet`}><button>Financial</button></NavLink>
             <SearchCompanyInput />
             <NavLink tabIndex={-1} to={`/company/${companyId}/forecasting`}><button>Forecasting</button></NavLink>
             <NavLink tabIndex={-1} to={`/company/${companyId}/investor-info`}><button>Investor Info</button></NavLink>

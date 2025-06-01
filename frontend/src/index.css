@@ -76,7 +76,7 @@ body {
 
 *::-webkit-scrollbar-thumb {
     background-color: #aaa;
-    border-radius: 3px;
+    border-radius: 8px;
 }
 
 /* Hide scrollbar arrows */

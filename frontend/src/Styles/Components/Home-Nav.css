@@ -36,7 +36,6 @@
     background: transparent;
     color: var(--text-primary);
     padding: 10px;
-    border-radius: 6px;
     transition: background-color 0.2s ease, color 0.2s ease, padding .25s ease-in-out;
     cursor: pointer;
 }
