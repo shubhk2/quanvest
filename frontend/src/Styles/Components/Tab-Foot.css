@@ -5,9 +5,9 @@
     gap: 10px;
     padding: 10px;
     width: 100%;
-    overflow-x: scroll;
+    overflow-x: auto;
     overflow-y: hidden;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(1px);
 }
 
 .tabs-footer p {
@@ -28,7 +28,6 @@
 .tabs-footer .tab.active {
     background-color: var(--surface-primary);
     border-color: var(--border-high-contrast);
-    box-shadow: 0 0 0 2px var(--border-high-contrast);
 }
 
 .tabs-footer .tab p,
