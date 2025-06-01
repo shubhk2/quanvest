@@ -161,7 +161,7 @@ button,
 button[type="button"],
 button[type="submit"] {
     font-size: .9rem;
-    padding: 0.6rem 1.2rem;
+    padding: 3px 10px;
     background-color: var(--button-green);
     color: var(--text-contrast);
     border: none;
@@ -194,7 +194,7 @@ select {
     background-color: var(--surface-primary);
     border: 1px solid var(--border-input);
     border-radius: 6px;
-    padding: 0.5rem 0.75rem;
+    padding: 5px 10px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }

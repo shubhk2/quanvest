@@ -25,9 +25,9 @@
 }
 
 .main-nav button {
+    min-width: 100px;
     background: transparent;
     color: var(--text-primary);
-    padding: 10px;
     border: none;
     border-radius: 6px;
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -48,12 +48,13 @@
     border: none;
     min-width: 150px;
     width: max-content;
+    padding: 5px 10px;
     transition: min-width 0.2s ease-in-out;
 }
 
 .main-nav .search-company-input input:focus {
     min-width: 350px;
- box-shadow: 0 4px 6px -6px var(--surface-contrast); /* Only bottom shadow */
+    box-shadow: 0 4px 6px -6px var(--surface-contrast);
     border-bottom: 1px solid var(--border-input);
     border-radius: 8px 8px 0px 0px;
 }
