@@ -35,7 +35,7 @@
     grid-area: statistics;
     display: grid;
     height: 100%;
-    gap: 10px;
+    gap: 15px;
     padding: 15px;
     grid-template-areas:
         "stats-heading stats-heading stats-heading"
@@ -55,7 +55,7 @@
 }
 
 .statistics>*>.stat-item {
-    padding: 5px 3px;
+    padding: 5px 0px;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid var(--border-input);

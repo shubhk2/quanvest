@@ -11,6 +11,9 @@ export const Overview = () => {
     const { data: { overview, stats }, selectedCompany } = useSelector(store => store.mainReducer);
     const dispatch = useDispatch();
     const processStatsData = (key, statCategory) => {
+        if (!stats[key]) {
+            return;
+        }
         const { columns, values } = stats[key];
         if (!values || !columns) {
             return;
