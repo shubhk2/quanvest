@@ -1,11 +1,27 @@
 from fastapi import APIRouter, Query, HTTPException
-from backend.services.search_service import search_companies, search_parameters
+from backend.services.search_service import search_companies, search_parameters,search_company_by_id
 import logging
 
 # Set up logger
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/search", tags=["search"])
+
+@router.get("/company/{company_id}")
+async def get_company_by_id(
+    company_id: int
+):
+    logger.debug(f"Searching company with ID: {company_id}")
+    try:
+        result = search_company_by_id(company_id)
+        if not result:
+            logger.info(f"No company found with ID: {company_id}")
+            return {"result": None}
+        logger.info(f"Company found: {result}")
+        return {"result": result}
+    except Exception as e:
+        logger.error(f"Error fetching company by ID: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500,detail=str(e))
 
 @router.get("/companies")
 async def search_companies_route(

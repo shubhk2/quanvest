@@ -1,6 +1,6 @@
 from backend.db_setup import connect_to_db
 from psycopg2.extras import RealDictCursor
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import logging
 
 # Set up logger
@@ -75,6 +75,34 @@ def search_parameters(query: str, limit: int = 10) -> List[Dict[str, Any]]:
         conn.close()
         logger.debug("Database connection closed")
 
+def search_company_by_id(company_id: int) -> Optional[Dict[str, Any]]:
+    logger.debug(f"Searching company with ID: {company_id}")
+    conn = connect_to_db()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute(
+            """
+            SELECT company_number, full_name
+            FROM company_detail
+            WHERE company_number = %s
+            """,
+            (company_id,)
+        )
+        result = cursor.fetchone()
+        if result:
+            logger.info(f"Company found for ID {company_id}")
+        else:
+            logger.info(f"No company found for ID {company_id}")
+        return result
+    except Exception as e:
+        logger.error(f"Error searching company by ID: {str(e)}", exc_info=True)
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+        logger.debug("Database connection closed")
+
+
 if __name__ == "__main__":
     # Configure logging for standalone execution
     logging.basicConfig(level=logging.DEBUG, 
@@ -82,5 +110,6 @@ if __name__ == "__main__":
     
     # Example usage
     logger.info("Testing search functionality")
+    print(search_company_by_id(1))  # Example company ID
     print(search_companies("Tata"))
     print(search_parameters("sale"))
