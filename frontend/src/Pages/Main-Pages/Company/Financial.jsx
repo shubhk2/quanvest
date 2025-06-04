@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { getFinancialDataFunc } from '../../../Redux/MainReducer/action';
 import { formatDateToShortMonthYear } from '../../../Utils/dateFormatter';
-import ParameterChart from '../../../Components/ParameterChart';
+import { ParameterChart } from '../../../Components/ParameterChart';
 import { formatLabel } from '../../../Utils/labelFormatter';
 
 export const Financial = () => {
@@ -13,9 +13,10 @@ export const Financial = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const { financial } = useSelector(store => store.mainReducer);
+
     const [selectedParams, setSelectedParams] = useState(new Set());
     const [allDatesForChart, setAllDatesForChart] = useState([]);
-    const [globalFormattedData, setGlobalFormattedData] = useState([]);
+    const [globalFormattedData, setGlobalFormattedData] = useState({});
 
     const types = useMemo(() => [
         "balance_sheet",
@@ -34,7 +35,13 @@ export const Financial = () => {
         dispatch(getFinancialDataFunc(compId, type));
     }, [type, types, compId, navigate, dispatch, location]);
 
-    if (!types.includes(type)) return null;
+    useEffect(() => {
+        if (!financial[type]?.data) return;
+
+        const { formattedData, allDates } = prepareFinancialData(financial[type].data);
+        setGlobalFormattedData(formattedData);
+        setAllDatesForChart(allDates);
+    }, [financial, type]);
 
     const handleRowToggle = (parameter) => {
         setSelectedParams(prev => {
@@ -47,28 +54,28 @@ export const Financial = () => {
             return newSet;
         });
     };
-    console.log(selectedParams)
-    const formatData = () => {
-        const { data } = financial[type];
-        const formattedData = {};
-        for (let i = 0; i < data.length; i++) {
-            const currentItem = data[i];
-            const param = currentItem.parameter;
-            if (!formattedData[param]) {
-                formattedData[param] = [];
-            }
-            const formattedItem = formattedData[param];
-            formattedItem.push(currentItem);
-        }
-        for (const param in formattedData) {
-            formattedData[param].sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
-        }
-        return formattedData;
-    }
-    const generateTableContent = () => {
-        const formattedData = formatData();
 
-        if (!formattedData || Object.keys(formattedData).length === 0) {
+    const prepareFinancialData = (data) => {
+        const groupedData = {};
+        const dateSet = new Set();
+
+        for (const item of data) {
+            const { parameter, report_date, value } = item;
+            if (!groupedData[parameter]) groupedData[parameter] = [];
+            groupedData[parameter].push({ report_date, value });
+            dateSet.add(report_date);
+        }
+
+        for (const param in groupedData) {
+            groupedData[param].sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
+        }
+
+        const allDates = Array.from(dateSet).sort((a, b) => new Date(a) - new Date(b));
+        return { formattedData: groupedData, allDates };
+    };
+
+    const generateTableContent = () => {
+        if (!globalFormattedData || Object.keys(globalFormattedData).length === 0) {
             return (
                 <tbody>
                     <tr>
@@ -78,41 +85,28 @@ export const Financial = () => {
             );
         }
 
-        // Step 1: Get all unique dates from all parameters
-        const allDates = Array.from(
-            new Set(
-                Object.values(formattedData)
-                    .flat()
-                    .map(item => item.report_date)
-            )
-        ).sort((a, b) => new Date(a) - new Date(b));
-        // setAllDatesForChart(allDates);
-        // setGlobalFormattedData(formattedData);
-
         return (
             <>
                 <thead>
                     <tr>
                         <th>Parameter</th>
-                        {allDates.map((date, index) => (
+                        {allDatesForChart.map((date, index) => (
                             <th key={index}>{formatDateToShortMonthYear(date)}</th>
                         ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(formattedData).map(([parameter, records], rowIndex) => {
-                        const valueMap = Object.fromEntries(
-                            records.map(entry => [entry.report_date, entry.value])
-                        );
+                    {Object.entries(globalFormattedData).map(([parameter, records], rowIndex) => {
+                        const valueMap = Object.fromEntries(records.map(entry => [entry.report_date, entry.value]));
                         const parameterValue = type + "|-|" + parameter;
                         const isChecked = selectedParams.has(parameterValue);
+
                         return (
                             <tr key={rowIndex} onClick={() => handleRowToggle(parameterValue)}>
                                 <td>
-                                    <input type="checkbox" checked={isChecked} readOnly />
-                                    {" "}{parameter}
+                                    <input type="checkbox" checked={isChecked} readOnly /> {parameter}
                                 </td>
-                                {allDates.map((date, colIndex) => (
+                                {allDatesForChart.map((date, colIndex) => (
                                     <td key={colIndex}>{valueMap[date] ?? '-'}</td>
                                 ))}
                             </tr>
@@ -122,6 +116,8 @@ export const Financial = () => {
             </>
         );
     };
+
+    if (!types.includes(type)) return null;
 
     return (
         <div className='financial-container'>
@@ -136,18 +132,11 @@ export const Financial = () => {
                     )}
                 </div>
                 <div className='tabs'>
-                    {
-                        types.map((item) => {
-                            const label = formatLabel(item);
-                            return (
-                                <NavLink key={item} tabIndex={-1} to={`/company/${compId}/financial/${item}`}>
-                                    <button>
-                                        {label}
-                                    </button>
-                                </NavLink>
-                            );
-                        })
-                    }
+                    {types.map((item) => (
+                        <NavLink key={item} tabIndex={-1} to={`/company/${compId}/financial/${item}`}>
+                            <button>{formatLabel(item)}</button>
+                        </NavLink>
+                    ))}
                 </div>
                 <table className='table'>
                     {financial[type]?.data && generateTableContent()}
@@ -155,4 +144,4 @@ export const Financial = () => {
             </div>
         </div>
     );
-}
+};
