@@ -1,8 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks,HTTPException, Query
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
-import glob
-from datetime import datetime
+
 # from app.classifier import classify_text
 # from db_mongo import save_to_mongodb, get_classified_data
 import os
@@ -20,7 +17,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import our modules
-from backend.db_setup import connect_to_db, create_tables, load_data
 
 # Load environment variables
 load_dotenv()

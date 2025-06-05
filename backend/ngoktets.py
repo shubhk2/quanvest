@@ -3,7 +3,7 @@ import json
 # import time # This import was not used
 
 # Define the ngrok URL as a constant
-NGROK_URL = "https://67fb-34-143-130-17.ngrok-free.app"  # Replace with your actual URL
+NGROK_URL = "https://b4d0-34-125-188-86.ngrok-free.app"  # Replace with your actual URL
 
 def test_colab_flask_endpoint():  # ngrok_url parameter removed
     """Test the Colab Flask retrieval endpoint"""
@@ -14,7 +14,7 @@ def test_colab_flask_endpoint():  # ngrok_url parameter removed
 
     # Test payload
     test_payload = {
-        "query": "What is mahindra and mahindra MD&A financial performance?"
+        "query": "compare M&M vs TCS MD&A financial performance?"
     }
 
     print(f"Testing endpoint: {endpoint}")

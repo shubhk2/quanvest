@@ -26,7 +26,12 @@ def get_database():
         collection = db[COLLECTION_NAME]
     return collection
 
-
+def get_tickers():
+    """Retrieve distinct tickers from the MongoDB collection"""
+    collection = get_database()
+    # Get distinct tickers
+    tickers = collection.distinct("ticker")
+    print(tickers)
 def save_to_mongodb(ticker, date, classified_text, source_file=""):
     collection = get_database()
     # Convert date to year/month fields
@@ -72,5 +77,5 @@ def get_classified_data(ticker: Optional[str] = None, date: Optional[str] = None
     results = list(collection.find(query, {"_id": 0}))
     return results
 if __name__=="__main__":
-    get_classified_data()
+    get_tickers()
 
