@@ -8,28 +8,28 @@
     width: 100%;
 }
 
-.overview,
-.chart,
-.statistics {
+.overview-container .overview,
+.overview-container .chart,
+.overview-container .statistics {
     background-color: var(--surface-primary);
     border-radius: 8px;
 }
 
-.overview {
+.overview-container .overview {
     grid-area: overview;
     padding: 15px;
 }
 
-.overview-container h2{
+.overview-container h2 {
     margin-top: 0px;
 }
 
-.chart {
+.overview-container .chart {
     grid-area: chart;
     width: 50vw;
 }
 
-.statistics {
+.overview-container .statistics {
     grid-area: statistics;
     display: grid;
     height: 100%;
@@ -42,55 +42,55 @@
         "returns_5yr financial_health growth";
 }
 
-.statistics>*>.stat-category,
-.statistics>*>.stat-item {
+.overview-container .statistics>*>.stat-category,
+.overview-container .statistics>*>.stat-item {
     font-size: 12px;
 }
 
-.statistics>*>.stat-category {
+.overview-container .statistics>*>.stat-category {
     font-weight: 600;
     margin: 10px 0px;
 }
 
-.statistics>*>.stat-item {
+.overview-container .statistics>*>.stat-item {
     padding: 5px 0px;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid var(--border-input);
 }
 
-.statistics>*>.stat-item:last-child {
+.overview-container .statistics>*>.stat-item:last-child {
     border: none;
 }
 
-.statistics .stats-heading {
+.overview-container .statistics .stats-heading {
     grid-area: stats-heading;
 }
 
-.statistics .profile {
+.overview-container .statistics .profile {
     grid-area: profile;
 }
 
-.statistics .margins {
+.overview-container .statistics .margins {
     grid-area: margins;
 }
 
-.statistics .returns-5yr {
+.overview-container .statistics .returns-5yr {
     grid-area: returns_5yr;
 }
 
-.statistics .valuation-ttm {
+.overview-container .statistics .valuation-ttm {
     grid-area: valuation_ttm;
 }
 
-.statistics .valuation-ntm {
+.overview-container .statistics .valuation-ntm {
     grid-area: valuation_ntm;
 }
 
-.statistics .financial-health {
+.overview-container .statistics .financial-health {
     grid-area: financial_health;
 }
 
-.statistics .growth {
+.overview-container .statistics .growth {
     grid-area: growth;
 }

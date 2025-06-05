@@ -3,9 +3,8 @@ import '../../../Styles/Pages/Main-Pages/Company/Financial.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { getFinancialDataFunc } from '../../../Redux/MainReducer/action';
-import { formatDateToShortMonthYear } from '../../../Utils/dateFormatter';
 import { ParameterChart } from '../../../Components/ParameterChart';
-import { formatLabel } from '../../../Utils/labelFormatter';
+import { formatDateToShortMonthYear, formatLabel, getRandomBrightColor } from '../../../Utils/utilities';
 
 export const Financial = () => {
     const { compId, type } = useParams();
@@ -58,18 +57,20 @@ export const Financial = () => {
     const prepareFinancialData = (data) => {
         const groupedData = {};
         const dateSet = new Set();
-
         for (const item of data) {
             const { parameter, report_date, value } = item;
-            if (!groupedData[parameter]) groupedData[parameter] = [];
-            groupedData[parameter].push({ report_date, value });
+            if (!groupedData[parameter]) {
+                groupedData[parameter] = {
+                    color: getRandomBrightColor(),
+                    records: []
+                };
+            }
+            groupedData[parameter].records.push({ report_date, value });
             dateSet.add(report_date);
         }
-
         for (const param in groupedData) {
-            groupedData[param].sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
+            groupedData[param].records.sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
         }
-
         const allDates = Array.from(dateSet).sort((a, b) => new Date(a) - new Date(b));
         return { formattedData: groupedData, allDates };
     };
@@ -96,7 +97,7 @@ export const Financial = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(globalFormattedData).map(([parameter, records], rowIndex) => {
+                    {Object.entries(globalFormattedData).map(([parameter, { records, color }], rowIndex) => {
                         const valueMap = Object.fromEntries(records.map(entry => [entry.report_date, entry.value]));
                         const parameterValue = type + "|-|" + parameter;
                         const isChecked = selectedParams.has(parameterValue);
@@ -104,7 +105,7 @@ export const Financial = () => {
                         return (
                             <tr key={rowIndex} onClick={() => handleRowToggle(parameterValue)}>
                                 <td>
-                                    <input type="checkbox" checked={isChecked} readOnly /> {parameter}
+                                    <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': color }} checked={isChecked} readOnly /> {parameter}
                                 </td>
                                 {allDatesForChart.map((date, colIndex) => (
                                     <td key={colIndex}>{valueMap[date] ?? '-'}</td>
@@ -138,9 +139,11 @@ export const Financial = () => {
                         </NavLink>
                     ))}
                 </div>
-                <table className='table'>
-                    {financial[type]?.data && generateTableContent()}
-                </table>
+                <div className='table-container'>
+                    <table className='table'>
+                        {generateTableContent()}
+                    </table>
+                </div>
             </div>
         </div>
     );

@@ -1,7 +1,24 @@
 import { Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar } from "recharts";
-import { formatDateToShortMonthYear } from "../Utils/dateFormatter";
 import { useEffect, useState } from "react";
-import { formatLabel } from "../Utils/labelFormatter";
+import { formatDateToShortMonthYear } from "../Utils/utilities";
+
+const CustomLegend = ({ payload, chartTypes, onToggleType }) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: 10 }}>
+        {payload.map((entry, index) => {
+            const type = chartTypes[entry.dataKey];
+            return (
+                <div key={index} style={{ cursor: "pointer" }}>
+                    <span style={{ color: entry.color, marginRight: 8, fontWeight: 600 }}>
+                        {entry.value}
+                    </span>
+                    <button onClick={() => onToggleType(entry.dataKey)}>
+                        {type === 'line' ? 'Switch to Bar' : 'Switch to Line'}
+                    </button>
+                </div>
+            );
+        })}
+    </div>
+);
 
 export const ParameterChart = ({ selectedParams, allDates, formattedData }) => {
     const [chartTypes, setChartTypes] = useState({});
@@ -10,73 +27,60 @@ export const ParameterChart = ({ selectedParams, allDates, formattedData }) => {
         setChartTypes(prev => {
             const updated = { ...prev };
             for (let param of selectedParams) {
-                if (!(param in updated)) updated[param] = 'line';
+                if (!updated[param]) updated[param] = 'line';
             }
             return updated;
         });
     }, [selectedParams]);
 
-    const toggleChartType = (param) => {
-        setChartTypes(prev => ({
-            ...prev,
-            [param]: prev[param] === 'line' ? 'bar' : 'line'
-        }));
-    };
-
     const chartData = allDates.map(date => {
         const point = { date: formatDateToShortMonthYear(date) };
         for (let param of selectedParams) {
-            const [label, key] = param.split("|-|");
-            const records = formattedData[key] || [];
+            const paramKey = param.split("|-|")[1];
+            const records = formattedData[paramKey]?.records || [];
             const value = records.find(r => r.report_date === date)?.value;
-            point[`${formatLabel(label)} ${key}`] = value ?? null;
+            point[param] = value ?? null;
         }
         return point;
     });
 
-    const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
+    const handleToggleType = (key) => {
+        setChartTypes(prev => ({
+            ...prev,
+            [key]: prev[key] === 'line' ? 'bar' : 'line'
+        }));
+    };
 
     return (
-        <div style={{ width: "100%" }}>
-            <div style={{ marginBottom: 10 }}>
-                {Array.from(selectedParams).map(param => (
-                    <button key={param} onClick={() => toggleChartType(param)}>
-                        {param.split("|-|")[0]}: {chartTypes[param] === 'line' ? 'LINE' : 'BAR'}
-                    </button>
-                ))}
-            </div>
-            <div style={{ height: 400 }}>
-                <ResponsiveContainer>
-                    <ComposedChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {Array.from(selectedParams).map((param, index) => {
-                            const [label, key] = param.split("|-|");
-                            const dataKey = `${formatLabel(label)} ${key}`;
-                            const color = colors[index % colors.length];
-                            return chartTypes[param] === 'line' ? (
-                                <Line
-                                    key={dataKey}
-                                    type="monotone"
-                                    dataKey={dataKey}
-                                    stroke={color}
-                                    dot={false}
-                                />
-                            ) : (
-                                <Bar
-                                    key={dataKey}
-                                    dataKey={dataKey}
-                                    fill={color}
-                                    barSize={20}
-                                />
-                            );
-                        })}
-                    </ComposedChart>
-                </ResponsiveContainer>
-            </div>
+        <div style={{ width: "100%", height: 400 }}>
+            <ResponsiveContainer>
+                <ComposedChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend content={<CustomLegend chartTypes={chartTypes} onToggleType={handleToggleType} />} />
+                    {Array.from(selectedParams).map((param) => {
+                        const paramKey = param.split("|-|")[1];
+                        const color = formattedData[paramKey]?.color;
+                        return chartTypes[param] === 'bar' ? (
+                            <Bar
+                                key={param}
+                                dataKey={param}
+                                fill={color}
+                            />
+                        ) : (
+                            <Line
+                                key={param}
+                                type="monotone"
+                                dataKey={param}
+                                stroke={color}
+                                dot={false}
+                            />
+                        );
+                    })}
+                </ComposedChart>
+            </ResponsiveContainer>
         </div>
     );
 };

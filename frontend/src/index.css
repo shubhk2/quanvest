@@ -32,6 +32,11 @@ body {
     --hover-dropdown-item: var(--color-gray-2);
     --active-dropdown-item: var(--color-gray-3);
     --menu-item-hover: var(--color-gray-2);
+    --table-base-bg: var(--color-white);
+    --table-stripe-bg: var(--color-gray-1);
+    --table-hover-bg: var(--color-gray-3);
+    --table-header-bg: var(--color-gray-2);
+    --table-border-color: var(--color-gray-3);
     background-color: var(--surface-base);
     font-family: var(--font-family);
 }
@@ -55,7 +60,12 @@ body {
     --chart-border-color: var(--color-dark-5);
     --hover-dropdown-item: var(--color-dark-7);
     --active-dropdown-item: var(--color-dark-9);
-    --menu-item-hover: var(--color-dark-6)
+    --menu-item-hover: var(--color-dark-6);
+    --table-base-bg: var(--color-dark-8);
+    --table-stripe-bg: var(--color-dark-7);
+    --table-hover-bg: var(--color-dark-6);
+    --table-header-bg: var(--color-dark-9);
+    --table-border-color: var(--color-dark-4)
 }
 
 /* Firefox */
@@ -214,19 +224,29 @@ textarea::placeholder {
 
 /* Tables (basic) */
 table {
-    width: 100%;
     border-collapse: collapse;
+    width: 100%;
     color: var(--text-primary);
+    background-color: var(--table-base-bg);
+    border: 1px solid var(--table-border-color);
+}
+
+table tr:nth-child(2n) {
+    background-color: var(--table-stripe-bg);
+}
+
+table tr:hover {
+    background-color: var(--table-hover-bg);
 }
 
 th,
 td {
-    padding: 0.75rem;
-    border: 1px solid var(--border-input);
+    padding: 10px 15px;
+    border: 1px solid var(--table-border-color);
 }
 
 th {
-    background-color: var(--surface-secondary);
+    background-color: var(--table-header-bg);
     text-align: left;
 }
 

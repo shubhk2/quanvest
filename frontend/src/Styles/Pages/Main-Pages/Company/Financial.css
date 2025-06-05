@@ -34,3 +34,24 @@
     outline: 2px solid var(--border-high-contrast);
     outline-offset: 2px;
 }
+
+.financial-container .table-container {
+    width: 100%;
+    padding: 15px;
+    padding-top: 0px;
+    box-sizing: border-box;
+}
+
+.financial-container .table-container .table tbody td:first-child {
+    display: flex;
+    align-items: center;
+    gap: 2%;
+}
+
+.financial-container .table-container .table tr .table-row-checkbox {
+    width: 15px;
+    height: 15px;
+    padding: 0px;
+    margin: 0px;
+    accent-color: var(--checkbox-color, var(--text-primary));
+}
