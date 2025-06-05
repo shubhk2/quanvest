@@ -181,7 +181,7 @@ button[type="submit"] {
 }
 
 button:hover {
-    background-color: var(--surface-green);
+    background-color: var(--text-green);
 }
 
 button:active {

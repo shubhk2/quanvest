@@ -1,14 +1,15 @@
 import { Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar } from "recharts";
 import { useEffect, useState } from "react";
 import { formatDateToShortMonthYear } from "../Utils/utilities";
+import "../Styles/Components/ParameterChart.css"
 
 const CustomLegend = ({ payload, chartTypes, onToggleType }) => (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: 10 }}>
+    <div className="chart-legend">
         {payload.map((entry, index) => {
             const type = chartTypes[entry.dataKey];
             return (
-                <div key={index} style={{ cursor: "pointer" }}>
-                    <span style={{ color: entry.color, marginRight: 8, fontWeight: 600 }}>
+                <div key={index}>
+                    <span>
                         {entry.value}
                     </span>
                     <button onClick={() => onToggleType(entry.dataKey)}>
@@ -32,7 +33,6 @@ export const ParameterChart = ({ selectedParams, allDates, formattedData }) => {
             return updated;
         });
     }, [selectedParams]);
-
     const chartData = allDates.map(date => {
         const point = { date: formatDateToShortMonthYear(date) };
         for (let param of selectedParams) {
@@ -52,7 +52,7 @@ export const ParameterChart = ({ selectedParams, allDates, formattedData }) => {
     };
 
     return (
-        <div style={{ width: "100%", height: 400 }}>
+        <div className="chart-container">
             <ResponsiveContainer>
                 <ComposedChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
