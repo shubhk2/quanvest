@@ -60,7 +60,7 @@ def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> Lis
 
             # Strategy 1: Try exact ticker match first
             cursor.execute(
-                "SELECT company_number FROM company_detail WHERE UPPER(ticker) = UPPER(%s)",
+                "SELECT company_number FROM company_overview WHERE UPPER(ticker) = UPPER(%s)",
                 (ticker,)
             )
             result = cursor.fetchone()
@@ -70,7 +70,7 @@ def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> Lis
 
             # Strategy 2: Try fuzzy full_name matching
             cursor.execute(
-                "SELECT company_number FROM company_detail WHERE full_name ILIKE %s LIMIT 1",
+                "SELECT company_number FROM company_overview WHERE company_overview.company_name ILIKE %s LIMIT 1",
                 (f"%{full_name}%",)
             )
             result = cursor.fetchone()
