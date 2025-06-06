@@ -119,7 +119,6 @@ async def ask_copilot(request: CopilotRequest):
     )
     colab_url = os.getenv(
         "COLAB_URL",
-        "https://fb96-34-87-133-178.ngrok-free.app"
     )
     financials_base_url = os.getenv(
         "FINANCIALS_BASE_URL",
