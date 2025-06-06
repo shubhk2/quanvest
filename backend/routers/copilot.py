@@ -91,10 +91,24 @@ def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> Lis
 @router.post("/ask")
 async def ask_copilot(request: CopilotRequest):
     """
-    Updated to pull base URLs from environment variables and improved logging.
+    Description:
+    This endpoint processes a user's query and optionally a list of company IDs. If no company
+    IDs are provided, it attempts to resolve them by calling a Colab-based resolution endpoint.
+    Once resolved, it retrieves:
+      1) Overview data for each company
+      2) Financial data (profit_and_loss) for each company
+      3) Chart data (parameters)
+      4) Refined context from Colab
+    Then calls Gemini API to generate an LLM response based on the refined context.
+
+    Parameters:
+    - user_query (str): The user's question
+    - company_ids (List[int], optional): Explicitly provided company numbers
+    - context (dict, optional): Any extra context
+    - raw_only (bool): If True, skip Gemini and just return the raw parallel fetch data
     """
 
-    # Read from environment variables, with fallback to defaults
+    # Updated to pull base URLs from environment variables and improved logging
     overview_base_url = os.getenv(
         "OVERVIEW_BASE_URL",
         "http://ec2-15-206-84-119.ap-south-1.compute.amazonaws.com:8000/overview/company"
@@ -105,7 +119,11 @@ async def ask_copilot(request: CopilotRequest):
     )
     colab_url = os.getenv(
         "COLAB_URL",
-        "https://76f9-35-240-252-178.ngrok-free.app"
+        "https://fb96-34-87-133-178.ngrok-free.app"
+    )
+    financials_base_url = os.getenv(
+        "FINANCIALS_BASE_URL",
+        "http://ec2-15-206-84-119.ap-south-1.compute.amazonaws.com:8000/financials"
     )
 
     standard_headers = {'Content-Type': 'application/json'}
@@ -134,6 +152,8 @@ async def ask_copilot(request: CopilotRequest):
 
     all_tasks_lambdas = []
     num_overview_tasks = 0
+    num_charts_tasks = 0
+    num_financials_tasks = 0
 
     # Overview tasks
     if company_ids_to_use:
@@ -147,16 +167,34 @@ async def ask_copilot(request: CopilotRequest):
             )
             num_overview_tasks += 1
 
-    # Charts task
+    # Charts task (single post request if we do have company IDs)
     if company_ids_to_use:
-        chart_params = f"?company_numbers={','.join(map(str, company_ids_to_use))}&parameters=sales&chart_type=line"
-        charts_full_url = f"{charts_url}{chart_params}"
+        chart_payload = {
+            "company_numbers": company_ids_to_use,  # as required
+            "parameters": ["sales"],
+            "chart_type": "line"
+        }
         all_tasks_lambdas.append(
-            lambda: make_request(charts_full_url, "GET", headers=standard_headers)
+            lambda: make_request(charts_url, "POST", chart_payload, standard_headers)
         )
+        num_charts_tasks = 1
     else:
-        # Add empty chart data if no companies
         all_tasks_lambdas.append(lambda: {})
+        num_charts_tasks = 1
+
+    # Financials tasks: example using "profit_and_loss" for each company
+    if company_ids_to_use:
+        for cid in company_ids_to_use:
+            if cid > 0:
+                fin_url = f"{financials_base_url}?company_number={cid}&statement_type=profit_and_loss&start_year=2021&end_year=2023"
+                all_tasks_lambdas.append(
+                    lambda url=fin_url: make_request(url, "GET", headers=standard_headers)
+                )
+                num_financials_tasks += 1
+    else:
+        # Return empty if no companies
+        all_tasks_lambdas.append(lambda: {})
+        num_financials_tasks = 1
 
     # Colab retrieval
     colab_payload = {"query": request.user_query}
@@ -178,18 +216,26 @@ async def ask_copilot(request: CopilotRequest):
         else:
             all_responses.append(r)
 
+    # Segment out each type of data from the gathered responses
+    # 1) Overview
     overview_data_list: List[Dict[str, Any]] = []
     if num_overview_tasks > 0:
         overview_data_list = all_responses[:num_overview_tasks]
+    logger.info(f"Fetched {num_overview_tasks} overview results")
 
+    # 2) Charts
     chart_data_index = num_overview_tasks
-    colab_data_index = num_overview_tasks + 1
+    chart_data = all_responses[chart_data_index] if len(all_responses) > chart_data_index else {}
 
-    chart_data: Dict[str, Any] = {}
-    if len(all_responses) > chart_data_index:
-        chart_data = all_responses[chart_data_index]
+    # 3) Financial data
+    financials_data_start = num_overview_tasks + num_charts_tasks
+    financials_data_end = financials_data_start + num_financials_tasks
+    financial_data_list = all_responses[financials_data_start:financials_data_end]
+    logger.info(f"Fetched {num_financials_tasks} financial results")
 
-    colab_data: Dict[str, Any] = {}
+    # 4) Colab
+    colab_data_index = financials_data_end
+    colab_data = {}
     if len(all_responses) > colab_data_index:
         colab_data = all_responses[colab_data_index]
 
@@ -200,9 +246,11 @@ async def ask_copilot(request: CopilotRequest):
             "llm_response": None,
             "company_overviews": overview_data_list,
             "chart_data": chart_data,
+            "financial_data": financial_data_list,
             "colab_data": colab_data
         }
 
+    # Attempt Gemini call
     try:
         gemini_result = await get_copilot_response(
             user_query=request.user_query,
@@ -214,6 +262,7 @@ async def ask_copilot(request: CopilotRequest):
             "error": f"Gemini call failed: {str(e)}",
             "company_overviews": overview_data_list,
             "chart_data": chart_data,
+            "financial_data": financial_data_list,
             "colab_data": colab_data
         }
 
@@ -221,6 +270,7 @@ async def ask_copilot(request: CopilotRequest):
         "llm_response": gemini_result.get("response"),
         "company_overviews": overview_data_list,
         "chart_data": chart_data,
+        "financial_data": financial_data_list,
         "colab_data": colab_data,
         "context_info": {
             "ner_entities": colab_data.get("ner_entities", []),
