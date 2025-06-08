@@ -25,6 +25,7 @@ logger.debug("Environment variables loaded")
 from backend.routers import home, financials, ratios, overview, charts, copilot
 from backend.routers import search  # add this import
 from backend.routers import dividend  # add this import
+from backend.routers import shareholding_pattern  # add this import
 
 
 logger.info("Starting Financial Data API")
@@ -50,6 +51,7 @@ app.include_router(charts.router, prefix="/charts")
 app.include_router(copilot.router, prefix="/copilot")
 app.include_router(search.router)  # add this line
 app.include_router(dividend.router, prefix="/dividend")  # add this line
+app.include_router(shareholding_pattern.router, prefix="/shareholding_pattern")  # add this line
 logger.info("All routers registered")
 
 
