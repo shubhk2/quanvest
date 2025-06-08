@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 logger.debug("Environment variables loaded")
-
+from backend.routers import stock_data
 from backend.routers import home, financials, ratios, overview, charts, copilot
 from backend.routers import search  # add this import
 from backend.routers import dividend  # add this import
@@ -46,6 +46,7 @@ logger.debug("Registering routers")
 app.include_router(home.router)
 app.include_router(financials.router, prefix="/financials")
 app.include_router(ratios.router, prefix="/ratios")
+app.include_router(stock_data.router, prefix="/stock_data")
 app.include_router(overview.router, prefix="/overview")
 app.include_router(charts.router, prefix="/charts")
 app.include_router(copilot.router, prefix="/copilot")
