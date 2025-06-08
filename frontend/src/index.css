@@ -203,6 +203,7 @@ select {
     color: var(--text-primary);
     background-color: var(--surface-primary);
     border: 1px solid var(--border-input);
+    width: 100%;
     border-radius: 6px;
     padding: 5px 10px;
     outline: none;

@@ -76,7 +76,6 @@ export const AssetAllocationPieChart = () => {
                     <option value="Commodities">Commodities View</option>
                 </select>
             </div>
-
             <div style={{ width: "100%", height: 300 }}>
                 <ResponsiveContainer>
                     <PieChart>
