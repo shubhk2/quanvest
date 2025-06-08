@@ -3,7 +3,7 @@ import json
 # import time # This import was not used
 
 # Define the ngrok URL as a constant
-NGROK_URL = "https://b4d0-34-125-188-86.ngrok-free.app"  # Replace with your actual URL
+NGROK_URL = "https://6d4c-34-19-73-99.ngrok-free.app"  # Replace with your actual URL
 
 def test_colab_flask_endpoint():  # ngrok_url parameter removed
     """Test the Colab Flask retrieval endpoint"""
