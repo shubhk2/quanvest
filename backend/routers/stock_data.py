@@ -1,4 +1,4 @@
-from fastapi import HTTPException, APIRouter, Query
+from fastapi import HTTPException, APIRouter, Query,Path
 from backend.services.stock_data_service import create_stock_chart, get_stock_data_table
 import logging
 
@@ -8,8 +8,8 @@ router = APIRouter()
 @router.get("/{data_type}/{period}/chart")
 async def get_stock_chart(
     company_number: int = Query(..., description="Company number"),
-    data_type: str = Query(..., enum=["price", "dma50", "dma200"]),
-    period: str = Query(..., enum=["1month", "6month", "1yr", "3yr", "5yr", "10yr"])
+    data_type: str = Path(..., enum=["price", "dma50", "dma200"]),
+    period: str = Path(..., enum=["1month", "6month", "1yr", "3yr", "5yr", "10yr"])
 ):
     """
     Get a Plotly chart (JSON) for the selected stock data type and period.
@@ -26,8 +26,8 @@ async def get_stock_chart(
 @router.get("/{data_type}/{period}/table")
 async def get_stock_table(
     company_number: int = Query(..., description="Company number"),
-    data_type: str = Query(..., enum=["price", "dma50", "dma200"]),
-    period: str = Query(..., enum=["1month", "6month", "1yr", "3yr", "5yr", "10yr"])
+    data_type: str = Path(..., enum=["price", "dma50", "dma200"]),
+    period: str = Path(..., enum=["1month", "6month", "1yr", "3yr", "5yr", "10yr"])
 ):
     """
     Get the raw data table for the selected stock data type and period.
