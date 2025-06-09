@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CREATE_TAB, ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, REMOVE_ERROR, REMOVE_TAB, RESET_SEARCH_RESULTS, SEARCH_COMPANY, SET_ACTIVE_TAB, STOP_LOADING } from "./actionTypes";
+import { CREATE_TAB, ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, GET_OVERVIEW_GRAPH_DATA, LOADING, REMOVE_ERROR, REMOVE_TAB, RESET_SEARCH_RESULTS, SEARCH_COMPANY, SET_ACTIVE_TAB, STOP_LOADING } from "./actionTypes";
 
 export const loading = () => {
     return {
@@ -35,6 +35,12 @@ export const resetSearchResults = () => {
 export const getOverviewData = (payload) => {
     return {
         type: GET_OVERVIEW_DATA,
+        payload
+    }
+}
+export const getOverviewGraphData = (payload) => {
+    return {
+        type: GET_OVERVIEW_GRAPH_DATA,
         payload
     }
 }
@@ -103,6 +109,22 @@ export const getOverviewDataFunc = id => dispatch => {
     return axios(request)
         .then((res) => {
             dispatch(getOverviewData({ data: res.data }));
+            // dispatch(getOverviewGraphDataFunc(id));
+        })
+        .catch((err) => {
+            dispatch(error());
+            throw new Error(err?.response?.data || err);
+        });
+}
+export const getOverviewGraphDataFunc = (id, type = "price", period = "10yr") => dispatch => {
+    dispatch(loading());
+    const request = {
+        method: "get",
+        url: `${process.env.REACT_APP_BACKEND_URL_NGROK || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/stock_data/${type}/${period}/chart?company_number=${id}`
+    }
+    return axios(request)
+        .then((res) => {
+            dispatch(getOverviewGraphData({ data: res.data }));
         })
         .catch((err) => {
             dispatch(error());

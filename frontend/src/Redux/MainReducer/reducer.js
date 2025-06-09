@@ -1,10 +1,11 @@
-import { ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, RESET_SEARCH_RESULTS, SEARCH_COMPANY, STOP_LOADING, REMOVE_ERROR, CREATE_TAB, REMOVE_TAB, SET_ACTIVE_TAB } from "./actionTypes"
+import { ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, RESET_SEARCH_RESULTS, SEARCH_COMPANY, STOP_LOADING, REMOVE_ERROR, CREATE_TAB, REMOVE_TAB, SET_ACTIVE_TAB, GET_OVERVIEW_GRAPH_DATA } from "./actionTypes"
 
 const initState = {
     isLoading: false,
     isError: false,
     overview: {
-        data: {}
+        data: {},
+        graph: {}
     },
     financial: {
         balance_sheet: {},
@@ -50,6 +51,16 @@ export const reducer = (state = initState, { type, payload }) => {
                 overview: {
                     ...state.overview,
                     data: payload.data || []
+                }
+            };
+        case GET_OVERVIEW_GRAPH_DATA:
+            return {
+                ...state,
+                isLoading: false,
+                isError: false,
+                overview: {
+                    ...state.overview,
+                    graph: (payload.data && JSON.parse(payload?.data?.chart_json)) || {}
                 }
             };
         case GET_FINANCIAL_DATA:

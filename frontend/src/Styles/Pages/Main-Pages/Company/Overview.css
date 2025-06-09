@@ -29,12 +29,41 @@
     width: 50vw;
 }
 
+.overview-container .chart-controls {
+    padding: 15px;
+    display: grid;
+    gap: 15px;
+    align-items: center;
+    grid-template-columns: max-content max-content;
+}
+
+.overview-container .chart-period-button {
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+    padding: 6px 10px;
+}
+
+.overview-container .chart-period-button:hover {
+    background-color: var(--hover-dropdown-item);
+    color: var(--text-primary);
+}
+
+.overview-container .chart-period-button:focus-visible {
+    outline: 2px solid var(--border-high-contrast);
+    outline-offset: 2px;
+}
+
 .overview-container .statistics {
     grid-area: statistics;
     display: grid;
     height: 100%;
     gap: 15px;
     padding: 15px;
+    grid-auto-flow: dense;
+    grid-template-rows: masonry;
     grid-template-areas:
         "stats-heading stats-heading stats-heading"
         "profile valuation_ttm growth"
