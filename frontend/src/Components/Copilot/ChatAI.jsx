@@ -1,4 +1,3 @@
-import Plot from 'react-plotly.js';
 import '../../Styles/Components/ChatAI.css';
 import * as Dialog from "@radix-ui/react-dialog";
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,13 +10,13 @@ export const ChatAI = () => {
     const [selectedChat, setSelectedChat] = useState(0);
 
     useEffect(() => {
-
+        
     }, [dispatch, chatHistory, chatHistoryMap]);
 
     return (
         <Dialog.Root className="chat-ai">
             <Dialog.Trigger asChild>
-                <button className="chat-ai-Button violet">Ask with Copilot</button>
+                <button className="chat-ai-Button violet">Ask Copilot</button>
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="chat-ai-DialogOverlay" />
@@ -56,10 +55,6 @@ export const ChatAI = () => {
                         </div>
                     </div>
 
-                    <Dialog.Close asChild>
-                        <button aria-label="Close">
-                        </button>
-                    </Dialog.Close>
                 </Dialog.Content>
             </Dialog.Portal>
         </Dialog.Root>
