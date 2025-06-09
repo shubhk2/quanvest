@@ -17,7 +17,7 @@ export const SearchCompanyInput = () => {
     const handleCompanySearch = (event) => {
         dispatch(loading());
         const searchString = event?.target?.value?.trim() || '';
-        setSearch(searchString);
+        setSearch(event?.target?.value || '');
 
         clearTimeout(debounceTimeout.current);
         debounceTimeout.current = setTimeout(() => {

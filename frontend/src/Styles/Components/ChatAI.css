@@ -1,0 +1,93 @@
+.chat-ai {
+    box-sizing: border-box;
+}
+
+.chat-ai-DialogOverlay {
+    position: fixed;
+    backdrop-filter: blur(3px);
+    inset: 0;
+    border: 1px solid var(--border-input);
+    z-index: 9999;
+    animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-ai-DialogContent {
+    border: 1px solid var(--border-input);
+    z-index: 99999;
+    backdrop-filter: blur(40px);
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    padding: 15px;
+    animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-ai-DialogContent:focus {
+    outline: none;
+}
+
+@keyframes chatoverlayShow {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes contentShow {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.chat-ai-copilot-container {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    border: 1px solid var(--border-input);
+    height: 75vh;
+    border-radius: 8px;
+}
+
+.chat-ai-copilot-container>div {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chat-ai-history {
+    border-right: 1px solid var(--border-input);
+}
+
+.chat-ai-history>hr {
+    width: 100%;
+    margin: 20px;
+}
+
+.chat-ai-history>* {
+    min-width: 80%;
+}
+
+.chat-ai-message-screen {
+    justify-content: center;
+    position: relative;
+}
+
+.chat-ai-message-input {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+}

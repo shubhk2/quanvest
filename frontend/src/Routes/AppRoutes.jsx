@@ -12,7 +12,6 @@ import { ValuationModeling } from '../Pages/Main-Pages/ValuationModeling';
 import { PeerComparison } from '../Pages/Main-Pages/PeerComparison';
 import { Forecasting } from '../Pages/Main-Pages/Company/Forecasting';
 import { ReportsDownloads } from '../Pages/Main-Pages/ReportsDownloads';
-import { ChatAI } from '../Pages/Main-Pages/ChatAI';
 import { InvestorInfo } from '../Pages/Main-Pages/Company/InvestorInfo';
 import { Company } from '../Pages/Main-Pages/Company';
 import { NotFound } from '../Styles/Pages/Main-Pages/NotFound';
@@ -26,7 +25,6 @@ export const AppRoutes = () => {
                 <Route path="/signin" element={<Signin />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/signout" element={<Signout />} />
-                <Route path="/chat-ai" element={<ChatAI />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/company" element={<Company />} >
                     <Route path=":compId" element={<CompanyId />} >

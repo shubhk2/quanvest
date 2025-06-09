@@ -1,0 +1,7 @@
+export const LOADING = "LOADING";
+export const ERROR = "ERROR";
+
+export const SET_CHAT_HISTORY = "SET_CHAT_HISTORY";
+export const REMOVE_CHAT_HISTORY = "REMOVE_CHAT_HISTORY";
+
+export const SET_CURRENT_LLM_RESPONSE = "SET_CURRENT_LLM_RESPONSE";
