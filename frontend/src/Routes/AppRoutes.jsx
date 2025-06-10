@@ -33,6 +33,7 @@ export const AppRoutes = () => {
                         <Route path="financial/:type" element={<Financial />} />
                         <Route path="forecasting" element={<Forecasting />} />
                         <Route path="investor-info" element={<InvestorInfo />} />
+                        <Route path="investor-info/:type" element={<InvestorInfo />} />
                         <Route path="*" element={<Navigate to={"/company"} replace />} />
                     </Route>
                 </Route>

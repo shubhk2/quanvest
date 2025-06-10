@@ -1,4 +1,4 @@
-import { ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, RESET_SEARCH_RESULTS, SEARCH_COMPANY, STOP_LOADING, REMOVE_ERROR, CREATE_TAB, REMOVE_TAB, SET_ACTIVE_TAB, GET_OVERVIEW_GRAPH_DATA } from "./actionTypes"
+import { ERROR, GET_FINANCIAL_DATA, GET_OVERVIEW_DATA, LOADING, RESET_SEARCH_RESULTS, SEARCH_COMPANY, STOP_LOADING, REMOVE_ERROR, CREATE_TAB, REMOVE_TAB, SET_ACTIVE_TAB, GET_OVERVIEW_GRAPH_DATA, GET_INVESTOR_INFO_DATA } from "./actionTypes"
 
 const initState = {
     isLoading: false,
@@ -13,6 +13,10 @@ const initState = {
         profit_and_loss: {},
         quarterly_results: {},
         data: []
+    },
+    investorInfo: {
+        dividend: "",
+        shareholding_pattern: ""
     },
     searchedCompanies: [],
     selectedCompany: {},
@@ -73,6 +77,13 @@ export const reducer = (state = initState, { type, payload }) => {
                     [payload.type]: payload.data || {}
                 }
             };
+        case GET_INVESTOR_INFO_DATA:
+            return {
+                ...state,
+                isLoading: false,
+                isError: false,
+                investorInfo: { ...state.investorInfo, [payload.type]: payload.data }
+            }
         case SEARCH_COMPANY:
             return {
                 ...state,

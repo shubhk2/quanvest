@@ -1,5 +1,20 @@
-.investor-info {
-    background-color: var(--surface-base);
-    text-align: center;
-    margin-top: 35vh;
+.investor-info-container {
+    padding: 15px;
+}
+
+.investor-info-container .body {
+    background-color: var(--surface-primary);
+    border-radius: 8px;
+}
+
+.investor-info-container .tabs {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    gap: 15px;
+}
+
+.investor-info-container .body .tabs button {
+    min-width: 100px;
+    padding: 7px 10px;
 }

@@ -25,7 +25,7 @@ export const Financial = () => {
     ], []);
 
     useEffect(() => {
-        if(location.pathname.endsWith("/financial")){
+        if (location.pathname.endsWith("/financial")) {
             navigate('balance_sheet');
             return;
         }
@@ -139,7 +139,7 @@ export const Financial = () => {
                 <div className='tabs'>
                     {types.map((item) => (
                         <NavLink key={item} tabIndex={-1} to={`/company/${compId}/financial/${item}`}>
-                            <button>{formatLabel(item)}</button>
+                            <button className='button-secondary'>{formatLabel(item)}</button>
                         </NavLink>
                     ))}
                 </div>

@@ -17,22 +17,7 @@
 
 .financial-container .body .tabs button {
     min-width: 100px;
-    background: transparent;
-    color: var(--text-primary);
-    border: none;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    cursor: pointer;
     padding: 7px 10px;
-}
-
-.financial-container .body .tabs button:hover {
-    background-color: var(--hover-dropdown-item);
-    color: var(--text-primary);
-}
-
-.financial-container .body .tabs button:focus-visible {
-    outline: 2px solid var(--border-high-contrast);
-    outline-offset: 2px;
 }
 
 .financial-container .table-container {
