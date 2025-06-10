@@ -34,14 +34,24 @@
     display: grid;
     gap: 15px;
     align-items: center;
-    grid-template-columns: max-content max-content;
+    grid-template-areas:
+        "chart-periods chart-type-select"
+        "chart-plot chart-plot";
+    grid-template-columns: fit-content max-content;
     position: sticky;
     top: calc(50px + 46.89px);
 }
 
-.overview-container .chart-plot {
-    position: sticky;
-    top: calc(50px + 46.89px + 62.4px);
+.overview-container .chart-controls .chart-periods {
+    grid-area: chart-periods;
+}
+
+.overview-container .chart-controls .chart-type-select {
+    grid-area: chart-type-select;
+}
+
+.overview-container .chart-controls .plot {
+    grid-area: chart-plot;
 }
 
 .overview-container .statistics {

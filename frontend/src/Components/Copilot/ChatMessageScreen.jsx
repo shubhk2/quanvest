@@ -46,6 +46,7 @@ export const ChatMessageScreen = ({ chatId }) => {
             const currentMetric = metricesFormattedData[metric];
             tables += `<h3>${metric}</h3>`;
             tables += `<table class="company-stats-table"><thead><tr>`;
+            // eslint-disable-next-line no-loop-func
             header.forEach(head => {
                 tables += `<th>${head}</th>`;
             });

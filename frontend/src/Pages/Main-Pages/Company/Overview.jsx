@@ -10,7 +10,7 @@ import { PlotlyGraph } from '../../../Components/PlotlyGraph';
 export const Overview = () => {
     const { compId } = useParams();
     const [fullOverview, setFullOverview] = useState(false);
-    const { overview: { data: { overview, stats }, graph }, selectedCompany } = useSelector(store => store.mainReducer);
+    const { overview: { data: { overview, stats }, graph } } = useSelector(store => store.mainReducer);
     const dispatch = useDispatch();
     const [graphPeriod, setGraphPeriod] = useState('10yr');
     const [graphType, setGraphType] = useState('price');
@@ -66,8 +66,6 @@ export const Overview = () => {
                         <option value={'dma50'} title='50-Day Moving Average'>DMA50</option>
                         <option value={'dma200'} title='100-Day Moving Average'>DMA200</option>
                     </select>
-                </div>
-                <div className='chart-plot'>
                     <PlotlyGraph graphData={graph} />
                 </div>
             </div>

@@ -135,7 +135,7 @@ export const getFinancialDataFunc = (id, type, start = '', end = '') => dispatch
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials/?company_number=${id}&statement_type=${type}`
     }
     if (start) request.url += `&start_year=${start}`;
     if (end) request.url += `&end_year=${end}`;
