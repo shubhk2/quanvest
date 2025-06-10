@@ -86,40 +86,48 @@ export const ChatMessageScreen = ({ chatId }) => {
                             </div>
                             <div className="chat-response">
                                 {
-                                    response.company_overviews && response?.company_overviews?.length &&
-                                    <div className="company-overviews">
-                                        <h2>Company Overviews</h2>
-                                        {
-                                            response?.company_overviews.map(({ overview }, index) => {
-                                                const splittedOverview = splitOverview(overview?.overview_text, false);
-                                                return (
-                                                    <div className="company-overview" key={index}>
-                                                        <div>{splittedOverview.companyName}</div>
-                                                        <ReactMarkdown>{splittedOverview?.overview || ''}</ReactMarkdown>
-                                                    </div>
-                                                );
-                                            })
-                                        }
-                                    </div>
+                                    response.company_overviews && response?.company_overviews?.length ?
+                                        <div className="company-overviews">
+                                            <h2>Company Overviews</h2>
+                                            {
+                                                response?.company_overviews.map(({ overview }, index) => {
+                                                    const splittedOverview = splitOverview(overview?.overview_text, false);
+                                                    return (
+                                                        <div className="company-overview" key={index}>
+                                                            <div>{splittedOverview.companyName}</div>
+                                                            <ReactMarkdown>{splittedOverview?.overview || ''}</ReactMarkdown>
+                                                        </div>
+                                                    );
+                                                })
+                                            }
+                                        </div>
+                                        :
+                                        null
                                 }
                                 {
-                                    response?.llm_response && <div className="llm-response">
+                                    response?.llm_response ? <div className="llm-response">
                                         <ReactMarkdown>{response.llm_response}</ReactMarkdown>
                                     </div>
+                                        :
+                                        'No response detected from server. Try again later.'
                                 }
                                 {
-                                    Object.keys(graph).length > 0 && <div className='chart-plot'>
+                                    Object.keys(graph).length > 0 ? <div className='chart-plot'>
                                         <PlotlyGraph graphData={graph} />
                                     </div>
+                                        :
+                                        null
                                 }
                                 {
-                                    response.company_overviews && response?.company_overviews?.length &&
-                                    <div className="company-stats">
-                                        <h2>Company Stats</h2>
-                                        {
-                                            loadCompanyStats(response?.company_overviews)
-                                        }
-                                    </div>
+                                    response.company_overviews && response?.company_overviews?.length ?
+                                        <div className="company-stats">
+                                            <h2>Company Stats</h2>
+                                            {
+                                                loadCompanyStats(response?.company_overviews)
+                                            }
+                                        </div>
+                                        :
+                                        null
                                 }
                             </div>
                         </div>
