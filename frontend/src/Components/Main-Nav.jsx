@@ -8,11 +8,11 @@ export const MainNav = () => {
     const { companyId } = selectedCompany;
     return (
         <div className="main-nav">
-            <NavLink tabIndex={-1} to={`/company/${companyId}/overview`}><button>Overview</button></NavLink>
-            <NavLink tabIndex={-1} to={`/company/${companyId}/financial/balance_sheet`}><button>Financial</button></NavLink>
+            <NavLink tabIndex={-1} to={`/company/${companyId}/overview`}><button className='button-secondary'>Overview</button></NavLink>
+            <NavLink tabIndex={-1} to={`/company/${companyId}/financial/balance_sheet`}><button className='button-secondary'>Financial</button></NavLink>
             <SearchCompanyInput />
-            <NavLink tabIndex={-1} to={`/company/${companyId}/forecasting`}><button>Forecasting</button></NavLink>
-            <NavLink tabIndex={-1} to={`/company/${companyId}/investor-info`}><button>Investor Info</button></NavLink>
+            <NavLink tabIndex={-1} to={`/company/${companyId}/forecasting`}><button className='button-secondary'>Forecasting</button></NavLink>
+            <NavLink tabIndex={-1} to={`/company/${companyId}/investor-info`}><button className='button-secondary'>Investor Info</button></NavLink>
         </div>
     );
 };

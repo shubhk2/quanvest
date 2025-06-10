@@ -16,3 +16,13 @@ export const formatDateToShortMonthYear = (dateStr) => {
     const year = String(date.getFullYear()).slice(-2);
     return `${month} '${year}`;
 }
+export const splitOverview = (text = '', fullOverview = false) => {
+    const match = text.match(/^For company (.+?) Company Overview Hide\s*/i);
+    const companyName = match?.[1]?.trim() || '';
+    const cleaned = text.replace(/^For company .+? Company Overview Hide\s*/i, '');
+    const [intro = '', ...rest] = cleaned.split(/\n{2,}/);
+    return {
+        companyName,
+        overview: intro.trim() + (fullOverview ? '\n\n' + rest.join('\n\n') : '')
+    };
+};

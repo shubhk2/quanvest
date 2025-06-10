@@ -26,21 +26,6 @@
 
 .main-nav button {
     min-width: 100px;
-    background: transparent;
-    color: var(--text-primary);
-    border: none;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    cursor: pointer;
-}
-
-.main-nav button:hover {
-    background-color: var(--hover-dropdown-item);
-    color: var(--text-primary);
-}
-
-.main-nav button:focus-visible {
-    outline: 2px solid var(--border-high-contrast);
-    outline-offset: 2px;
 }
 
 .main-nav .search-company-input input {

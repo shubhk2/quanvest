@@ -73,7 +73,7 @@ export const searchCompanyFunc = (searchString, limit = 10) => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL_NGROK || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/companies?q=${searchString}&limit=${limit}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/companies?q=${searchString}&limit=${limit}`
     }
     return axios(request)
         .then((res) => {
@@ -88,7 +88,7 @@ export const getCompanyDetailsById = id => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL_NGROK || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/company/${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/company/${id}`
     }
     return axios(request)
         .then(res => {
@@ -104,7 +104,7 @@ export const getOverviewDataFunc = id => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL_NGROK || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/overview/company/${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/overview/company/${id}`
     }
     return axios(request)
         .then((res) => {
@@ -120,7 +120,7 @@ export const getOverviewGraphDataFunc = (id, type = "price", period = "10yr") =>
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL_NGROK || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/stock_data/${type}/${period}/chart?company_number=${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/stock_data/${type}/${period}/chart?company_number=${id}`
     }
     return axios(request)
         .then((res) => {
@@ -135,12 +135,13 @@ export const getFinancialDataFunc = (id, type, start = '', end = '') => dispatch
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL_NGROK || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`
     }
     if (start) request.url += `&start_year=${start}`;
     if (end) request.url += `&end_year=${end}`;
     return axios(request)
         .then(res => {
+            console.log(res.data);
             dispatch(getFinancialData({ type, data: res.data }));
         })
         .catch(err => {

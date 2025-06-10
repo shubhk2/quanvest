@@ -1,17 +1,40 @@
 import '../../Styles/Components/ChatAI.css';
 import * as Dialog from "@radix-ui/react-dialog";
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChatMessageScreen } from './ChatMessageScreen';
+import { removeChatHistory, sendChatRequest } from '../../Redux/ChatReducer/action';
+import { FaTrashAlt } from "react-icons/fa";
 
 export const ChatAI = () => {
     const dispatch = useDispatch();
     const { chatHistory, chatHistoryMap } = useSelector((state) => state.chatReducer);
     const [selectedChat, setSelectedChat] = useState(0);
+    const [chatQuery, setChatQuery] = useState('');
+
+    const textareaRef = useRef(null);
+
+    const handleInput = () => {
+        const textarea = textareaRef.current;
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+        setChatQuery(textarea.value);
+    };
+
+    const sendRequest = () => {
+        dispatch(sendChatRequest(chatQuery, selectedChat));
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendRequest();
+        }
+    };
 
     useEffect(() => {
-        
-    }, [dispatch, chatHistory, chatHistoryMap]);
+        setChatQuery('');
+    }, [selectedChat]);
 
     return (
         <Dialog.Root className="chat-ai">
@@ -25,16 +48,18 @@ export const ChatAI = () => {
 
                     <div className="chat-ai-copilot-container">
                         <div className='chat-ai-history'>
-                            <button onClick={() => setSelectedChat(0)}>New Chat</button>
+                            <button className={`button-secondary ${selectedChat === 0 && 'active'}`} onClick={() => setSelectedChat(0)}>New Chat</button>
                             <hr />
-                            {
-                                chatHistory.map(chatId => {
-                                    const chatHistoryTitle = chatHistoryMap[chatId]?.title || `Chat ${chatId}`;
-                                    return (
-                                        <button key={chatId} onClick={() => setSelectedChat(chatId)}>{chatHistoryTitle}</button>
-                                    )
-                                })
-                            }
+                            <div className='history-buttons'>
+                                {
+                                    chatHistory.map(chatId => {
+                                        const chatHistoryTitle = chatHistoryMap[chatId]?.title || `Chat ${chatId}`;
+                                        return (
+                                            <button key={chatId} className={`button-secondary chat-history-tabs ${selectedChat === chatId && 'active'}`} onClick={() => setSelectedChat(chatId)}><span>{chatHistoryTitle}</span><FaTrashAlt className='remove-chat-history' onClick={e => { e.stopPropagation(); dispatch(removeChatHistory({ chatId })); setSelectedChat(0) }} /></button>
+                                        )
+                                    })
+                                }
+                            </div>
                         </div>
                         <div className='chat-ai-message-screen'>
                             <div className="chat-ai-message-preview">
@@ -50,7 +75,7 @@ export const ChatAI = () => {
                                 }
                             </div>
                             <div className="chat-ai-message-input">
-                                <textarea id='message-input' placeholder="Type your message here..." ></textarea>
+                                <textarea ref={textareaRef} id='message-input' rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery} placeholder="Type your prompt here..." ></textarea>
                             </div>
                         </div>
                     </div>

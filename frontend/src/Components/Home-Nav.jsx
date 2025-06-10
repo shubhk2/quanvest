@@ -13,9 +13,9 @@ export const HomeNav = () => {
         <div className={`home-nav ${isCompanyPage && 'compressed'}`}>
             <div></div>
             <div>
-                <NavLink tabIndex={-1} to={"dashboard"}><button>Dashboard</button></NavLink>
-                <NavLink tabIndex={-1} to={"company"}><button>Company</button></NavLink>
-                <NavLink tabIndex={-1} to={""}><button className='logo-button'>
+                <NavLink tabIndex={-1} to={"dashboard"}><button className="button-secondary">Dashboard</button></NavLink>
+                <NavLink tabIndex={-1} to={"company"}><button className="button-secondary">Company</button></NavLink>
+                <NavLink tabIndex={-1} to={""}><button className="button-secondary logo-button">
                     <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" version="1.0" width="100%" height="100%" viewBox="30 175 440 150" preserveAspectRatio="xMidYMid meet">
                         <g transform="translate(0.000000,500.000000) scale(0.100000,-0.100000)" stroke="none">
                             <path d="M850 2987 c-251 -86 -396 -347 -335 -606 42 -178 181 -322 364 -378 54 -16 221 -16 274 0 l38 12 -41 55 -40 54 -83 2 c-233 6 -382 158 -382 389 1 109 27 176 101 255 160 171 441 156 579 -31 108 -147 96 -370 -27 -496 -45 -46 -45 -42 16 -114 l29 -34 47 53 c149 167 181 383 85 578 -62 128 -172 223 -304 264 -91 29 -234 27 -321 -3z" />
@@ -30,15 +30,15 @@ export const HomeNav = () => {
                         </g>
                     </svg>
                 </button></NavLink>
-                <NavLink tabIndex={-1} to={"market"}><button>Market</button></NavLink>
-                <NavLink tabIndex={-1} to={"news"}><button>News</button></NavLink>
+                <NavLink tabIndex={-1} to={"market"}><button className="button-secondary">Market</button></NavLink>
+                <NavLink tabIndex={-1} to={"news"}><button className="button-secondary">News</button></NavLink>
             </div>
             <div>
                 <div className='settings'>
-                    <button><IoMdSettings /></button>
+                    <button className="button-secondary"><IoMdSettings /></button>
                     <div className='settings-dropdown'>
                         <Link to={"account"}>
-                            <button>Account</button>
+                            <button className="button-secondary">Account</button>
                         </Link>
                         <div className='theme-toggle-container' onClick={toggleTheme}>
                             <FaRegSun className='modes' />

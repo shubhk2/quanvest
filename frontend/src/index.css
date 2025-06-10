@@ -13,6 +13,7 @@ body {
     --surface-primary: var(--color-gray-0);
     --surface-secondary: var(--color-gray-3);
     --surface-contrast: var(--color-gray-9);
+    --surface-chat-query: var(--color-gray-4);
     --surface-green: var(--color-green-1);
     --surface-red: var(--color-red-1);
     --button-green: var(--color-green-6);
@@ -47,6 +48,7 @@ body {
     --surface-contrast: var(--color-dark-2);
     --surface-primary: var(--color-dark-8);
     --surface-secondary: var(--color-dark-7);
+    --surface-chat-query: var(--color-dark-4);
     --surface-green: var(--color-green-9);
     --surface-red: var(--color-red-5);
     --border-input: var(--color-dark-4);
@@ -150,7 +152,7 @@ p {
     margin-bottom: 1rem;
     line-height: 1.6;
     font-size: 14px;
-    color: var(--text-tertiary-gray);
+    color: var(--text-primary);
 }
 
 /* Links */
@@ -173,7 +175,7 @@ button[type="submit"] {
     font-size: .9rem;
     padding: 3px 10px;
     background-color: var(--button-green);
-    color: var(--text-contrast);
+    color: var(--text-primary);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -230,6 +232,7 @@ table {
     color: var(--text-primary);
     background-color: var(--table-base-bg);
     border: 1px solid var(--table-border-color);
+    /* table-layout: fixed; */
 }
 
 table tr:nth-child(2n) {
@@ -244,6 +247,17 @@ th,
 td {
     padding: 10px 15px;
     border: 1px solid var(--table-border-color);
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+table td:first-child,
+table th {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 th {
