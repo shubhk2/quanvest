@@ -8,7 +8,7 @@ import { FaTrashAlt } from "react-icons/fa";
 
 export const ChatAI = () => {
     const dispatch = useDispatch();
-    const { chatHistory, chatHistoryMap } = useSelector((state) => state.chatReducer);
+    const { isLoading, chatHistory, chatHistoryMap } = useSelector((state) => state.chatReducer);
     const [selectedChat, setSelectedChat] = useState(0);
     const [chatQuery, setChatQuery] = useState('');
 
@@ -21,14 +21,10 @@ export const ChatAI = () => {
         setChatQuery(textarea.value);
     };
 
-    const sendRequest = () => {
-        dispatch(sendChatRequest(chatQuery, selectedChat));
-    }
-
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendRequest();
+            dispatch(sendChatRequest(chatQuery, selectedChat, chatHistory.length + 1, setSelectedChat))
         }
     };
 
@@ -75,7 +71,7 @@ export const ChatAI = () => {
                                 }
                             </div>
                             <div className="chat-ai-message-input">
-                                <textarea ref={textareaRef} id='message-input' rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery} placeholder="Type your prompt here..." ></textarea>
+                                <textarea disabled={isLoading} ref={textareaRef} id='message-input' rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery} placeholder="Type your prompt here..." ></textarea>
                             </div>
                         </div>
                     </div>

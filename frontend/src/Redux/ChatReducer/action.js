@@ -24,7 +24,6 @@ export const setChatHistory = (payload) => {
     }
 }
 export const removeChatHistory = (payload) => {
-    console.log(payload);
     return {
         type: REMOVE_CHAT_HISTORY,
         payload
@@ -37,7 +36,7 @@ export const setCurrentLLMResponse = (payload) => {
     }
 }
 
-export const sendChatRequest = (query, chatId) => dispatch => {
+export const sendChatRequest = (query, chatId, historyLength, setSelectedChat) => dispatch => {
     dispatch(loading());
     const config = {
         method: 'POST',
@@ -71,6 +70,7 @@ export const sendChatRequest = (query, chatId) => dispatch => {
                 dispatch(setChatHistory(payload))
             } else {
                 const payload = {
+                    chatId: historyLength,
                     title: query || `Chat ${chatId}`,
                     historyData: {
                         query: query,
@@ -79,7 +79,9 @@ export const sendChatRequest = (query, chatId) => dispatch => {
                     }
                 }
                 dispatch(createChatHistory(payload))
+                setSelectedChat(historyLength);
             }
+            return true;
         })
         .catch(err => {
             console.error(err?.response?.data || err);

@@ -107,7 +107,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                                     </div>
                                 }
                                 {
-                                    graph && <div className='chart-plot'>
+                                    Object.keys(graph).length > 0 && <div className='chart-plot'>
                                         <PlotlyGraph graphData={graph} />
                                     </div>
                                 }

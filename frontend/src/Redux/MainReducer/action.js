@@ -141,7 +141,6 @@ export const getFinancialDataFunc = (id, type, start = '', end = '') => dispatch
     if (end) request.url += `&end_year=${end}`;
     return axios(request)
         .then(res => {
-            console.log(res.data);
             dispatch(getFinancialData({ type, data: res.data }));
         })
         .catch(err => {

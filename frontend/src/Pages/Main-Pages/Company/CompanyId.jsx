@@ -19,7 +19,7 @@ export const CompanyId = () => {
                 .then(res => {
                     const { company_number, full_name } = res;
                     if (!company_number || !full_name) {
-                        navigate("/company");
+                        return navigate("/company");
                     }
                     const tabPayload = {
                         tabId: `tab-${compId}`,

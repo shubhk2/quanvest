@@ -4471,11 +4471,10 @@ export const reducer = (state = initState, { type, payload }) => {
                 isError: true
             };
         case CREATE_CHAT_HISTORY:
-            const chatId = state.chatHistory.length + 1;
-            state.chatHistory.push(chatId);
-            state.chatHistoryMap[chatId] = {
+            state.chatHistory.push(payload.chatId);
+            state.chatHistoryMap[payload.chatId] = {
                 title: payload.title,
-                history: payload.historyData
+                history: [payload.historyData]
             }
             return {
                 ...state,
@@ -4490,7 +4489,6 @@ export const reducer = (state = initState, { type, payload }) => {
                 isError: false
             };
         case REMOVE_CHAT_HISTORY:
-            console.log("Working")
             return {
                 ...state,
                 isLoading: false,
