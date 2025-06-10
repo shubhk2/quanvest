@@ -3,7 +3,7 @@ from backend.services.home_service import get_dashboard_stats
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def home():
     """Home page with dashboard overview"""
     try:

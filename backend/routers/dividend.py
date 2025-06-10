@@ -3,7 +3,7 @@ from backend.services.dividend_service import get_dividend_file_id
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def get_dividend(company_number: int = Query(..., description="Company number")):
     """
     Returns a string representing the file id for the given company_number.

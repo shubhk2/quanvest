@@ -5,7 +5,7 @@ from fastapi.concurrency import run_in_threadpool
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def get_financials(
     company_number: int,
     statement_type: str = Query(..., enum=["balance_sheet", "profit_and_loss", "cashflow", "quarterly_results"]),

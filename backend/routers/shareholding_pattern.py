@@ -3,7 +3,7 @@ from backend.services.shareholding_pattern_service import get_shareholding_patte
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def get_shareholding_pattern(company_number: int = Query(..., description="Company number")):
     """
     Returns a string representing the file id for the given company_number (shareholding pattern).
