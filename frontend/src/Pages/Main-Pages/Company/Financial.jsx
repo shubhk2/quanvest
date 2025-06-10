@@ -25,6 +25,10 @@ export const Financial = () => {
     ], []);
 
     useEffect(() => {
+        if(location.pathname.endsWith("/financial")){
+            navigate('balance_sheet');
+            return;
+        }
         if (!types.includes(type)) {
             const newUrl = location.pathname.split("/");
             newUrl.pop();
@@ -41,6 +45,8 @@ export const Financial = () => {
         setGlobalFormattedData(formattedData);
         setAllDatesForChart(allDates);
     }, [financial, type]);
+
+    if (!types.includes(type)) return null;
 
     const handleRowToggle = (parameter) => {
         setSelectedParams(prev => {
@@ -117,8 +123,6 @@ export const Financial = () => {
             </>
         );
     };
-
-    if (!types.includes(type)) return null;
 
     return (
         <div className='financial-container'>

@@ -10,7 +10,7 @@ const CustomLegend = ({ payload, chartTypes, onToggleType }) => (
             return (
                 <div key={index}>
                     <span>
-                        {entry.value}
+                        {entry.value.split('|-|')[1]}
                     </span>
                     <button onClick={() => onToggleType(entry.dataKey)}>
                         {type === 'line' ? 'Switch to Bar' : 'Switch to Line'}
