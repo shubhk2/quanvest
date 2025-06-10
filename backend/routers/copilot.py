@@ -111,18 +111,18 @@ async def ask_copilot(request: CopilotRequest):
     # Updated to pull base URLs from environment variables and improved logging
     overview_base_url = os.getenv(
         "OVERVIEW_BASE_URL",
-        "http://ec2-15-206-84-119.ap-south-1.compute.amazonaws.com:8000/overview/company"
+        "https://quanvest.me/overview/company"
     )
     charts_url = os.getenv(
         "CHARTS_URL",
-        "http://ec2-15-206-84-119.ap-south-1.compute.amazonaws.com:8000/charts/parameters"
+        "https://quanvest.me/charts/parameters"
     )
     colab_url = os.getenv(
         "COLAB_URL",
     )
     financials_base_url = os.getenv(
         "FINANCIALS_BASE_URL",
-        "http://ec2-15-206-84-119.ap-south-1.compute.amazonaws.com:8000/financials"
+        "https://quanvest.me/financials"
     )
 
     standard_headers = {'Content-Type': 'application/json'}
