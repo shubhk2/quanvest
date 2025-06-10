@@ -43,7 +43,7 @@ logger.debug("CORS middleware configured")
 
 # Include routers
 logger.debug("Registering routers")
-app.include_router(home.router)
+app.include_router(home.router,prefix='/home')
 app.include_router(financials.router, prefix="/financials")
 app.include_router(ratios.router, prefix="/ratios")
 app.include_router(stock_data.router, prefix="/stock_data")
