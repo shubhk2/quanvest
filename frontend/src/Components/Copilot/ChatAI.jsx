@@ -71,7 +71,7 @@ export const ChatAI = () => {
                                 }
                             </div>
                             <div className="chat-ai-message-input">
-                                <textarea disabled={isLoading} ref={textareaRef} id='message-input' rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery} placeholder="Type your prompt here..." ></textarea>
+                                <textarea disable={isLoading} ref={textareaRef} id='message-input' rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery} placeholder="Type your prompt here..." ></textarea>
                             </div>
                         </div>
                     </div>
