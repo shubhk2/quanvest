@@ -42,8 +42,8 @@ export const SearchCompanyInput = () => {
                         (searchedCompanies.length > 0 &&
                             <ul className="searched-companies">
                                 {searchedCompanies.map((company) => (
-                                    <li key={company.company_number}>
-                                        <Link to={`/company/${company.company_number}`}>
+                                    <li key={company.id}>
+                                        <Link to={`/company/${company.id}`}>
                                             {company.full_name}
                                         </Link>
                                     </li>

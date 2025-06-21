@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { getFinancialDataFunc } from '../../../Redux/MainReducer/action';
 import { ParameterChart } from '../../../Components/ParameterChart';
-import { formatDateToShortMonthYear, formatLabel, getRandomBrightColor } from '../../../Utils/utilities';
+import { formatLabel, getRandomBrightColor } from '../../../Utils/utilities';
 
 export const Financial = () => {
     const { compId, type } = useParams();
@@ -12,16 +12,14 @@ export const Financial = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const { financial } = useSelector(store => store.mainReducer);
-
-    const [selectedParams, setSelectedParams] = useState(new Set());
-    const [allDatesForChart, setAllDatesForChart] = useState([]);
-    const [globalFormattedData, setGlobalFormattedData] = useState({});
+    const [currentPageData, setCurrentPageData] = useState({});
+    const [generatedColors, setGeneratedColors] = useState(new Set());
+    const [selectedParams, setSelectedParams] = useState(new Map());
 
     const types = useMemo(() => [
         "balance_sheet",
         "cashflow",
-        "profit_and_loss",
-        "quarterly_results"
+        "profit_and_loss"
     ], []);
 
     useEffect(() => {
@@ -39,90 +37,31 @@ export const Financial = () => {
     }, [type, types, compId, navigate, dispatch, location]);
 
     useEffect(() => {
-        if (!financial[type]?.data) return;
-
-        const { formattedData, allDates } = prepareFinancialData(financial[type].data);
-        setGlobalFormattedData(formattedData);
-        setAllDatesForChart(allDates);
-    }, [financial, type]);
+        type && financial[type] && setCurrentPageData(financial[type]);
+    }, [financial])
 
     if (!types.includes(type)) return null;
 
-    const handleRowToggle = (parameter) => {
+    const handleRowToggle = (parameter, data) => {
+        const color = getRandomBrightColor();
+        if (generatedColors.has(color)) {
+            handleRowToggle(parameter, data);
+            return;
+        } else {
+            const newColorSet = new Set(generatedColors);
+            setGeneratedColors(newColorSet);
+        }
         setSelectedParams(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(parameter)) {
-                newSet.delete(parameter);
+            const newMap = new Map(prev);
+            if (newMap.has(parameter)) {
+                newMap.delete(parameter);
             } else {
-                newSet.add(parameter);
+                newMap.set(parameter, [color, data]);
             }
-            return newSet;
+            return newMap;
         });
     };
-
-    const prepareFinancialData = (data) => {
-        const groupedData = {};
-        const dateSet = new Set();
-        for (const item of data) {
-            const { parameter, report_date, value } = item;
-            if (!groupedData[parameter]) {
-                groupedData[parameter] = {
-                    color: getRandomBrightColor(),
-                    records: []
-                };
-            }
-            groupedData[parameter].records.push({ report_date, value });
-            dateSet.add(report_date);
-        }
-        for (const param in groupedData) {
-            groupedData[param].records.sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
-        }
-        const allDates = Array.from(dateSet).sort((a, b) => new Date(a) - new Date(b));
-        return { formattedData: groupedData, allDates };
-    };
-
-    const generateTableContent = () => {
-        if (!globalFormattedData || Object.keys(globalFormattedData).length === 0) {
-            return (
-                <tbody>
-                    <tr>
-                        <td>No data available</td>
-                    </tr>
-                </tbody>
-            );
-        }
-
-        return (
-            <>
-                <thead>
-                    <tr>
-                        <th>Parameter</th>
-                        {allDatesForChart.map((date, index) => (
-                            <th key={index}>{formatDateToShortMonthYear(date)}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {Object.entries(globalFormattedData).map(([parameter, { records, color }], rowIndex) => {
-                        const valueMap = Object.fromEntries(records.map(entry => [entry.report_date, entry.value]));
-                        const parameterValue = type + "|-|" + parameter;
-                        const isChecked = selectedParams.has(parameterValue);
-
-                        return (
-                            <tr key={rowIndex} onClick={() => handleRowToggle(parameterValue)}>
-                                <td>
-                                    <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': color }} checked={isChecked} readOnly /> {parameter}
-                                </td>
-                                {allDatesForChart.map((date, colIndex) => (
-                                    <td key={colIndex}>{valueMap[date] ?? '-'}</td>
-                                ))}
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </>
-        );
-    };
+    console.log(selectedParams);
 
     return (
         <div className='financial-container'>
@@ -131,8 +70,7 @@ export const Financial = () => {
                     {selectedParams.size > 0 && (
                         <ParameterChart
                             selectedParams={selectedParams}
-                            allDates={allDatesForChart}
-                            formattedData={globalFormattedData}
+                            headers={currentPageData.headers}
                         />
                     )}
                 </div>
@@ -145,7 +83,47 @@ export const Financial = () => {
                 </div>
                 <div className='table-container'>
                     <table className='table'>
-                        {generateTableContent()}
+                        {
+                            currentPageData.data && currentPageData.data.length ?
+                                <>
+                                    <thead>
+                                        <tr>
+                                            {currentPageData?.headers?.map((date, index) => (
+                                                <th key={index}>{date}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {currentPageData?.data?.map((row, rowIndex) => {
+                                            return (
+                                                <tr key={rowIndex} onClick={() => handleRowToggle(row[currentPageData?.headers[0]], row)}>
+                                                    {
+                                                        currentPageData?.headers?.map((head, headIndex) => {
+                                                            if (headIndex === 0 && head === "Account") {
+                                                                return (
+                                                                    <td key={headIndex}>
+                                                                        <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {row[head]}
+                                                                    </td>
+                                                                )
+                                                            } else {
+                                                                return (
+                                                                    <td key={headIndex}>{row[head] ?? '-'}</td>
+                                                                )
+                                                            }
+                                                        })
+                                                    }
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </>
+                                :
+                                <tbody>
+                                    <tr>
+                                        <td>No data available</td>
+                                    </tr>
+                                </tbody>
+                        }
                     </table>
                 </div>
             </div>

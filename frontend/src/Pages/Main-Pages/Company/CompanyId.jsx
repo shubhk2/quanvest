@@ -17,14 +17,15 @@ export const CompanyId = () => {
         if (!userTabs[compId]) {
             dispatch(getCompanyDetailsById(compId))
                 .then(res => {
-                    const { company_number, full_name } = res;
-                    if (!company_number || !full_name) {
+                    const { id, full_name, ticker } = res;
+                    if (!id || !full_name) {
                         return navigate("/company");
                     }
                     const tabPayload = {
                         tabId: `tab-${compId}`,
                         companyName: full_name,
-                        companyId: company_number
+                        companyId: id,
+                        companyTicker: ticker
                     }
                     dispatch(createTab(tabPayload));
                     dispatch(setActiveTab(tabPayload));

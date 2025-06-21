@@ -11,7 +11,6 @@ const initState = {
         balance_sheet: {},
         cashflow: {},
         profit_and_loss: {},
-        quarterly_results: {},
         data: []
     },
     investorInfo: {
@@ -64,7 +63,7 @@ export const reducer = (state = initState, { type, payload }) => {
                 isError: false,
                 overview: {
                     ...state.overview,
-                    graph: (payload.data && JSON.parse(payload?.data?.chart_json)) || {}
+                    graph: (payload.data && JSON.parse(payload?.data?.plotly_json)) || {}
                 }
             };
         case GET_FINANCIAL_DATA:

@@ -17,7 +17,6 @@ export const InvestorInfo = () => {
         "shareholding_pattern",
     ], []);
 
-    console.log(investorInfo)
     useEffect(() => {
         if (location.pathname.endsWith("/investor-info")) {
             navigate('dividend');
@@ -26,7 +25,7 @@ export const InvestorInfo = () => {
         if (!types.includes(type)) {
             const newUrl = location.pathname.split("/");
             newUrl.pop();
-            navigate(`${newUrl.join("/")}/dividend`, { replace: true });
+            navigate(`${newUrl.join("/")}/dividend`);
             return;
         }
         dispatch(getInvertorInfoDataFunc(compId, type));
@@ -44,13 +43,21 @@ export const InvestorInfo = () => {
                         </NavLink>
                     ))}
                 </div>
-                <iframe
-                    src={`https://drive.google.com/file/d/${investorInfo[type]}/view`}
-                    width="640"
-                    height="480"
-                    allow="autoplay"
-                    title="Google Drive File"
-                />
+                {
+                    investorInfo[type] &&
+                    <div className="pdf-viewer-container">
+                        <iframe title='PDF Viewer' src={`https://drive.google.com/file/d/${investorInfo[type]}/preview`} allow="autoplay"></iframe>
+                        <a
+                            href={`https://drive.google.com/uc?export=download&id=${investorInfo[type]}`}
+                            download
+                            className="download-button"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Download File
+                        </a>
+                    </div>
+                }
             </div>
         </div>
     )

@@ -1,6 +1,9 @@
 .chart-container {
-    height: 500px;
     padding: 15px;
+}
+
+.chart-container .chart {
+    height: 500px;
 }
 
 .chart-container .chart-legend {
@@ -14,5 +17,3 @@
     justify-content: space-between;
     align-items: center;
 }
-
-.chart-container .chart-legend div:hover {}
