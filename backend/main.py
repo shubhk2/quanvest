@@ -26,7 +26,7 @@ from backend.routers import home, financials, ratios, overview, charts, copilot
 from backend.routers import search  # add this import
 from backend.routers import dividend  # add this import
 from backend.routers import shareholding_pattern  # add this import
-
+# from backend.routers import quarterly_files
 
 logger.info("Starting Financial Data API")
 app = FastAPI(title="Financial Data API")

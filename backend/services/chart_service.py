@@ -1,5 +1,3 @@
-from soupsieve.util import lower
-
 from backend.db_setup import connect_to_db
 from psycopg2.extras import RealDictCursor
 from typing import List, Optional, Dict, Any
@@ -7,410 +5,239 @@ import logging
 import plotly.graph_objs as go
 import plotly.io as pio
 
-# Enhance logger configuration
 logger = logging.getLogger(__name__)
 
-def get_table_for_parameter(parameter: str) -> str:
-    """
-    Determine which table to query based on the parameter
-    
-    Parameters:
-    - parameter: financial parameter name
-    
-    Returns:
-    - Table name where the parameter can be found
-    """
+# Parameter lists converted to lowercase sets for efficient, case-insensitive lookup
+bs_parameters = {
+    "finance division loans and leases long-term", "long-term debt", "net property plant and equipment",
+    "current income taxes payable", "deferred tax assets long-term (collected)", "gross property plant and equipment",
+    "non-interest bearing deposits", "total receivables", "current portion of leases", "gross loans",
+    "separate account liability", "current portion of long-term debt", "common stock, total",
+    "investment securities, total", "short-term borrowings", "unpaid claims", "insurance and annuity liabilities",
+    "unearned revenue non current", "total other investments", "accrued interest payable",
+    "accounts receivable long-term", "other intangibles, total", "deferred charges long-term", "total current assets",
+    "total investments", "comprehensive income and other", "treasury stock", "net loans",
+    "deferred tax assets long-term", "prepaid expenses", "unearned revenue current, total", "total common equity",
+    "inventory", "interest bearing deposits", "preferred stock non redeemable", "unearned revenue, current",
+    "policy loans", "mortgage loans", "additional paid in capital", "finance division loans and leases current",
+    "total liabilities and equity", "accumulated depreciation", "deferred tax liability non-current",
+    "minority interest", "investment in debt securities", "allowance for loan losses",
+    "other real estate owned and foreclosed", "total liabilities", "total preferred equity", "long-term investments",
+    "other current assets, total", "real estate owned", "separate account assets", "reinsurance recoverable",
+    "preferred stock redeemable", "accrued interest receivable", "long-term leases", "accounts receivable, total",
+    "other receivables", "total assets", "loans receivable long-term", "preferred stock convertible",
+    "accrued expenses, total", "notes receivable", "other long-term assets, total", "other current liabilities",
+    "accounts payable, total", "total current liabilities", "other non current liabilities", "goodwill",
+    "cash and equivalents", "short term investments", "total deposits", "pension & other post retirement benefits",
+    "unearned premiums", "investment in equity and preferred securities, total", "restricted cash",
+    "retained earnings", "reinsurance payable", "total cash and short term investments",
+    "trading asset securities, total", "total equity"
+}
+pl_parameters = {
+    "total interest and dividend income", "gain (loss) on sale of loans", "non-insurance activities revenues",
+    "net income", "gain (loss) on sale of investment, total", "preferred dividend and other adjustments",
+    "interest income on investments", "cost of goods sold, total", "depreciation & amortization - (collected)",
+    "restructuring charges", "other operating expenses, total", "gain (loss) on sale of invest. & securities",
+    "total revenues", "ebt, excl. unusual items", "insurance division revenues", "r&d expenses",
+    "interest and invest. income", "legal settlements", "earnings of discontinued operations", "income tax expense",
+    "policy acquisition / underwriting costs, total", "total operating expenses", "impairment of goodwill",
+    "non interest expense, total", "interest expense, total", "credit card fee", "other revenues, total",
+    "net interest income", "extraordinary item & accounting change", "selling general & admin expenses, total",
+    "provision for bad debts", "total shares outstanding", "operating revenues", "minority interest",
+    "earnings from continuing operations", "exploration / drilling costs, total",
+    "other non operating income (expenses)",
+    "depreciation & amortization", "non interest income, total", "weighted avg. shares outstanding", "gross profit",
+    "impairment of oil, gas & mineral properties", "ebitda", "(income) loss on equity invest.", "operating margin",
+    "total other non interest income", "revenues before provison for loan losses", "income (loss) on equity invest.",
+    "weighted avg. shares outstanding dil", "effective tax rate", "other unusual items",
+    "gain (loss) on sale of assets",
+    "interest expense - finance division", "gross profit margin", "finance div. revenues", "stock-based compensation",
+    "eps diluted", "net income to common excl. extra items", "gain (loss) on sale of investments",
+    "interest income on loans", "operating income", "net interest expenses", "insurance settlements",
+    "ebt, incl. unusual items", "currency exchange gains (loss)", "total revenues % chg.",
+    "total other non interest expense", "net income to common incl extra items",
+    "merger & related restructuring charges",
+    "premiums and annuity revenues", "provision for loan losses", "total merger & related restructuring charges",
+    "asset writedown", "salaries and other employee benefits", "policy benefits", "other operating expenses",
+    "interest income, total", "occupancy expense", "interest on deposits", "eps", "interest and investment income"
+}
+cf_parameters = {
+    "amortization of goodwill and intangible assets", "change in accounts receivable",
+    "sale (purchase) of real estate properties", "investment in marketable and equity securities, total", "net income",
+    "special dividend paid", "asset writedown & restructuring costs", "depreciation, depletion & amortization",
+    "net cash from discontinued operations", "issuance of preferred stock", "other operating activities, total",
+    "capital expenditure", "amortization of deferred charges, total", "change in unearned revenues",
+    "total depreciation, depletion & amortization", "total debt issued", "(gain) loss on sale of asset",
+    "other financing activities, total", "provision and write-off of bad debts", "provision for credit losses",
+    "foreign exchange rate adjustments", "depreciation & amortization", "miscellaneous cash flow adjustments",
+    "other operating activities", "(gain) loss from sale of asset", "total asset writedown",
+    "short term debt repaid, total", "(income) loss on equity investments",
+    "impairment of oil, gas & mineral properties",
+    "common dividends paid", "long-term debt repaid, total", "total debt repaid", "reinsurance recoverable",
+    "(gain) loss on sale of investments", "sale (purchase) of intangible assets", "change in inventories",
+    "purchase / sale of intangible assets", "change in other net operating assets (collected)",
+    "stock-based compensation", "sale of property, plant and equipment (collected)", "long-term debt issued, total",
+    "nopat", "net (increase) decrease in loans originated / sold - investing", "tax benefit from stock options",
+    "cash from operations", "divestitures", "net increase (decrease) in deposit accounts",
+    "short term debt issued, total", "sale of property, plant, and equipment", "change in other net operating assets",
+    "repurchase of preferred stock", "depreciation & amortization, total", "repurchase of common stock",
+    "change in insurance reserves / liabilities", "common & preferred stock dividends paid", "cash from financing",
+    "issuance of common stock", "cash from investing", "other investing activities, total",
+    "change in accounts payable", "preferred dividends paid", "net change in cash", "cash acquisitions"
+}
+
+
+def to_float_for_plotting(value: Any) -> Optional[float]:
+    """Safely convert a value to a float for plotting, returning None for invalid inputs."""
+    if value is None:
+        return None
+    try:
+        # Handle common non-numeric strings by treating them as no data
+        if isinstance(value, str) and value.strip() in ('', '-', '—', 'N/A'):
+            return None
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
+
+def get_table_for_parameter(parameter: str) -> Optional[str]:
+    """Determine which financial statement table to query based on the parameter."""
     logger.debug(f"Determining table for parameter: '{parameter}'")
-    # Map parameters to their respective tables
-    # This is a simplified approach, in reality you'd have a more comprehensive mapping
-    pl_parameters = [
-        'exceptional items', 'minority share', 'other income', 'tax',
-        'material cost %', 'employee cost', 'exceptional items at',
-        'sales growth %', 'employee cost %', 'depreciation', 'other expenses',
-        'power and fuel', 'sales', 'reported net profit', 'other income normal',
-        'dividend amount', 'change in inventory', 'profit for eps', 'net profit',
-        'profit before tax', 'raw material cost', 'selling and admin',
-        'profit after tax', 'interest', 'profit for pe', 'manufacturing cost %',
-        'other cost %', 'profit from associates', 'other mfr. exp'
-    ]
-    bs_parameters= [
-        'face value', 'land', 'estates', 'equipments', 'non controlling int',
-        'capital work in progress', 'preference capital', 'trade receivables',
-        'cash equivalents', 'other fixed assets', 'trade payables',
-        'plant machinery', 'short term borrowings', 'total', 'investments',
-        'other assets', 'inventory', 'long term borrowings', 'railway sidings',
-        'no. of equity shares', 'other borrowings', 'lease liabilities',
-        'loans n advances', 'other liability items', 'net block', 'building',
-        'other asset items', 'inventories', 'new bonus shares',
-        'accumulated depreciation', 'reserves', 'furniture n fittings',
-        'cash & bank', 'gross block', 'receivables', 'intangible assets',
-        'borrowings', 'equity share capital', 'computers', 'vehicles',
-        'ships vessels', 'advance from customers', 'other liabilities'
-]
-
-    cf_parameters = [
-        'investment subsidy', 'other wc items', 'issue of shares on acq', 'financial liabilities',
-        'cash from operating activity', 'repayment of borrowings', 'redemp n canc of shares',
-        'acquisition of companies', 'investments purchased', 'interest paid fin', 'interest paid',
-        'redemption of debentures', 'proceeds from shares', 'interest received',
-        'other operating items', 'invest in subsidiaries', 'net cash flow',
-        'cash from financing activity', 'share application money', 'inter corporate deposits',
-        'loans advances', 'proceeds from debentures', 'fixed assets sold', 'other financing items',
-        'inventory', 'operating investments', 'application money refund', 'loans to subsidiaries',
-        'operating borrowings', 'corporate loans', 'proceeds from deposits', 'dividends paid',
-        'investment in group cos', 'payables', 'exceptional cf items', 'subsidy received',
-        'fixed assets purchased', 'cash from investing activity', 'deposits', 'dividends received',
-        'profit from operations', 'direct taxes', 'proceeds from borrowings', 'investments sold',
-        'capital wip', 'investment income', 'receivables', 'other investing items',
-        'working capital changes'
-    ]
-    # Quarterly results parameters
-    qr_parameters = [
-        'expenses', 'employee cost %', 'depreciation', 'exceptional items',
-        'minority share', 'yoy profit growth %', 'other income', 'sales',
-        'reported net profit', 'tax', 'other income normal', 'material cost %',
-        'profit for eps', 'net profit', 'profit before tax', 'yoy sales growth %',
-        'exceptional items at', 'profit after tax', 'interest', 'profit for pe',
-        'operating profit', 'profit from associates'
-    ]
-
     param_lower = parameter.lower()
     if param_lower in pl_parameters:
-        logger.debug(f"Parameter '{parameter}' found in profit_and_loss")
+        # print("yes")
         return "profit_and_loss"
     elif param_lower in bs_parameters:
-        logger.debug(f"Parameter '{parameter}' found in balance_sheet")
         return "balance_sheet"
     elif param_lower in cf_parameters:
-        logger.debug(f"Parameter '{parameter}' found in cashflow")
         return "cashflow"
-    elif param_lower in qr_parameters:
-        logger.debug(f"Parameter '{parameter}' found in quarterly_results")
-        return "quarterly_results"
     else:
-        # Default to profit_and_loss or consider raising an error
-        logger.warning(f"Parameter '{parameter}' not found in any parameter list, defaulting to profit_and_loss")
-        return "oh my god, this is not in any table"
+        logger.warning(f"Parameter '{parameter}' not found in any financial statement.")
+        return None
+
 
 def generate_parameter_chart(
-    company_numbers: List[int],
-    parameters: List[str],
-    start_year: Optional[int] = None,
-    end_year: Optional[int] = None,
-    chart_type: str = "line"
-):
-    logger.info(f"Generating parameter chart for companies={company_numbers}, parameters={parameters}, years={start_year}-{end_year}, type={chart_type}")
+        company_numbers: List[int],
+        parameters: List[str],
+        start_year: Optional[int] = None,
+        end_year: Optional[int] = None,
+
+) -> Dict[str, Any]:
+    """Generate a Plotly chart for specified financial parameters and companies."""
+    logger.info(
+        f"Generating parameter chart for companies={company_numbers}, parameters={parameters}, years={start_year}-{end_year}")
     conn = connect_to_db()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
+        cursor.execute("SELECT id, full_name FROM company_detail WHERE id = ANY(%s)", (company_numbers,))
+        company_details_map = {row['id']: row for row in cursor.fetchall()}
+
+        start = start_year - 2000 if start_year else 16
+        end = end_year - 2000 if end_year else 25
+        selected_year_cols = [f'mar_{yr}' for yr in range(start, end + 1)]
+        x_axis_labels = [f"Mar {2000 + int(col.split('_')[1])}" for col in selected_year_cols]
+
         traces = []
-        labels = []
-        company_names = {}
+        for company_number in company_numbers:
+            company_info = company_details_map.get(company_number)
+            if not company_info:
+                logger.warning(f"Details not found for company_number {company_number}")
+                continue
 
-        # Collect all matching IDs for the given company_numbers
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(
-                "SELECT id, full_name, company_number FROM company_detail WHERE company_number = ANY(%s)",
-                (company_numbers,)
-            )
-            detail_rows = cursor.fetchall()
-            logger.debug(f"Found {len(detail_rows)} company detail records")
-        
-        # Build a map (company_number -> [list of ids]) and names
-        company_id_map = {}
-        for row in detail_rows:
-            cid = row["company_number"]
-            if cid not in company_id_map:
-                company_id_map[cid] = []
-            company_id_map[cid].append(row["id"])
-            company_names[row["id"]] = row["full_name"]
-        
-        logger.debug(f"Company ID map: {company_id_map}")
-        logger.debug(f"Company names: {company_names}")
-
-        # Collect data for each parameter and company
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             for parameter in parameters:
-                logger.debug(f"Processing parameter: {parameter}")
-                table = get_table_for_parameter(parameter)
-                for cnum, ids in company_id_map.items():
-                    logger.debug(f"Processing company number {cnum} with IDs {ids}")
-                    placeholders = ",".join(["%s"] * len(ids))
-                    query = f"""
-                        SELECT report_date, value 
-                        FROM {table}
-                        WHERE company_id IN ({placeholders})
-                        AND lower(parameter) = %s
-                        """
-                    if start_year:
-                        query += " AND EXTRACT(YEAR FROM report_date) >= %s"
-                    else:
-                        logger.debug("No start_year filter applied")
-                        
-                    if end_year:
-                        query += " AND EXTRACT(YEAR FROM report_date) <= %s"
-                    else:
-                        logger.debug("No end_year filter applied")
-                        
-                    query += " ORDER BY report_date ASC"
+                table_name = get_table_for_parameter(parameter)
+                if not table_name:
+                    logger.warning(f"Skipping parameter '{parameter}' as its table could not be determined.")
+                    continue
 
-                    query_params = ids + [parameter]
-                    if start_year: query_params.append(start_year)
-                    if end_year: query_params.append(end_year)
-                    
-                    logger.debug(f"Executing query: {query} with params: {query_params}")
-                    cursor.execute(query, query_params)
-                    results = cursor.fetchall()
-                    logger.debug(f"Found {len(results)} results for parameter {parameter} and company {cnum}")
+                query = f"SELECT {', '.join(selected_year_cols)} FROM public.{table_name} WHERE company_number = %s AND account = %s"
+                cursor.execute(query, (company_number, parameter))
+                data_row = cursor.fetchone()
 
-                    if results:
-                        x = [r["report_date"].strftime("%Y-%m-%d") for r in results]
-                        y = [float(r["value"]) for r in results]
-                        label = f"{company_names[ids[0]]} - {parameter}"
-                        trace = go.Scatter(x=x, y=y, mode="lines+markers", name=label)
-                        traces.append(trace)
-                        if not labels:
-                            labels = x
-                    else:
-                        logger.warning(f"No data found for parameter {parameter} and company {cnum}")
+                if data_row:
+                    # print(data_row)
+                    y_values = [to_float_for_plotting(data_row[col]) for col in selected_year_cols]
+                    trace = go.Scatter(x=x_axis_labels, y=y_values, mode='lines+markers',
+                                       name=f"{company_info['full_name']} - {parameter}")
+                    traces.append(trace)
+                else:
+                    logger.warning(f"No data for parameter '{parameter}' for company '{company_info['full_name']}'")
 
-        logger.info(f"Created {len(traces)} traces for chart")
         if not traces:
-            logger.warning("No data found for chart generation")
-            return {"plotly_json": "{}", "warning": "No data found for specified parameters"}
+            return {"plotly_json": "{}", "warning": "No data found for the specified parameters and companies."}
 
         fig = go.Figure(data=traces)
-        fig.update_layout(
-            title="Financial Parameter Chart",
-            xaxis_title="Date",
-            yaxis_title="Value",
-            legend_title="Company - Parameter"
-        )
-        chart_json = pio.to_json(fig)
-        logger.debug("Successfully generated Plotly chart JSON")
-        return {"plotly_json": chart_json}
-    except Exception as e:
-        logger.error(f"Error generating parameter chart: {str(e)}", exc_info=True)
-        raise
+        fig.update_layout(title="Financial Parameter Comparison", xaxis_title="Year", yaxis_title="Value")
+        return {"plotly_json": pio.to_json(fig)}
     finally:
+        cursor.close()
         conn.close()
 
-def calculate_ratio(
-    conn,
-    company_id: int,
-    ratio_name: str,
-    report_date
-) -> float:
-    """
-    Calculate a financial ratio for a company at a specific date
-
-    Parameters:
-    - conn: Database connection
-    - company_id: Company ID
-    - ratio_name: Name of the ratio to calculate
-    - report_date: Date for which to calculate the ratio
-
-    Returns:
-    - Calculated ratio value
-    """
-    logger.debug(f"Calculating ratio '{ratio_name}' for company_id={company_id}, date={report_date}")
-    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        # Implement common financial ratios
-        if ratio_name == "Gross Margin":
-            # Gross Margin = Gross Profit / Revenue
-            cursor.execute(
-                """
-                SELECT 
-                    (SELECT value FROM profit_and_loss WHERE company_id = %s AND report_date = %s AND parameter = 'Gross Profit') /
-                    NULLIF((SELECT value FROM profit_and_loss WHERE company_id = %s AND report_date = %s AND parameter = 'Revenue'), 0) AS ratio
-                """,
-                (company_id, report_date, company_id, report_date)
-            )
-            logger.debug("Calculated Gross Margin ratio")
-
-        elif ratio_name == "Net Margin":
-            # Net Margin = Net Income / Revenue
-            cursor.execute(
-                """
-                SELECT 
-                    (SELECT value FROM profit_and_loss WHERE company_id = %s AND report_date = %s AND parameter = 'Net Income') /
-                    NULLIF((SELECT value FROM profit_and_loss WHERE company_id = %s AND report_date = %s AND parameter = 'Revenue'), 0) AS ratio
-                """,
-                (company_id, report_date, company_id, report_date)
-            )
-            logger.debug("Calculated Net Margin ratio")
-
-        elif ratio_name == "ROE":
-            # ROE = Net Income / Total Equity
-            cursor.execute(
-                """
-                SELECT 
-                    (SELECT value FROM profit_and_loss WHERE company_id = %s AND report_date = %s AND parameter = 'Net Income') /
-                    NULLIF((SELECT value FROM balance_sheet WHERE company_id = %s AND report_date = %s AND parameter = 'Total Equity'), 0) AS ratio
-                """,
-                (company_id, report_date, company_id, report_date)
-            )
-            logger.debug("Calculated ROE ratio")
-
-        elif ratio_name == "Current Ratio":
-            # Current Ratio = Current Assets / Current Liabilities
-            cursor.execute(
-                """
-                SELECT 
-                    (SELECT value FROM balance_sheet WHERE company_id = %s AND report_date = %s AND parameter = 'Current Assets') /
-                    NULLIF((SELECT value FROM balance_sheet WHERE company_id = %s AND report_date = %s AND parameter = 'Current Liabilities'), 0) AS ratio
-                """,
-                (company_id, report_date, company_id, report_date)
-            )
-            logger.debug("Calculated Current Ratio")
-
-        elif ratio_name == "Debt to Equity":
-            # Debt to Equity = Total Liabilities / Total Equity
-            cursor.execute(
-                """
-                SELECT 
-                    (SELECT value FROM balance_sheet WHERE company_id = %s AND report_date = %s AND parameter = 'Total Liabilities') /
-                    NULLIF((SELECT value FROM balance_sheet WHERE company_id = %s AND report_date = %s AND parameter = 'Total Equity'), 0) AS ratio
-                """,
-                (company_id, report_date, company_id, report_date)
-            )
-            logger.debug("Calculated Debt to Equity ratio")
-        else:
-            # Default to returning 0 if ratio not supported
-            logger.warning(f"Unsupported ratio: {ratio_name}, returning 0")
-            return 0
-
-        result = cursor.fetchone()
-        if result and result["ratio"] is not None:
-            logger.debug(f"Ratio value: {float(result['ratio'])}")
-            return float(result["ratio"])
-        else:
-            logger.warning(f"No data found for ratio {ratio_name}, returning 0")
-            return 0
 
 def generate_ratio_chart(
-    company_ids: List[int],
-    ratios: List[str],
-    start_year: Optional[int] = None,
-    end_year: Optional[int] = None,
-    chart_type: str = "line"
+        company_numbers: List[int],
+        parameters: List[str],
+        start_year: Optional[int] = None,
+        end_year: Optional[int] = None,
+        chart_type: str = "line"
 ) -> Dict[str, Any]:
-    """
-    Generate chart data for financial ratios
-
-    Parameters:
-    - company_ids: List of company IDs to include
-    - ratios: List of ratio parameters to chart
-    - start_year: Start year for data
-    - end_year: End year for data
-    - chart_type: Type of chart to generate
-
-    Returns:
-    - Dictionary with chart data
-    """
-    logger.info(f"Generating ratio chart for companies={company_ids}, ratios={ratios}, years={start_year}-{end_year}, type={chart_type}")
+    """Generate a Plotly chart for specified financial ratios and companies."""
+    logger.info(
+        f"Generating ratio chart for companies={company_numbers}, ratios={parameters}, years={start_year}-{end_year}")
     conn = connect_to_db()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        chart_data = {
-            "labels": [],  # Years/dates
-            "datasets": []
-        }
+        cursor.execute("SELECT id, full_name FROM company_detail WHERE id = ANY(%s)", (company_numbers,))
+        company_details_map = {row['id']: row for row in cursor.fetchall()}
 
-        # Get company names for labels
-        company_names = {}
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(
-                "SELECT id, full_name FROM company_detail WHERE id = ANY(%s)",
-                (company_ids,)
-            )
-            for row in cursor.fetchall():
-                company_names[row["id"]] = row["full_name"]
-        
-        logger.debug(f"Company names: {company_names}")
+        start = start_year - 2000 if start_year else 16
+        end = end_year - 2000 if end_year else 25
+        selected_year_cols = [f'mar_{yr}' for yr in range(start, end + 1)]
+        x_axis_labels = [f"Mar {2000 + int(col.split('_')[1])}" for col in selected_year_cols]
 
-        # Build date filter for query
-        date_filter = ""
-        date_params = []
-        if start_year:
-            date_filter += " AND EXTRACT(YEAR FROM report_date) >= %s"
-            date_params.append(start_year)
-            logger.debug(f"Added start_year filter: {start_year}")
-        else:
-            logger.debug("No start_year filter applied")
-            
-        if end_year:
-            date_filter += " AND EXTRACT(YEAR FROM report_date) <= %s"
-            date_params.append(end_year)
-            logger.debug(f"Added end_year filter: {end_year}")
-        else:
-            logger.debug("No end_year filter applied")
+        traces = []
+        for company_number in company_numbers:
+            company_info = company_details_map.get(company_number)
+            if not company_info:
+                continue
 
-        # For each company, get all available report dates
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            for company_id in company_ids:
-                logger.debug(f"Processing company ID: {company_id}")
-                # Get all report dates for this company
-                query = f"""
-                SELECT DISTINCT report_date 
-                FROM profit_and_loss 
-                WHERE company_id = %s {date_filter}
-                ORDER BY report_date ASC
-                """
-                logger.debug(f"Executing query: {query} with params: [{company_id}] + {date_params}")
-                cursor.execute(query, [company_id] + date_params)
-                report_dates = [row["report_date"] for row in cursor.fetchall()]
-                logger.debug(f"Found {len(report_dates)} report dates for company {company_id}")
+            for ratio_name in parameters:
+                query = f"SELECT {', '.join(selected_year_cols)} FROM public.financial_ratios WHERE company_number = %s AND name = %s"
+                cursor.execute(query, (company_number, ratio_name))
+                data_row = cursor.fetchone()
 
-                # If we don't have dates yet, use these for the chart labels
-                if not chart_data["labels"]:
-                    chart_data["labels"] = [date.strftime("%Y-%m-%d") for date in report_dates]
-                    logger.debug(f"Set chart labels: {chart_data['labels']}")
+                if data_row:
+                    y_values = [to_float_for_plotting(data_row[col]) for col in selected_year_cols]
+                    trace = go.Scatter(x=x_axis_labels, y=y_values, mode='lines+markers',
+                                       name=f"{company_info['full_name']} - {ratio_name}")
+                    traces.append(trace)
+                else:
+                    logger.warning(f"No data for ratio '{ratio_name}' for company '{company_info['full_name']}'")
 
-                # For each ratio, calculate values for all dates
-                for ratio in ratios:
-                    logger.debug(f"Calculating ratio: {ratio}")
-                    ratio_values = []
-                    for date in report_dates:
-                        ratio_value = calculate_ratio(conn, company_id, ratio, date)
-                        ratio_values.append(ratio_value)
+        if not traces:
+            return {"plotly_json": "{}", "warning": "No data found for the specified ratios and companies."}
 
-                    # Add dataset for this company and ratio
-                    dataset = {
-                        "label": f"{company_names.get(company_id, f'Company {company_id}')} - {ratio}",
-                        "data": ratio_values,
-                    }
-                    chart_data["datasets"].append(dataset)
-                    logger.debug(f"Added dataset for {ratio} with {len(ratio_values)} values")
-
-        # Add chart type to the response
-        chart_data["chart_type"] = chart_type
-        logger.info(f"Completed chart generation with {len(chart_data['datasets'])} datasets")
-
-        if not chart_data["datasets"]:
-            logger.warning("No datasets created for chart")
-            return {"chart_data": {}, "warning": "No data found for specified parameters"}
-
-        return chart_data
-
-    except Exception as e:
-        logger.error(f"Error generating ratio chart: {str(e)}", exc_info=True)
-        raise
+        fig = go.Figure(data=traces)
+        fig.update_layout(title="Financial Ratio Comparison", xaxis_title="Year", yaxis_title="Value")
+        return {"plotly_json": pio.to_json(fig)}
     finally:
+        cursor.close()
         conn.close()
 
-
 if __name__ == "__main__":
-    # Configure logging for standalone execution
-    logging.basicConfig(level=logging.DEBUG, 
-                       format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    
     # Example usage
-    company_ids = [1, 2, 3]
-    parameters = ["Net Profit", "Borrowings","Land","sales"]
-    ratios = ["Gross Margin", "Net Margin"]
-    
-    logger.info("Running test with example data")
-    chart_data = generate_parameter_chart(company_ids, parameters)
+    chart_data = generate_parameter_chart(
+        company_numbers=[90, 42],
+        parameters=["Gross Profit", "Depreciation & Amortization"],
+        start_year=2018,
+        end_year=2020
+    )
     print(chart_data)
 
-    # ratio_chart_data = generate_ratio_chart(company_ids, ratios)
-    # print(ratio_chart_data)
+    ratio_data = generate_ratio_chart(
+        company_numbers=[90, 42],
+        parameters=["debt_to_equity", "cash_ratio"],
+        start_year=2018,
+        end_year=2020
+    )
+    print(ratio_data)
