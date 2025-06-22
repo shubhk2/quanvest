@@ -26,19 +26,24 @@ export const splitOverview = (text = '', fullOverview = false) => {
         overview: intro.trim() + (fullOverview ? '\n\n' + rest.join('\n\n') : '')
     };
 };
-export const shortifyDecimalValue = (value) => {
+export const shortifyDecimalValue = (value, decimalPlaces = 1) => {
     if (typeof value === "number") {
-        return Number.isInteger(value) ? value : value.toFixed(1);
+        return Number.isInteger(value)
+            ? value
+            : Number(value.toFixed(decimalPlaces));
     }
     if (typeof value === "string") {
         if (value === '-' || value.trim() === '') return value;
-        const match = value.match(/^([-\d.]+)([A-Za-z]*)$/);
+        const match = value.match(/^([-\d.]+)([%A-Za-z]*)$/);
         if (!match) return value;
         const [, numStr, suffix] = match;
         const num = parseFloat(numStr);
         if (isNaN(num)) return value;
-        const shortNum = Number.isInteger(num) ? numStr : num.toFixed(1);
-        return `${shortNum}${suffix}`;
+        const isEffectivelyInt = Number(num).toFixed(0) === numStr.replace(/^0+/, '').replace(/\.0+$/, '');
+        const rounded = isEffectivelyInt
+            ? Math.round(num).toString()
+            : num.toFixed(decimalPlaces);
+        return `${rounded}${suffix}`;
     }
     return value;
 };

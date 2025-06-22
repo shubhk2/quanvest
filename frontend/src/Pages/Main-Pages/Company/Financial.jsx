@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { getFinancialDataFunc } from '../../../Redux/MainReducer/action';
 import { ParameterChart } from '../../../Components/ParameterChart';
-import { formatLabel, getRandomBrightColor } from '../../../Utils/utilities';
+import { formatLabel, getRandomBrightColor, shortifyDecimalValue } from '../../../Utils/utilities';
 
 export const Financial = () => {
     const { compId, type } = useParams();
@@ -12,6 +12,7 @@ export const Financial = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const { isLoading, financial } = useSelector(store => store.mainReducer);
+    const [decimalPos, setDecimalPos] = useState(1);
     const [currentPageData, setCurrentPageData] = useState({});
     const [generatedColors, setGeneratedColors] = useState(new Set());
     const [selectedParams, setSelectedParams] = useState(new Map());
@@ -83,6 +84,15 @@ export const Financial = () => {
                         </NavLink>
                     ))}
                 </div>
+                <div className='filters'>
+                    <div className='decimal-position'>
+                        <span>Decimal Position </span>
+                        <span>
+                            <button disabled={decimalPos <= 1} onClick={() => decimalPos > 1 && setDecimalPos(decimalPos - 1)}>.0</button>
+                            <button disabled={decimalPos >= 8} onClick={() => decimalPos < 8 && setDecimalPos(decimalPos + 1)}>.00</button>
+                        </span>
+                    </div>
+                </div>
                 <div className='table-container'>
                     <table className='table'>
                         {
@@ -111,12 +121,12 @@ export const Financial = () => {
                                                                 if (headIndex === 0 && (head === "Account" || head === "Ratio")) {
                                                                     return (
                                                                         <td key={headIndex}>
-                                                                            <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {formatLabel(row[head])}
+                                                                            <span><input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {formatLabel(row[head])}</span>
                                                                         </td>
                                                                     )
                                                                 } else {
                                                                     return (
-                                                                        <td key={headIndex}>{row[head] ?? '-'}</td>
+                                                                        <td key={headIndex}>{shortifyDecimalValue(row[head], decimalPos) ?? '-'}</td>
                                                                     )
                                                                 }
                                                             })

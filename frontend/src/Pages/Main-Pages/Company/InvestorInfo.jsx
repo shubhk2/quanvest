@@ -94,7 +94,6 @@ export const InvestorInfo = () => {
                                                                             <td title={row[head]} key={headIndex}>{shortifyDecimalValue(row[head]) ?? '-'}</td>
                                                                             :
                                                                             <td key={headIndex}>{shortifyDecimalValue(row[head]) ?? '-'}</td>
-
                                                                     })
                                                                 }
                                                             </tr>
