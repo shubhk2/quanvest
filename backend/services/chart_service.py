@@ -86,6 +86,8 @@ cf_parameters = {
     "change in accounts payable", "preferred dividends paid", "net change in cash", "cash acquisitions"
 }
 
+l=list(pl_parameters)+list(bs_parameters)+list(cf_parameters)
+print(len(l))
 
 def to_float_for_plotting(value: Any) -> Optional[float]:
     """Safely convert a value to a float for plotting, returning None for invalid inputs."""
@@ -116,16 +118,17 @@ def get_table_for_parameter(parameter: str) -> Optional[str]:
         return None
 
 
+# Python
 def generate_parameter_chart(
         company_numbers: List[int],
         parameters: List[str],
         start_year: Optional[int] = None,
         end_year: Optional[int] = None,
-
+        chart_type: str = "line"
 ) -> Dict[str, Any]:
     """Generate a Plotly chart for specified financial parameters and companies."""
     logger.info(
-        f"Generating parameter chart for companies={company_numbers}, parameters={parameters}, years={start_year}-{end_year}")
+        f"Generating parameter chart for companies={company_numbers}, parameters={parameters}, years={start_year}-{end_year}, chart_type={chart_type}")
     conn = connect_to_db()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
@@ -155,10 +158,12 @@ def generate_parameter_chart(
                 data_row = cursor.fetchone()
 
                 if data_row:
-                    # print(data_row)
                     y_values = [to_float_for_plotting(data_row[col]) for col in selected_year_cols]
-                    trace = go.Scatter(x=x_axis_labels, y=y_values, mode='lines+markers',
-                                       name=f"{company_info['full_name']} - {parameter}")
+                    if chart_type == "bar":
+                        trace = go.Bar(x=x_axis_labels, y=y_values, name=f"{company_info['full_name']} - {parameter}")
+                    else:  # Default to line chart
+                        trace = go.Scatter(x=x_axis_labels, y=y_values, mode='lines+markers',
+                                           name=f"{company_info['full_name']} - {parameter}")
                     traces.append(trace)
                 else:
                     logger.warning(f"No data for parameter '{parameter}' for company '{company_info['full_name']}'")
@@ -183,7 +188,7 @@ def generate_ratio_chart(
 ) -> Dict[str, Any]:
     """Generate a Plotly chart for specified financial ratios and companies."""
     logger.info(
-        f"Generating ratio chart for companies={company_numbers}, ratios={parameters}, years={start_year}-{end_year}")
+        f"Generating ratio chart for companies={company_numbers}, ratios={parameters}, years={start_year}-{end_year}, chart_type={chart_type}")
     conn = connect_to_db()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
@@ -208,8 +213,11 @@ def generate_ratio_chart(
 
                 if data_row:
                     y_values = [to_float_for_plotting(data_row[col]) for col in selected_year_cols]
-                    trace = go.Scatter(x=x_axis_labels, y=y_values, mode='lines+markers',
-                                       name=f"{company_info['full_name']} - {ratio_name}")
+                    if chart_type == "bar":
+                        trace = go.Bar(x=x_axis_labels, y=y_values, name=f"{company_info['full_name']} - {ratio_name}")
+                    else:  # Default to line chart
+                        trace = go.Scatter(x=x_axis_labels, y=y_values, mode='lines+markers',
+                                           name=f"{company_info['full_name']} - {ratio_name}")
                     traces.append(trace)
                 else:
                     logger.warning(f"No data for ratio '{ratio_name}' for company '{company_info['full_name']}'")
@@ -223,7 +231,6 @@ def generate_ratio_chart(
     finally:
         cursor.close()
         conn.close()
-
 if __name__ == "__main__":
     # Example usage
     chart_data = generate_parameter_chart(

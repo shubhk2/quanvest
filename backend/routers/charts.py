@@ -42,7 +42,7 @@ async def chart_parameters(request: ChartRequest):
 @router.post("/ratios")
 async def chart_ratios(request: ChartRequest):
     """Generate a chart for specified financial ratios."""
-    logger.info(f"Chart ratios request received: {request.dict()}")
+    logger.info(f"Chart ratios request received: {request.model_dump()}")
     try:
         if not request.company_numbers or not request.parameters:
             raise HTTPException(status_code=400, detail="Company numbers and ratios must be provided.")

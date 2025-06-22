@@ -26,6 +26,7 @@ from backend.routers import home, financials, ratios, overview, charts, copilot
 from backend.routers import search  # add this import
 from backend.routers import dividend  # add this import
 from backend.routers import shareholding_pattern  # add this import
+from backend.routers import sql_rag
 # from backend.routers import quarterly_files
 
 logger.info("Starting Financial Data API")
@@ -49,6 +50,7 @@ app.include_router(ratios.router, prefix="/ratios")
 app.include_router(stock_data.router, prefix="/stock_data")
 app.include_router(overview.router, prefix="/overview")
 app.include_router(charts.router, prefix="/charts")
+app.include_router(sql_rag.router)  # add this line
 app.include_router(copilot.router, prefix="/copilot")
 app.include_router(search.router)  # add this line
 app.include_router(dividend.router, prefix="/dividend")  # add this line
