@@ -115,7 +115,6 @@ export const getOverviewDataFunc = id => dispatch => {
     return axios(request)
         .then((res) => {
             dispatch(getOverviewData({ data: res.data }));
-            // dispatch(getOverviewGraphDataFunc(id));
         })
         .catch((err) => {
             dispatch(error());
@@ -170,6 +169,10 @@ export const getInvertorInfoDataFunc = (id, type) => dispatch => {
 
     return axios(config)
         .then(res => {
+            if (type === "shareholding_pattern") {
+                dispatch(getInvertorInfoData({ type, data: res?.data }));
+                return;
+            }
             dispatch(getInvertorInfoData({ type, data: res?.data[`${type}_file_id`] || 0 }));
         })
         .catch(err => {

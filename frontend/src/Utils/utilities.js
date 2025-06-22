@@ -26,3 +26,19 @@ export const splitOverview = (text = '', fullOverview = false) => {
         overview: intro.trim() + (fullOverview ? '\n\n' + rest.join('\n\n') : '')
     };
 };
+export const shortifyDecimalValue = (value) => {
+    if (typeof value === "number") {
+        return Number.isInteger(value) ? value : value.toFixed(1);
+    }
+    if (typeof value === "string") {
+        if (value === '-' || value.trim() === '') return value;
+        const match = value.match(/^([-\d.]+)([A-Za-z]*)$/);
+        if (!match) return value;
+        const [, numStr, suffix] = match;
+        const num = parseFloat(numStr);
+        if (isNaN(num)) return value;
+        const shortNum = Number.isInteger(num) ? numStr : num.toFixed(1);
+        return `${shortNum}${suffix}`;
+    }
+    return value;
+};

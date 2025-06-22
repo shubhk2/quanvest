@@ -58,3 +58,8 @@
 .investor-info-container .download-button:hover {
     background-color: var(--surface-green);
 }
+
+.investor-info-container table td:first-child,
+.investor-info-container table th {
+    max-width: 300px;
+}
