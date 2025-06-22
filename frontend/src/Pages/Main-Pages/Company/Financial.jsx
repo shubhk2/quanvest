@@ -43,25 +43,25 @@ export const Financial = () => {
     if (!types.includes(type)) return null;
 
     const handleRowToggle = (parameter, data) => {
-        const color = getRandomBrightColor();
-        if (generatedColors.has(color)) {
-            handleRowToggle(parameter, data);
-            return;
-        } else {
-            const newColorSet = new Set(generatedColors);
-            setGeneratedColors(newColorSet);
-        }
         setSelectedParams(prev => {
             const newMap = new Map(prev);
+            const newColorSet = new Set(generatedColors);
             if (newMap.has(parameter)) {
+                const [oldColor] = newMap.get(parameter);
                 newMap.delete(parameter);
+                newColorSet.delete(oldColor);
             } else {
+                let color;
+                do {
+                    color = getRandomBrightColor();
+                } while (newColorSet.has(color));
+                newColorSet.add(color);
                 newMap.set(parameter, [color, data]);
             }
+            setGeneratedColors(newColorSet);
             return newMap;
         });
     };
-    console.log(selectedParams);
 
     return (
         <div className='financial-container'>
@@ -71,6 +71,7 @@ export const Financial = () => {
                         <ParameterChart
                             selectedParams={selectedParams}
                             headers={currentPageData.headers}
+                            handleRowToggle={handleRowToggle}
                         />
                     )}
                 </div>

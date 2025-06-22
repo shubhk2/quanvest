@@ -9,11 +9,22 @@
 .chart-container .chart-legend {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    /* gap: 15px; */
 }
 
 .chart-container .chart-legend div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+.chart-container .chart-legend div:hover {
+    background-color: var(--table-hover-bg);
+}
+
+.chart-container .chart-legend div>div {
+    display: flex;
+    gap: 15px;
     align-items: center;
 }

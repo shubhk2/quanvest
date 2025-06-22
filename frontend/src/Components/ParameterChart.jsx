@@ -1,21 +1,27 @@
-import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from "recharts";
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar } from "recharts";
 import { useEffect, useState } from "react";
 import "../Styles/Components/ParameterChart.css";
+import { FaTrashAlt } from "react-icons/fa";
 
-const CustomLegend = ({ payload, chartTypes, onToggleType }) => (
+const CustomLegend = ({ payload, chartTypes, onToggleType, handleRowToggle }) => (
     <div className="chart-legend">
         {payload.map((entry, index) => (
             <div key={index}>
                 <span>{entry.value}</span>
-                <button onClick={() => onToggleType(entry.dataKey)}>
-                    {chartTypes[entry.dataKey] === 'line' ? 'Switch to Bar' : 'Switch to Line'}
-                </button>
+                <div>
+                    <button onClick={() => onToggleType(entry.dataKey)}>
+                        {chartTypes[entry.dataKey] === 'line' ? 'Switch to Bar' : 'Switch to Line'}
+                    </button>
+                    <button onClick={() => handleRowToggle(entry.value)}>
+                        <FaTrashAlt />
+                    </button>
+                </div>
             </div>
         ))}
     </div>
 );
 
-export const ParameterChart = ({ selectedParams, headers }) => {
+export const ParameterChart = ({ selectedParams, headers, handleRowToggle }) => {
     const [chartTypes, setChartTypes] = useState({});
 
     useEffect(() => {
@@ -54,8 +60,6 @@ export const ParameterChart = ({ selectedParams, headers }) => {
                         <XAxis dataKey="date" />
                         <YAxis domain={['auto', 'auto']} />
                         <Tooltip />
-                        {/* <Legend content={<CustomLegend chartTypes={chartTypes} onToggleType={handleToggleType} />} /> */}
-
                         {Array.from(selectedParams.entries()).map(([param, [color]]) =>
                             chartTypes[param] === 'bar' ? (
                                 <Bar key={param} dataKey={param} fill={color} barSize={20} />
@@ -66,7 +70,7 @@ export const ParameterChart = ({ selectedParams, headers }) => {
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
-            <CustomLegend chartTypes={chartTypes} onToggleType={handleToggleType} payload={Array.from(selectedParams.keys()).map(key => ({
+            <CustomLegend handleRowToggle={handleRowToggle} chartTypes={chartTypes} onToggleType={handleToggleType} payload={Array.from(selectedParams.keys()).map(key => ({
                 value: key,
                 dataKey: key,
                 color: selectedParams.get(key)?.[0] || "#000"
