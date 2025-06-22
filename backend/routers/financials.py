@@ -65,7 +65,7 @@ class FinancialsParamsBody(BaseModel):
 
 @router.post("/parameters")
 async def get_financials_by_parameters(
-    company_numbe: int,
+    company_number: int,
     body: FinancialsParamsBody,
     statement_type: str = Query(..., enum=["balance_sheet", "profit_and_loss", "cashflow"])
       # Use the Pydantic model for the body
@@ -81,7 +81,7 @@ async def get_financials_by_parameters(
     try:
         data = await run_in_threadpool(
             get_financial_data_by_parameters,
-            company_numbe,
+            company_number,
             statement_type,
             body.parameters,  # Get parameters from the body
             body.start_year,   # Get start_year from the body

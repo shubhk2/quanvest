@@ -88,7 +88,8 @@ def build_financials_url(base_url: str, endpoint_mode: str, company_id: int,
                          statement_type: str, parameters: List[str] = None) -> str:
     """Build appropriate financials URL based on endpoint mode"""
     if endpoint_mode == "parameters" and parameters:
-        return f"{base_url}/parameters"
+        # The POST endpoint requires company_number and statement_type as query params
+        return f"{base_url}/parameters?company_number={company_id}&statement_type={statement_type}"
     else:
         return f"{base_url}?company_number={company_id}&statement_type={statement_type}&start_year=2021&end_year=2023"
 
@@ -105,9 +106,8 @@ def prepare_financials_payload(endpoint_mode: str, company_id: int, statement_ty
                                parameters: List[str] = None) -> Dict[str, Any]:
     """Prepare payload for financials request"""
     if endpoint_mode == "parameters" and parameters:
+        # The payload only contains what's in the Pydantic model (body)
         return {
-            "company_number": company_id,
-            "statement_type": statement_type,
             "parameters": parameters,
             "start_year": 2021,
             "end_year": 2023
@@ -271,8 +271,9 @@ async def ask_copilot(request: CopilotRequest):
             )
 
             if endpoint_mode == "parameters" and ratio_payload:
+                # Capture url and payload in lambda to avoid scope issues
                 all_tasks_lambdas.append(
-                    lambda: make_request(ratio_url, "POST", ratio_payload, standard_headers)
+                    lambda url=ratio_url, payload=ratio_payload: make_request(url, "POST", payload, standard_headers)
                 )
                 task_order.append('financial')
                 logger.info(f"Added filtered ratios task with parameters: {ratio_payload['parameters']}")
@@ -299,8 +300,9 @@ async def ask_copilot(request: CopilotRequest):
                         )
 
                         if endpoint_mode == "parameters" and fin_payload:
+                            # Correctly capture url and payload for the lambda
                             all_tasks_lambdas.append(
-                                lambda payload=fin_payload: make_request(fin_url, "POST", payload, standard_headers)
+                                lambda url=fin_url, payload=fin_payload: make_request(url, "POST", payload, standard_headers)
                             )
                             task_order.append('financial')
                             logger.info(f"Added filtered {table} task with parameters: {fin_payload['parameters']}")

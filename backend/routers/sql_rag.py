@@ -2,6 +2,7 @@
 # This will be added to your main FastAPI server as new endpoints
 
 from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import logging
@@ -133,16 +134,10 @@ def retrieve_table_context(company_id: int, table_name: str) -> Optional[str]:
         return None
 
 
-def retrieve_all_contexts(company_ticker: str, required_tables: List[str]) -> Dict[str, str]:
+def retrieve_all_contexts(company_id: int, required_tables: List[str]) -> Dict[str, str]:
     """
-    Retrieve contexts from all required tables for the given company
+    Retrieve contexts from all required tables for the given company ID.
     """
-    # Get company information
-    company_info = get_company_info(company_ticker)
-    if not company_info:
-        raise HTTPException(status_code=404, detail=f"Company not found: {company_ticker}")
-
-    company_id = company_info['id']
     contexts = {}
 
     # Retrieve context from each required table
@@ -159,6 +154,59 @@ def retrieve_all_contexts(company_ticker: str, required_tables: List[str]) -> Di
     return contexts
 
 
+# --- New synchronous helper functions for async execution ---
+
+def check_db_connection():
+    """Synchronous function to check DB connection."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1")
+    cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return True
+
+
+def get_all_companies(limit: int):
+    """Synchronous function to list available companies."""
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    query = "SELECT id, ticker, full_name FROM company_detail ORDER BY ticker LIMIT %s"
+    cursor.execute(query, (limit,))
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [dict(row) for row in results]
+
+
+def calculate_table_stats():
+    """Synchronous function to get statistics about context availability."""
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    stats = {}
+    for table in VALID_TABLES:
+        try:
+            query = f"""
+            SELECT
+                COUNT(*) as total_rows,
+                COUNT(CASE WHEN context IS NOT NULL AND context != '' THEN 1 END) as rows_with_context
+            FROM {table}
+            """
+            cursor.execute(query)
+            result = cursor.fetchone()
+            stats[table] = {
+                "total_rows": result['total_rows'],
+                "rows_with_context": result['rows_with_context'],
+                "context_coverage": round(
+                    (result['rows_with_context'] / result['total_rows'] * 100), 2) if result['total_rows'] > 0 else 0
+            }
+        except Exception as e:
+            stats[table] = {"error": str(e)}
+    cursor.close()
+    conn.close()
+    return stats
+
+
 # Create router for RAG endpoints
 router = APIRouter(prefix="/rag_flask", tags=["rag_flask"])
 
@@ -173,19 +221,12 @@ async def rag_root():
 async def rag_health_check():
     """Health check endpoint for RAG integration"""
     try:
-        # Test database connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1")
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
+        # Test database connection in a thread pool
+        await run_in_threadpool(check_db_connection)
         return {
             "status": "healthy",
             "database_connection": "ok",
             "valid_tables": VALID_TABLES,
-
         }
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
@@ -205,8 +246,8 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
     try:
         logger.info(f"Retrieving SQL context for {request.company_ticker}, tables: {request.required_tables}")
 
-        # Get company information
-        company_info = get_company_info(request.company_ticker)
+        # Get company information asynchronously
+        company_info = await run_in_threadpool(get_company_info, request.company_ticker)
         if not company_info:
             return SQLContextResponse(
                 status="error",
@@ -215,8 +256,8 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
                 error=f"Company not found: {request.company_ticker}"
             )
 
-        # Retrieve contexts from required tables
-        contexts = retrieve_all_contexts(request.company_ticker, request.required_tables)
+        # Retrieve contexts from required tables asynchronously
+        contexts = await run_in_threadpool(retrieve_all_contexts, company_info['id'], request.required_tables)
 
         response = SQLContextResponse(
             status="success",
@@ -245,7 +286,7 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
 async def company_lookup(ticker: str):
     """Test endpoint to verify company lookup"""
     try:
-        company_info = get_company_info(ticker)
+        company_info = await run_in_threadpool(get_company_info, ticker)
         if company_info:
             return {
                 "status": "found",
@@ -273,7 +314,7 @@ async def table_context(company_id: int, table_name: str):
                 "error": f"Invalid table name. Valid tables: {VALID_TABLES}"
             }
 
-        context = retrieve_table_context(company_id, table_name)
+        context = await run_in_threadpool(retrieve_table_context, company_id, table_name)
         return {
             "status": "success",
             "company_id": company_id,
@@ -293,24 +334,10 @@ async def table_context(company_id: int, table_name: str):
 async def list_companies(limit: int = 10):
     """List available companies in the database"""
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-        query = """
-        SELECT id, ticker, full_name
-        FROM company_detail
-        ORDER BY ticker
-        LIMIT %s
-        """
-        cursor.execute(query, (limit,))
-        results = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
+        results = await run_in_threadpool(get_all_companies, limit)
         return {
             "status": "success",
-            "companies": [dict(row) for row in results],
+            "companies": results,
             "count": len(results)
         }
     except Exception as e:
@@ -325,34 +352,7 @@ async def list_companies(limit: int = 10):
 async def get_table_stats():
     """Get statistics about context availability in each table"""
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-        stats = {}
-        for table in VALID_TABLES:
-            try:
-                # Count total rows and rows with context
-                query = f"""
-                SELECT
-                    COUNT(*) as total_rows,
-                    COUNT(CASE WHEN context IS NOT NULL AND context != '' THEN 1 END) as rows_with_context
-                FROM {table}
-                """
-                cursor.execute(query)
-                result = cursor.fetchone()
-
-                stats[table] = {
-                    "total_rows": result['total_rows'],
-                    "rows_with_context": result['rows_with_context'],
-                    "context_coverage": round((result['rows_with_context'] / result['total_rows'] * 100), 2) if result[
-                                                                                                                    'total_rows'] > 0 else 0
-                }
-            except Exception as e:
-                stats[table] = {"error": str(e)}
-
-        cursor.close()
-        conn.close()
-
+        stats = await run_in_threadpool(calculate_table_stats)
         return {
             "status": "success",
             "table_statistics": stats
