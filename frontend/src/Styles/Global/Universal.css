@@ -49,3 +49,46 @@
     background-color: var(--surface-primary) !important;
     border-radius: 8px;
 }
+
+/* Theme Toggler */
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.theme-toggle-container .modes {
+    color: var(--text-primary);
+}
+
+.theme-toggler {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 20px;
+    border-radius: 30px;
+    position: relative;
+    background: var(--border-high-contrast);
+}
+
+.theme-toggler .toggle {
+    position: absolute;
+    width: 13px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.3s ease-in-out;
+    color: var(--text-primary);
+    background: var(--surface-secondary);
+}
+
+.theme-toggler.light-theme .toggle {
+    left: 8%;
+}
+
+.theme-toggler.dark-theme .toggle {
+    left: calc(92% - 13px);
+}

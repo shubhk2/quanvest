@@ -19,7 +19,8 @@ export const Financial = () => {
     const types = useMemo(() => [
         "balance_sheet",
         "cashflow",
-        "profit_and_loss"
+        "profit_and_loss",
+        "ratio"
     ], []);
 
     useEffect(() => {
@@ -107,10 +108,10 @@ export const Financial = () => {
                                                     <tr key={rowIndex} onClick={() => handleRowToggle(row[currentPageData?.headers[0]], row)}>
                                                         {
                                                             currentPageData?.headers?.map((head, headIndex) => {
-                                                                if (headIndex === 0 && head === "Account") {
+                                                                if (headIndex === 0 && (head === "Account" || head === "Ratio")) {
                                                                     return (
                                                                         <td key={headIndex}>
-                                                                            <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {row[head]}
+                                                                            <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {formatLabel(row[head])}
                                                                         </td>
                                                                     )
                                                                 } else {

@@ -143,10 +143,17 @@ export const getFinancialDataFunc = (id, type, start = '', end = '') => dispatch
         method: "get",
         url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`
     }
+    if (type === 'ratio') {
+        request.url = `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/ratios?company_numbers=${id}`
+    }
     if (start) request.url += `&start_year=${start}`;
     if (end) request.url += `&end_year=${end}`;
     return axios(request)
         .then(res => {
+            if (type === 'ratio') {
+                dispatch(getFinancialData({ type, data: res.data[0] }));
+                return;
+            }
             dispatch(getFinancialData({ type, data: res.data }));
         })
         .catch(err => {

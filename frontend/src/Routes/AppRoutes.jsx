@@ -1,8 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Home } from '../Pages/Landing-Pages/Home';
-import { Signin } from '../Pages/Landing-Pages/Signin';
 import { Signout } from '../Pages/Landing-Pages/Signout';
-import { Signup } from '../Pages/Landing-Pages/Signup';
 import { Dashboard } from '../Pages/Main-Pages/Dashboard';
 import { Layout } from './Layout';
 import { Overview } from '../Pages/Main-Pages/Company/Overview';
@@ -14,18 +12,21 @@ import { Forecasting } from '../Pages/Main-Pages/Company/Forecasting';
 import { ReportsDownloads } from '../Pages/Main-Pages/ReportsDownloads';
 import { InvestorInfo } from '../Pages/Main-Pages/Company/InvestorInfo';
 import { Company } from '../Pages/Main-Pages/Company';
-import { NotFound } from '../Styles/Pages/Main-Pages/NotFound';
 import { CompanyId } from '../Pages/Main-Pages/Company/CompanyId';
+import { Account } from '../Pages/Main-Pages/Account';
+import { NotFound } from '../Pages/Main-Pages/NotFound';
+import { SigninSignup } from '../Pages/Landing-Pages/SigninSignup';
 
 export const AppRoutes = () => {
     return (
         <Layout>
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/signin" element={<Signin />} />
-                <Route path="/signup" element={<Signup />} />
+                <Route path="/signin" element={<SigninSignup />} />
+                <Route path="/signup" element={<SigninSignup />} />
                 <Route path="/signout" element={<Signout />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/account" element={<Account />} />
                 <Route path="/company" element={<Company />} >
                     <Route path=":compId" element={<CompanyId />} >
                         <Route path="overview" element={<Overview />} />

@@ -11,6 +11,7 @@ const initState = {
         balance_sheet: {},
         cashflow: {},
         profit_and_loss: {},
+        ratio: {},
         data: []
     },
     investorInfo: {
