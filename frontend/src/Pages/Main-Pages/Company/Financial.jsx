@@ -11,7 +11,7 @@ export const Financial = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-    const { financial } = useSelector(store => store.mainReducer);
+    const { isLoading, financial } = useSelector(store => store.mainReducer);
     const [currentPageData, setCurrentPageData] = useState({});
     const [generatedColors, setGeneratedColors] = useState(new Set());
     const [selectedParams, setSelectedParams] = useState(new Map());
@@ -38,7 +38,7 @@ export const Financial = () => {
 
     useEffect(() => {
         type && financial[type] && setCurrentPageData(financial[type]);
-    }, [financial])
+    }, [financial, type])
 
     if (!types.includes(type)) return null;
 
@@ -85,45 +85,52 @@ export const Financial = () => {
                 <div className='table-container'>
                     <table className='table'>
                         {
-                            currentPageData.data && currentPageData.data.length ?
-                                <>
-                                    <thead>
-                                        <tr>
-                                            {currentPageData?.headers?.map((date, index) => (
-                                                <th key={index}>{date}</th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentPageData?.data?.map((row, rowIndex) => {
-                                            return (
-                                                <tr key={rowIndex} onClick={() => handleRowToggle(row[currentPageData?.headers[0]], row)}>
-                                                    {
-                                                        currentPageData?.headers?.map((head, headIndex) => {
-                                                            if (headIndex === 0 && head === "Account") {
-                                                                return (
-                                                                    <td key={headIndex}>
-                                                                        <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {row[head]}
-                                                                    </td>
-                                                                )
-                                                            } else {
-                                                                return (
-                                                                    <td key={headIndex}>{row[head] ?? '-'}</td>
-                                                                )
-                                                            }
-                                                        })
-                                                    }
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </>
-                                :
+                            isLoading ?
                                 <tbody>
                                     <tr>
-                                        <td>No data available</td>
+                                        <td>Getting Your Requested Data. Please Wait...</td>
                                     </tr>
                                 </tbody>
+                                :
+                                currentPageData.data && currentPageData.data.length ?
+                                    <>
+                                        <thead>
+                                            <tr>
+                                                {currentPageData?.headers?.map((date, index) => (
+                                                    <th key={index}>{date}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentPageData?.data?.map((row, rowIndex) => {
+                                                return (
+                                                    <tr key={rowIndex} onClick={() => handleRowToggle(row[currentPageData?.headers[0]], row)}>
+                                                        {
+                                                            currentPageData?.headers?.map((head, headIndex) => {
+                                                                if (headIndex === 0 && head === "Account") {
+                                                                    return (
+                                                                        <td key={headIndex}>
+                                                                            <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {row[head]}
+                                                                        </td>
+                                                                    )
+                                                                } else {
+                                                                    return (
+                                                                        <td key={headIndex}>{row[head] ?? '-'}</td>
+                                                                    )
+                                                                }
+                                                            })
+                                                        }
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </>
+                                    :
+                                    <tbody>
+                                        <tr>
+                                            <td>No data available</td>
+                                        </tr>
+                                    </tbody>
                         }
                     </table>
                 </div>
