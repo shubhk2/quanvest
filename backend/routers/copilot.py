@@ -26,9 +26,9 @@ def make_request(url: str, method: str = "GET", json_data: dict = None, headers:
     """Helper function to make HTTP requests - UNCHANGED"""
     try:
         if method.upper() == "GET":
-            response = requests.get(url, headers=headers, timeout=30)
+            response = requests.get(url, headers=headers, timeout=70)
         else:
-            response = requests.post(url, json=json_data, headers=headers, timeout=30)
+            response = requests.post(url, json=json_data, headers=headers, timeout=70)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
