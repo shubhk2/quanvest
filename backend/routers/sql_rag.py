@@ -6,6 +6,7 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import logging
+import time  # Import time module
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from backend.db_setup import connect_to_db # Ensure this is correctly set up in your db_setup module
@@ -71,8 +72,11 @@ def get_company_info(ticker: str) -> Optional[Dict]:
         FROM company_detail
         WHERE UPPER(ticker) = UPPER(%s)
         """
+        start_time = time.time()
         cursor.execute(query, (ticker,))
         result = cursor.fetchone()
+        duration = time.time() - start_time
+        logger.info(f"DB query for company_info on ticker '{ticker}' took {duration:.4f} seconds.")
 
         cursor.close()
         conn.close()
@@ -112,8 +116,11 @@ def retrieve_table_context(company_id: int, table_name: str) -> Optional[str]:
         AND context IS NOT NULL
         AND context != ''
         """
+        start_time = time.time()
         cursor.execute(query, (company_id,))
         results = cursor.fetchall()
+        duration = time.time() - start_time
+        logger.info(f"DB query for context on table '{table_name}' took {duration:.4f} seconds.")
 
         cursor.close()
         conn.close()
@@ -139,7 +146,7 @@ def retrieve_all_contexts(company_id: int, required_tables: List[str]) -> Dict[s
     Retrieve contexts from all required tables for the given company ID.
     """
     contexts = {}
-
+    start_time = time.time()
     # Retrieve context from each required table
     for table_name in required_tables:
         if table_name in VALID_TABLES:
@@ -150,7 +157,8 @@ def retrieve_all_contexts(company_id: int, required_tables: List[str]) -> Dict[s
                 logger.info(f"No context available for {table_name}")
         else:
             logger.warning(f"Skipping invalid table: {table_name}")
-
+    duration = time.time() - start_time
+    logger.info(f"Total time to retrieve all contexts for company {company_id}: {duration:.4f} seconds.")
     return contexts
 
 
@@ -243,6 +251,7 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
     Main endpoint to retrieve SQL context data
     This is the endpoint that Flask server will call
     """
+    request_start_time = time.time()
     try:
         logger.info(f"Retrieving SQL context for {request.company_ticker}, tables: {request.required_tables}")
 
@@ -267,7 +276,8 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
             contexts=contexts
         )
 
-        logger.info(f"Successfully retrieved contexts for {len(contexts)} tables")
+        total_duration = time.time() - request_start_time
+        logger.info(f"Successfully retrieved contexts for {len(contexts)} tables in {total_duration:.2f} seconds.")
         return response
 
     except HTTPException:

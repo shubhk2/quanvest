@@ -1,6 +1,7 @@
 # Copilot Service - Updated for Hybrid RAG Integration
 import os
 import logging
+import time  # Import time module
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -143,6 +144,8 @@ def prepare_chart_request(chart_endpoint_type: str, company_ids: List[int],
 @router.post("/ask")
 async def ask_copilot(request: CopilotRequest):
     """Enhanced Copilot endpoint with intelligent routing and parameter filtering"""
+    request_start_time = time.time()
+    logger.info("Copilot /ask endpoint called.")
 
     # Environment URLs
     overview_base_url = os.getenv("OVERVIEW_BASE_URL", "https://quanvest.me/overview/company")
@@ -165,19 +168,22 @@ async def ask_copilot(request: CopilotRequest):
 
     try:
         logger.info("Calling Flask /enhanced_retrieve for hybrid context")
+        colab_call_start_time = time.time()
         enhanced_response = make_request(
             f"{colab_url}/enhanced_retrieve",
             "POST",
             {"query": request.user_query},
             ngrok_headers
         )
+        colab_call_duration = time.time() - colab_call_start_time
+        logger.info(f"Flask /enhanced_retrieve call completed in {colab_call_duration:.2f} seconds.")
 
         enhanced_context_data = enhanced_response
         combined_context = enhanced_response.get('combined_context', '')
         classification = enhanced_response.get('classification', {})
         display_recommendations = classification.get('display_components', {})
 
-        logger.info(f"Classification: {classification}")
+        logger.info(f"Classification: {classification} ")
         logger.info(f"Display recommendations: {display_recommendations}")
 
     except Exception as e:
@@ -320,9 +326,12 @@ async def ask_copilot(request: CopilotRequest):
     loop = asyncio.get_event_loop()
     results = []
     if all_tasks_lambdas:
+        parallel_fetch_start_time = time.time()
         with ThreadPoolExecutor(max_workers=len(all_tasks_lambdas)) as executor:
             futures = [loop.run_in_executor(executor, task_lambda) for task_lambda in all_tasks_lambdas]
             results = await asyncio.gather(*futures, return_exceptions=True)
+        parallel_fetch_duration = time.time() - parallel_fetch_start_time
+        logger.info(f"Parallel data fetch completed in {parallel_fetch_duration:.2f} seconds for {len(all_tasks_lambdas)} tasks.")
 
     # Step 7: Process results
     all_responses = []
@@ -386,11 +395,14 @@ async def ask_copilot(request: CopilotRequest):
 
     # Step 11: Generate LLM response
     try:
+        gemini_call_start_time = time.time()
         gemini_result = await get_copilot_response(
             user_query=request.user_query,
             refined_context=combined_context,
             context_data=context_data  # Pass context data for future template selection
         )
+        gemini_call_duration = time.time() - gemini_call_start_time
+        logger.info(f"Gemini API call completed in {gemini_call_duration:.2f} seconds.")
     except Exception as e:
         logger.error(f"Gemini call failed: {str(e)}")
         return {
@@ -405,6 +417,8 @@ async def ask_copilot(request: CopilotRequest):
         }
 
     # Step 12: Return comprehensive response
+    total_request_duration = time.time() - request_start_time
+    logger.info(f"Total copilot request processed in {total_request_duration:.2f} seconds.")
     return {
         "llm_response": gemini_result.get("response"),
         "enhanced_context_data": enhanced_context_data,
