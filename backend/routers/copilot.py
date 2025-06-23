@@ -388,8 +388,12 @@ async def ask_copilot(request: CopilotRequest):
         "required_sql_tables": required_sql_tables,
         "company_count": len(company_ids_to_use) if company_ids_to_use else 0,
         "has_charts": bool(chart_data and not chart_data.get('error')),
-        "has_financials": bool(financial_data and not any(d.get('error') for d in financial_data)),
-        "has_shareholding": bool(shareholding_data and not any(d.get('error') for d in shareholding_data)),
+        "has_financials": bool(
+            financial_data and not any(
+                isinstance(d, dict) and d.get('error') for d in financial_data
+            )
+        ),
+        "has_shareholding": bool(shareholding_data and not any(isinstance(d, dict) and d.get('error') for d in shareholding_data)),
         "query_type": classification.get('query_type', 'comprehensive')
     }
 
