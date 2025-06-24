@@ -444,10 +444,10 @@ async def ask_copilot(request: CopilotRequest):
                 "chart_parameters": chart_parameters
             },
             "data_availability": {
-                "company_overviews": len(company_overviews),
-                "shareholding_patterns": len(shareholding_data),
+                "company_overviews": len([d for d in company_overviews if not (isinstance(d, dict) and d.get('error'))]),
+                "shareholding_patterns": len([d for d in shareholding_data if not (isinstance(d, dict) and d.get('error'))]),
                 "charts": 1 if chart_data and not chart_data.get('error') else 0,
-                "financial_tables": len([d for d in financial_data if not d.get('error')])
+                "financial_tables": len([d for d in financial_data if not (isinstance(d, dict) and d.get('error'))])
             },
             "resolved_companies": enhanced_context_data.get("resolved_companies", []),
             "total_context_length": len(combined_context)
