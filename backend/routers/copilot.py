@@ -189,7 +189,13 @@ async def ask_copilot(request: CopilotRequest):
     except Exception as e:
         logger.error(f"Enhanced retrieve failed: {str(e)}")
         enhanced_context_data = {"error": str(e)}
-        combined_context = ""
+
+        # Fix: Don't use empty context, create minimal context from classification
+        if "timeout" in str(e).lower():
+            combined_context = f"Query classified as: {request.user_query}\nDataSource: hybrid analysis requested\nNote: Some context retrieval timed out but continuing with available data."
+        else:
+            combined_context = f"Processing query: {request.user_query}\nFallback context due to retrieval issues."
+
         display_recommendations = {
             "llm_response": True,
             "table": False,
