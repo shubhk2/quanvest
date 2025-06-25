@@ -466,6 +466,14 @@ async def get_copilot_response(
             "template_type": template_type
         }
 
+    # If no context is found for a valid financial query, apologize
+    if refined_context == "No specific financial context was retrieved for this query.":
+        return {
+            "response": "I apologize, but I currently lack the specific training data required to answer your question accurately.",
+            "retrieved_context": refined_context,
+            "template_type": "no_context_apology"
+        }
+
     # Create Jinja2 template and render
     template = Template(template_content)
 
@@ -608,3 +616,4 @@ if __name__ == "__main__":
         ))
         print(f"Template Type: {response.get('template_type')}")
         print(f"Response: {response.get('response', '')[:200]}...")
+
