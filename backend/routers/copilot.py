@@ -292,7 +292,7 @@ async def ask_copilot(request: CopilotRequest):
             else:
                 # Use base ratios endpoint (full table)
                 for cid in company_ids_to_use:
-                    full_ratio_url = f"{ratio_base_url}?company_number={cid}&start_year=2021&end_year=2023"
+                    full_ratio_url = f"{ratio_base_url}?company_numbers={cid}&start_year=2021&end_year=2023"
                     all_tasks_lambdas.append(
                         lambda url=full_ratio_url: make_request(url, "GET", headers=standard_headers)
                     )
