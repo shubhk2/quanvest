@@ -42,6 +42,19 @@ async def make_request(url: str, method: str = "POST", json_data: dict = None, h
         raise Exception(f"Async request to {url} failed: {str(e)}")
 
 
+def make_request(url: str, method: str = "GET", json_data: dict = None, headers: dict = None) -> Dict[str, Any]:
+    """Synchronous HTTP request - your original function"""
+    try:
+        if method.upper() == "GET":
+            response = requests.get(url, headers=headers, timeout=30)
+        else:
+            response = requests.post(url, json=json_data, headers=headers, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        raise Exception(f"Request to {url} failed: {str(e)}")
+
+
 def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> List[int]:
     """Get company_numbers from PostgreSQL using resolved companies."""
     if not resolved_companies:
@@ -173,7 +186,7 @@ async def ask_copilot(request: CopilotRequest):
     try:
         logger.info("Calling Flask /enhanced_retrieve for hybrid context")
         colab_call_start_time = time.time()
-        enhanced_response = make_request(
+        enhanced_response = await make_request(
             f"{colab_url}/enhanced_retrieve",
             "POST",
             {"query": request.user_query},
