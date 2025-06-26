@@ -23,7 +23,7 @@ class CopilotRequest(BaseModel):
     raw_only: bool = False
 
 
-async def make_request_async(url: str, method: str = "POST", json_data: dict = None, headers: dict = None) -> Dict[
+async def make_request(url: str, method: str = "POST", json_data: dict = None, headers: dict = None) -> Dict[
     str, Any]:
     """Async HTTP request to prevent thread pool starvation"""
     try:
