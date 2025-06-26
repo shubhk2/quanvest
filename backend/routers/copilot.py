@@ -23,7 +23,7 @@ class CopilotRequest(BaseModel):
     raw_only: bool = False
 
 
-async def make_request(url: str, method: str = "POST", json_data: dict = None, headers: dict = None) -> Dict[
+async def make_request_async(url: str, method: str = "POST", json_data: dict = None, headers: dict = None,timeout: int = 20) -> Dict[
     str, Any]:
     """Async HTTP request to prevent thread pool starvation"""
     try:
@@ -186,11 +186,12 @@ async def ask_copilot(request: CopilotRequest):
     try:
         logger.info("Calling Flask /enhanced_retrieve for hybrid context")
         colab_call_start_time = time.time()
-        enhanced_response = await make_request(
+        enhanced_response = await make_request_async(
             f"{colab_url}/enhanced_retrieve",
             "POST",
             {"query": request.user_query},
-            ngrok_headers
+            ngrok_headers,        # ← async version
+        timeout=25
         )
         colab_call_duration = time.time() - colab_call_start_time
         logger.info(f"Flask /enhanced_retrieve call completed in {colab_call_duration:.2f} seconds.")
