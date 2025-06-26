@@ -8,6 +8,23 @@ from jinja2 import Template
 
 load_dotenv()
 
+def strip_md_tables(text: str, default_placeholder: str = "~FINANCIAL_DATA_TABLE~") -> str:
+    """
+    Remove any Markdown table the model still sneaks in and
+    replace it with the generic placeholder so the front-end
+    can inject the real table.
+    """
+    md_table_regex = re.compile(r"^(?:\s*\|.*\|\s*$\n?)+", re.MULTILINE)
+    if md_table_regex.search(text):
+        # wipe every markdown grid we find
+        text = md_table_regex.sub("", text)
+        # ensure *one* placeholder after first paragraph
+        paras = text.split("\n\n")
+        if default_placeholder not in text:
+            if paras:
+                paras.insert(1, default_placeholder)
+                text = "\n\n".join(paras)
+    return text
 
 def determine_template_type(user_query: str, context_data: dict = None) -> str:
     """Determine which template to use based on query content and available data"""
@@ -96,6 +113,9 @@ Please ask questions related to:
         """,
 
         'company_overview': """
+{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are a financial analyst providing company overview analysis.
 
 User Query: "{{question}}"
@@ -121,7 +141,9 @@ Based on the financial context below, provide a focused analysis in 3-4 concise 
 - Avoid repeating basic company information already displayed
         """,
 
-        'comparative_analysis': """
+        'comparative_analysis': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are a financial analyst comparing multiple companies.
 
 User Query: "{{question}}"
@@ -152,7 +174,9 @@ Provide a structured comparison using these sections:
 - Conclude with a brief comparative summary
         """,
 
-        'shareholding_analysis': """
+        'shareholding_analysis': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are analyzing company shareholding patterns and ownership structure.
 
 User Query: "{{question}}"
@@ -186,7 +210,9 @@ User Query: "{{question}}"
 - Connect shareholding to company performance and strategy
         """,
 
-        'ratio_analysis_specific': """
+        'ratio_analysis_specific': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are a financial analyst focusing on specific financial ratios.
 
 User Query: "{{question}}"
@@ -221,7 +247,9 @@ User Query: "{{question}}"
 - Connect ratios to business performance
         """,
 
-        'ratio_analysis_comprehensive': """
+        'ratio_analysis_comprehensive': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are conducting a comprehensive financial ratio analysis.
 
 User Query: "{{question}}"
@@ -257,7 +285,9 @@ User Query: "{{question}}"
 Use the comprehensive ratio data to provide actionable insights.
         """,
 
-        'parameter_specific_analysis': """
+        'parameter_specific_analysis': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are analyzing specific financial statement parameters.
 
 User Query: "{{question}}"
@@ -292,7 +322,9 @@ User Query: "{{question}}"
 - Keep analysis targeted and actionable
         """,
 
-        'comprehensive_with_charts': """
+        'comprehensive_with_charts': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are providing comprehensive financial analysis with visual data support.
 
 User Query: "{{question}}"
@@ -327,7 +359,9 @@ The charts above illustrate key trends. Based on this visual data and the suppor
 - Maintain focus on actionable intelligence
         """,
 
-        'chart_focused_analysis': """
+        'chart_focused_analysis': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are analyzing financial data with primary focus on visual trends.
 
 User Query: "{{question}}"
@@ -361,7 +395,9 @@ Based on the charts above and supporting context:
 - Provide actionable conclusions
         """,
 
-        'tabular_analysis': """
+        'tabular_analysis': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are analyzing detailed financial data from company statements.
 
 User Query: "{{question}}"
@@ -399,7 +435,9 @@ Based on the financial data above:
 - Deliver actionable financial insights
         """,
 
-        'default_financial': """
+        'default_financial': """{% set no_raw_tables = true %}
+IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below – the real
+table / chart will be injected by the front-end.
 You are a financial analyst providing comprehensive company analysis.
 
 User Query: "{{question}}"
@@ -569,7 +607,7 @@ def ensure_proper_placeholders(response_content: str) -> str:
             # Insert placeholder after first paragraph
             paragraphs = response_content.split('\n\n')
             if len(paragraphs) > 1:
-                paragraphs.insert(1, '~FINANCIAL_DATA_TABLE~')
+                paragraphs.insert(1, '~OVERVIEW_STATS_TABLE~')
                 response_content = '\n\n'.join(paragraphs)
 
     return response_content
