@@ -10,7 +10,10 @@ import time  # Import time module
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from backend.db_setup import connect_to_db # Ensure this is correctly set up in your db_setup module
-import os
+import asyncio
+import aiofiles
+from typing import Union
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -96,72 +99,63 @@ def get_company_info(ticker: str) -> Optional[Dict]:
         raise HTTPException(status_code=500, detail=f"Error retrieving company info: {str(e)}")
 
 
-def retrieve_table_context(company_id: int, table_name: str) -> Optional[str]:
-    """
-    Retrieve context from a specific table for the given company
-    """
+async def retrieve_table_context_async(company_id: int, table_name: str) -> Optional[str]:
+    """Fully async version of table context retrieval"""
     if table_name not in VALID_TABLES:
         logger.warning(f"Invalid table name: {table_name}")
         return None
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        async with get_async_db_connection() as conn:
+            cursor = await run_in_threadpool(conn.cursor, cursor_factory=RealDictCursor)
 
-        # Query to get context from the specified table
-        query = f"""
-        SELECT context
-        FROM {table_name}
-        WHERE company_number = %s
-        AND context IS NOT NULL
-        AND context != ''
-        """
-        start_time = time.time()
-        cursor.execute(query, (company_id,))
-        results = cursor.fetchall()
-        duration = time.time() - start_time
-        logger.info(f"DB query for context on table '{table_name}' took {duration:.4f} seconds.")
+            query = f"""
+            SELECT context
+            FROM {table_name}
+            WHERE company_number = %s
+            AND context IS NOT NULL
+            AND context != ''
+            """
 
-        cursor.close()
-        conn.close()
+            start_time = time.time()
+            await run_in_threadpool(cursor.execute, query, (company_id,))
+            results = await run_in_threadpool(cursor.fetchall)
+            duration = time.time() - start_time
 
-        if results:
-            # Combine all context entries for this table
-            contexts = [result['context'] for result in results if result['context']]
-            combined_context = "\n\n".join(contexts)
-            logger.info(
-                f"Retrieved context from {table_name} for company {company_id}: {len(combined_context)} characters")
-            return combined_context
-        else:
-            logger.info(f"No context found in {table_name} for company {company_id}")
-            return None
+            await run_in_threadpool(cursor.close)
+
+            logger.info(f"🔍 DB query for {table_name} took {duration:.4f} seconds")
+
+            if results:
+                contexts = [result['context'] for result in results if result['context']]
+                combined_context = "\n\n".join(contexts)
+                logger.info(f"📊 Retrieved {table_name} context: {len(combined_context)} characters")
+                return combined_context
+            else:
+                logger.info(f"📭 No context found in {table_name} for company {company_id}")
+                return None
 
     except Exception as e:
-        logger.error(f"Error retrieving context from {table_name}: {str(e)}")
+        logger.error(f"💥 Error retrieving context from {table_name}: {str(e)}")
         return None
 
+async def retrieve_all_contexts(company_id: int, required_tables: List[str]) -> Dict[str, str]:
+    contexts: dict[str, str] = {}
+    tasks = []
 
-def retrieve_all_contexts(company_id: int, required_tables: List[str]) -> Dict[str, str]:
-    """
-    Retrieve contexts from all required tables for the given company ID.
-    """
-    contexts = {}
-    start_time = time.time()
-    # Retrieve context from each required table
     for table_name in required_tables:
-        if table_name in VALID_TABLES:
-            context = retrieve_table_context(company_id, table_name)
-            if context:
-                contexts[table_name] = context
-            else:
-                logger.info(f"No context available for {table_name}")
+        tasks.append((table_name, retrieve_table_context_async(company_id, table_name)))
+
+    results = await asyncio.gather(*(t[1] for t in tasks), return_exceptions=True)
+    for (table_name, _), result in zip(tasks, results):
+        if isinstance(result, Exception):
+            contexts[table_name] = f"Error: {str(result)}"
+        elif result is None:
+            contexts[table_name] = ""
         else:
-            logger.warning(f"Skipping invalid table: {table_name}")
-    duration = time.time() - start_time
-    logger.info(f"Total time to retrieve all contexts for company {company_id}: {duration:.4f} seconds.")
+            contexts[table_name] = str(result)
+
     return contexts
-
-
 # --- New synchronous helper functions for async execution ---
 
 def check_db_connection():
@@ -248,16 +242,32 @@ async def rag_health_check():
 @router.post("/retrieve_sql_context", response_model=SQLContextResponse)
 async def retrieve_sql_context_endpoint(request: SQLContextRequest):
     """
-    Main endpoint to retrieve SQL context data
-    This is the endpoint that Flask server will call
+    Enhanced async endpoint for SQL context retrieval with better concurrency
     """
     request_start_time = time.time()
-    try:
-        logger.info(f"Retrieving SQL context for {request.company_ticker}, tables: {request.required_tables}")
 
-        # Get company information asynchronously
-        company_info = await run_in_threadpool(get_company_info, request.company_ticker)
+    try:
+        logger.info(f"🔄 Processing SQL context request for {request.company_ticker}, tables: {request.required_tables}")
+
+        # Validate request
+        if not request.company_ticker or not request.required_tables:
+            raise HTTPException(status_code=400, detail="company_ticker and required_tables are required")
+
+        # Validate table names
+        invalid_tables = [t for t in request.required_tables if t not in VALID_TABLES]
+        if invalid_tables:
+            raise HTTPException(status_code=400, detail=f"Invalid tables: {invalid_tables}")
+
+        # Execute company lookup and context retrieval concurrently
+        async with asyncio.TaskGroup() as tg:  # Python 3.11+ feature
+            company_task = tg.create_task(
+                run_in_threadpool(get_company_info, request.company_ticker)
+            )
+
+        company_info = await company_task
+
         if not company_info:
+            logger.warning(f"❌ Company not found: {request.company_ticker}")
             return SQLContextResponse(
                 status="error",
                 company_ticker=request.company_ticker,
@@ -265,8 +275,30 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
                 error=f"Company not found: {request.company_ticker}"
             )
 
-        # Retrieve contexts from required tables asynchronously
-        contexts = await run_in_threadpool(retrieve_all_contexts, company_info['id'], request.required_tables)
+        logger.info(f"✅ Found company: {company_info['full_name']} (ID: {company_info['id']})")
+
+        # Retrieve contexts from all tables concurrently
+        context_tasks = []
+        for table in request.required_tables:
+            task = run_in_threadpool(retrieve_table_context_async, company_info['id'], table)
+            context_tasks.append((table, task))
+
+        # Wait for all context retrievals concurrently
+        contexts = {}
+        context_results = await asyncio.gather(*[task for _, task in context_tasks], return_exceptions=True)
+
+        for i, (table, _) in enumerate(context_tasks):
+            if isinstance(context_results[i], Exception):
+                logger.error(f"❌ Failed to retrieve context for {table}: {context_results[i]}")
+            elif context_results[i]:
+                contexts[table] = context_results[i]
+                logger.info(f"✅ Retrieved {table} context: {len(context_results[i])} chars")
+            else:
+                logger.info(f"⚠️ No context found for {table}")
+
+        total_duration = time.time() - request_start_time
+        logger.info(
+            f"🎉 Successfully retrieved contexts for {len(contexts)}/{len(request.required_tables)} tables in {total_duration:.2f}s")
 
         response = SQLContextResponse(
             status="success",
@@ -276,19 +308,20 @@ async def retrieve_sql_context_endpoint(request: SQLContextRequest):
             contexts=contexts
         )
 
-        total_duration = time.time() - request_start_time
-        logger.info(f"Successfully retrieved contexts for {len(contexts)} tables in {total_duration:.2f} seconds.")
         return response
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in retrieve_sql_context: {str(e)}")
+        logger.error(f"❌ Error in retrieve_sql_context: {str(e)}")
+        total_duration = time.time() - request_start_time
+        logger.error(f"💥 Request failed after {total_duration:.2f}s")
+
         return SQLContextResponse(
             status="error",
             company_ticker=request.company_ticker,
             contexts={},
-            error=str(e)
+            error=f"Internal server error: {str(e)}"
         )
 
 
@@ -313,6 +346,16 @@ async def company_lookup(ticker: str):
             "error": str(e)
         }
 
+@asynccontextmanager
+async def get_async_db_connection():
+    """Async context manager for database connections"""
+    conn = None
+    try:
+        conn = await run_in_threadpool(get_db_connection)
+        yield conn
+    finally:
+        if conn:
+            await run_in_threadpool(conn.close)
 
 @router.post("/table_context")
 async def table_context(company_id: int, table_name: str):
@@ -324,7 +367,7 @@ async def table_context(company_id: int, table_name: str):
                 "error": f"Invalid table name. Valid tables: {VALID_TABLES}"
             }
 
-        context = await run_in_threadpool(retrieve_table_context, company_id, table_name)
+        context = await run_in_threadpool(retrieve_table_context_async, company_id, table_name)
         return {
             "status": "success",
             "company_id": company_id,

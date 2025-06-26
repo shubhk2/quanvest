@@ -10,6 +10,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 from backend.services.copilot_service import get_copilot_response
 from backend.db_setup import connect_to_db
+import aiohttp
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -22,20 +23,23 @@ class CopilotRequest(BaseModel):
     raw_only: bool = False
 
 
-def make_request(url: str, method: str = "GET", json_data: dict = None, headers: dict = None) -> Dict[str, Any]:
-    """Helper function to make HTTP requests - UNCHANGED"""
+async def make_request_async(url: str, method: str = "POST", json_data: dict = None, headers: dict = None) -> Dict[
+    str, Any]:
+    """Async HTTP request to prevent thread pool starvation"""
     try:
-        if method.upper() == "GET":
-            response = requests.get(url, headers=headers, timeout=70)
-        else:
-            response = requests.post(url, json=json_data, headers=headers, timeout=70)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        error_message = f"Request to {url} failed: {str(e)}"
-        if hasattr(e, 'response') and e.response is not None:
-            error_message += f" | Status: {e.response.status_code} | Body: {e.response.text[:200]}"
-        raise Exception(error_message)
+        timeout = aiohttp.ClientTimeout(total=20)
+
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            if method.upper() == "GET":
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    return await response.json()
+            else:
+                async with session.post(url, json=json_data, headers=headers) as response:
+                    response.raise_for_status()
+                    return await response.json()
+    except Exception as e:
+        raise Exception(f"Async request to {url} failed: {str(e)}")
 
 
 def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> List[int]:

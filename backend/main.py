@@ -1,36 +1,64 @@
-from fastapi import FastAPI, BackgroundTasks,HTTPException, Query
-
-# from app.classifier import classify_text
-# from db_mongo import save_to_mongodb, get_classified_data
+from fastapi import FastAPI
 import os
+import asyncio
+from contextlib import asynccontextmanager
+from concurrent.futures import ThreadPoolExecutor
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import logging
+import uvloop
 
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG if os.environ.get('DEBUG') else logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger(__name__)
 
-# Import our modules
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
-logger.debug("Environment variables loaded")
-from backend.routers import stock_data
-from backend.routers import home, financials, ratios, overview, charts, copilot
-from backend.routers import search  # add this import
-from backend.routers import dividend  # add this import
-from backend.routers import shareholding_pattern  # add this import
-from backend.routers import sql_rag
-# from backend.routers import quarterly_files
 
-logger.info("Starting Financial Data API")
-app = FastAPI(title="Financial Data API")
+# Import routers
+from backend.routers import stock_data, home, financials, ratios, overview, charts, copilot
+from backend.routers import search, dividend, shareholding_pattern, sql_rag
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code to run on startup
+    logger.info("Configuring application startup settings...")
+    try:
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        logger.info("✅ Using uvloop for enhanced async performance")
+    except ImportError:
+        logger.info("⚠️ uvloop not available, using default asyncio event loop")
+
+    # Configure thread pool for database operations
+    loop = asyncio.get_event_loop()
+    executor = ThreadPoolExecutor(
+        max_workers=50,
+        thread_name_prefix="fastapi-db-"
+    )
+    loop.set_default_executor(executor)
+    logger.info(f"✅ Configured thread pool with {executor._max_workers} workers")
+
+    yield
+    # Code to run on shutdown (e.g., close database connections)
+    logger.info("Application shutting down.")
+
+
+# Create FastAPI app with the new lifespan manager
+app = FastAPI(
+    title="Financial Data API",
+    description="High-performance financial analysis API with async support",
+    version="2.0.0",
+    lifespan=lifespan
+)
+
+# Create FastAPI app with async optimizations
+
 
 # Add CORS middleware
 app.add_middleware(
@@ -40,53 +68,67 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 logger.debug("CORS middleware configured")
+
+
+# CRITICAL: Configure async settings for better concurrency
+
+
 
 # Include routers
 logger.debug("Registering routers")
-app.include_router(home.router,prefix='/home')
+app.include_router(home.router, prefix='/home')
 app.include_router(financials.router, prefix="/financials")
 app.include_router(ratios.router, prefix="/ratios")
 app.include_router(stock_data.router, prefix="/stock_data")
 app.include_router(overview.router, prefix="/overview")
 app.include_router(charts.router, prefix="/charts")
-app.include_router(sql_rag.router)  # add this line
+app.include_router(sql_rag.router)  # This includes /rag_flask endpoints
 app.include_router(copilot.router, prefix="/copilot")
-app.include_router(search.router)  # add this line
-app.include_router(dividend.router, prefix="/dividend")  # add this line
-app.include_router(shareholding_pattern.router, prefix="/shareholding_pattern")  # add this line
-logger.info("All routers registered")
+app.include_router(search.router)
+app.include_router(dividend.router, prefix="/dividend")
+app.include_router(shareholding_pattern.router, prefix="/shareholding_pattern")
 
+logger.info("All routers registered")
 
 
 @app.get("/")
 async def root():
     logger.debug("Root endpoint called")
-    return {"message": "Welcome to the Financial Data API"}
+    return {"message": "Welcome to the Financial Data API with Async Support"}
 
 
+# Add middleware for request timing
+@app.middleware("http")
+async def add_process_time_header(request, call_next):
+    import time
+    start_time = time.time()
 
+    response = await call_next(request)
 
-# @app.get("/companies")
-# async def get_companies():
-#     """Get list of all companies"""
-#     try:
-#         conn = connect_to_db()
-#         cursor = conn.cursor(cursor_factory=RealDictCursor)
-#         cursor.execute("SELECT * FROM company_detail ORDER BY full_name")
-#         companies = cursor.fetchall()
-#         cursor.close()
-#         conn.close()
-#         return {"companies": companies}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-#
-#
-#
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+
+    # Log slow requests
+    if process_time > 5.0:
+        logger.warning(f"Slow request: {request.method} {request.url.path} took {process_time:.2f}s")
+
+    return response
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info("Starting application server")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    logger.info("Starting application server with async optimizations")
+
+    # Run with optimal async settings
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        workers=1,  # Single worker for development
+        loop="asyncio",  # Use asyncio event loop
+        access_log=True
+    )
