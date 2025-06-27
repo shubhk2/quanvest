@@ -108,48 +108,48 @@ def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> Lis
     return company_numbers
 
 
-def build_financials_url(base_url: str, endpoint_mode: str, company_id: int,
-                         statement_type: str, parameters: List[str] = None) -> str:
-    """Build appropriate financials URL based on endpoint mode"""
-    if endpoint_mode == "parameters" and parameters:
-        # The POST endpoint requires company_number and statement_type as query params
-        return f"{base_url}/parameters?company_number={company_id}&statement_type={statement_type}"
-    else:
-        return f"{base_url}?company_number={company_id}&statement_type={statement_type}&start_year=2021&end_year=2023"
+# def build_financials_url(base_url: str, endpoint_mode: str, company_id: int,
+#                          statement_type: str, parameters: List[str] = None) -> str:
+#     """Build appropriate financials URL based on endpoint mode"""
+#     if endpoint_mode == "parameters" and parameters:
+#         # The POST endpoint requires company_number and statement_type as query params
+#         return f"{base_url}/parameters?company_number={company_id}&statement_type={statement_type}"
+#     else:
+#         return f"{base_url}?company_number={company_id}&statement_type={statement_type}&start_year=2021&end_year=2023"
 
 
-def build_ratios_url(base_url: str, endpoint_mode: str) -> str:
-    """Build appropriate ratios URL based on endpoint mode"""
-    if endpoint_mode == "parameters":
-        return f"{base_url}/parameters"
-    else:
-        return base_url
+# def build_ratios_url(base_url: str, endpoint_mode: str) -> str:
+#     """Build appropriate ratios URL based on endpoint mode"""
+#     if endpoint_mode == "parameters":
+#         return f"{base_url}/parameters"
+#     else:
+#         return base_url
+
+#
+# def prepare_financials_payload(endpoint_mode: str, company_id: int, statement_type: str,
+#                                parameters: List[str] = None) -> Dict[str, Any]:
+#     """Prepare payload for financials request"""
+#     if endpoint_mode == "parameters" and parameters:
+#         # The payload only contains what's in the Pydantic model (body)
+#         return {
+#             "parameters": parameters,
+#             "start_year": 2021,
+#             "end_year": 2025
+#         }
+#     return None  # GET request, no payload needed
 
 
-def prepare_financials_payload(endpoint_mode: str, company_id: int, statement_type: str,
-                               parameters: List[str] = None) -> Dict[str, Any]:
-    """Prepare payload for financials request"""
-    if endpoint_mode == "parameters" and parameters:
-        # The payload only contains what's in the Pydantic model (body)
-        return {
-            "parameters": parameters,
-            "start_year": 2021,
-            "end_year": 2023
-        }
-    return None  # GET request, no payload needed
-
-
-def prepare_ratios_payload(endpoint_mode: str, company_ids: List[int],
-                           parameters: List[str] = None) -> Dict[str, Any]:
-    """Prepare payload for ratios request"""
-    if endpoint_mode == "parameters" and parameters:
-        return {
-            "company_numbers": company_ids,
-            "parameters": parameters,
-            "start_year": 2021,
-            "end_year": 2023
-        }
-    return None
+# def prepare_ratios_payload(endpoint_mode: str, company_ids: List[int],
+#                            parameters: List[str] = None) -> Dict[str, Any]:
+#     """Prepare payload for ratios request"""
+#     if endpoint_mode == "parameters" and parameters:
+#         return {
+#             "company_numbers": company_ids,
+#             "parameters": parameters,
+#             "start_year": 2021,
+#             "end_year": 2025
+#         }
+#     return None
 
 
 def prepare_chart_request(chart_endpoint_type: str, company_ids: List[int],
@@ -159,7 +159,7 @@ def prepare_chart_request(chart_endpoint_type: str, company_ids: List[int],
         "company_numbers": company_ids,
         "parameters": parameters[:5],  # Limit to 5 parameters for chart clarity
         "start_year": 2021,
-        "end_year": 2023,
+        "end_year": 2025,
         "chart_type": "line"
     }
 
@@ -182,7 +182,7 @@ def build_endpoint_tasks(classification: Dict, company_ids_to_use: List[int]) ->
                     body_payload = {
                         "parameters": parameters,
                         "start_year": 2021,
-                        "end_year": 2023
+                        "end_year": 2025
                     }
                     task = lambda p=body_payload, q=query_params: http_sync(
                         f"{financials_base_url}/parameters{q}",  # Query params in URL
@@ -193,7 +193,7 @@ def build_endpoint_tasks(classification: Dict, company_ids_to_use: List[int]) ->
                     tasks.append((f'financials_{table}_{company_id}', task))
                 else:
                     # Use base financials endpoint
-                    url = f"{financials_base_url}?company_number={company_id}&statement_type={table}&start_year=2021&end_year=2023"
+                    url = f"{financials_base_url}?company_number={company_id}&statement_type={table}&start_year=2021&end_year=2025"
                     task = lambda u=url: http_sync(u, "GET", headers=standard_headers)
                     tasks.append((f'financials_{table}_{company_id}', task))
 
@@ -204,7 +204,7 @@ def build_endpoint_tasks(classification: Dict, company_ids_to_use: List[int]) ->
                     "company_numbers": company_ids_to_use,
                     "parameters": parameters,
                     "start_year": 2021,
-                    "end_year": 2023
+                    "end_year": 2025
                 }
                 task = lambda p=payload: http_sync(
                     f"{ratio_base_url}/parameters",
