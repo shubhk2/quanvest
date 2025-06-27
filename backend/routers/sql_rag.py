@@ -108,14 +108,20 @@ async def retrieve_table_context_async(company_id: int, table_name: str) -> Opti
     try:
         async with get_async_db_connection() as conn:
             cursor = await run_in_threadpool(conn.cursor, cursor_factory=RealDictCursor)
-
-            query = f"""
-            SELECT context
-            FROM {table_name}
-            WHERE company_number = %s
-            AND context IS NOT NULL
-            AND context != ''
-            """
+            if table_name != 'shareholder':
+                query = f"""
+                SELECT context
+                FROM {table_name}
+                WHERE company_number = %s
+                AND context IS NOT NULL
+                AND context != ''
+                """
+            else:
+                query=f"""
+                SELECT context
+                FROM share_holder
+                WHERE company_no = %s
+                AND context IS NOT NULL """
 
             start_time = time.time()
             await run_in_threadpool(cursor.execute, query, (company_id,))
