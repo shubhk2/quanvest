@@ -127,7 +127,7 @@ def get_financial_data_by_parameters(
     query = (
         f"SELECT {', '.join(query_cols)} "
         f"FROM public.{statement_type} "
-        f"WHERE company_number = %s AND account = ANY(%s)"
+        f"WHERE company_number = %s AND lower(account) = ANY(%s)"
     )
     logger.debug(f"Executing query: {query}")
 
