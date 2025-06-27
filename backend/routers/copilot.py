@@ -4,7 +4,7 @@ import logging
 import time  # Import time module
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 import asyncio
 import requests
 from concurrent.futures import ThreadPoolExecutor
@@ -23,7 +23,8 @@ class CopilotRequest(BaseModel):
     raw_only: bool = False
 
 
-async def make_request_async(url: str, method: str = "POST", json_data: dict = None, headers: dict = None,timeout: int = 20) -> Dict[
+async def make_request_async(url: str, method: str = "POST", json_data: dict = None, headers: dict = None,
+                             timeout: int = 20) -> Dict[
     str, Any]:
     """Async HTTP request to prevent thread pool starvation"""
     try:
@@ -53,6 +54,11 @@ def make_request(url: str, method: str = "GET", json_data: dict = None, headers:
         return response.json()
     except Exception as e:
         raise Exception(f"Request to {url} failed: {str(e)}")
+
+
+def is_valid_response(response):
+    'only for context for finding the correct template'
+    return not (isinstance(response, dict) and response.get('error'))
 
 
 def get_company_numbers_from_db(resolved_companies: List[Dict[str, Any]]) -> List[int]:
@@ -158,25 +164,141 @@ def prepare_chart_request(chart_endpoint_type: str, company_ids: List[int],
     }
 
 
+def build_endpoint_tasks(classification: Dict, company_ids_to_use: List[int]) -> List[Tuple[str, callable]]:
+    tasks = []
+    required_endpoints = classification.get('required_endpoints', [])
+
+    for endpoint_config in required_endpoints:
+        endpoint_type = endpoint_config['type']
+        endpoint_mode = endpoint_config['mode']
+        parameters = endpoint_config.get('parameters', [])
+
+        if endpoint_type == 'financials':
+            table = endpoint_config['table']
+            for company_id in company_ids_to_use:
+                if endpoint_mode == 'parameters' and parameters:
+                    # Correct parameter separation
+                    query_params = f"?company_number={company_id}&statement_type={table}"
+                    body_payload = {
+                        "parameters": parameters,
+                        "start_year": 2021,
+                        "end_year": 2023
+                    }
+                    task = lambda p=body_payload, q=query_params: http_sync(
+                        f"{financials_base_url}/parameters{q}",  # Query params in URL
+                        "POST",
+                        p,  # Parameters in BODY
+                        standard_headers
+                    )
+                    tasks.append((f'financials_{table}_{company_id}', task))
+                else:
+                    # Use base financials endpoint
+                    url = f"{financials_base_url}?company_number={company_id}&statement_type={table}&start_year=2021&end_year=2023"
+                    task = lambda u=url: http_sync(u, "GET", headers=standard_headers)
+                    tasks.append((f'financials_{table}_{company_id}', task))
+
+        elif endpoint_type == 'ratios':
+            if endpoint_mode == 'parameters' and parameters:
+                # Use filtered ratios endpoint
+                payload = {
+                    "company_numbers": company_ids_to_use,
+                    "parameters": parameters,
+                    "start_year": 2021,
+                    "end_year": 2023
+                }
+                task = lambda p=payload: http_sync(
+                    f"{ratio_base_url}/parameters",
+                    "POST",
+                    p,
+                    standard_headers
+                )
+                tasks.append(('ratios_filtered', task))
+            else:
+                # Use base ratios endpoint
+                for company_id in company_ids_to_use:
+                    url = f"{ratio_base_url}?company_number={company_id}&start_year=2021&end_year=2023"
+                    task = lambda u=url: http_sync(u, "GET", headers=standard_headers)
+                    tasks.append((f'ratios_{company_id}', task))
+
+        elif endpoint_type == 'shareholding':
+            for company_id in company_ids_to_use:
+                url = f"{shareholding_base_url}?company_number={company_id}"
+                task = lambda u=url: http_sync(u, "GET", headers=standard_headers)
+                tasks.append((f'shareholding_{company_id}', task))
+
+    return tasks
+
+
+def filter_data_fetching_by_intent(classification: Dict, user_query: str) -> Dict:
+    """Priority waala
+    Filter data fetching based on query intent to avoid unnecessary API calls
+    """
+    try:
+        from backend.tools.query_intent_analyzer import analyze_query_intent_and_priority
+
+        # Analyze intent and get priority filtering
+        intent_match, priority_filtering = analyze_query_intent_and_priority(user_query, classification)
+
+        # Update display recommendations based on intent
+        filtered_display = {}
+
+        # Start with original recommendations
+        original_display = classification.get('display_components', {})
+
+        # Apply intent-based filtering
+        primary_components = priority_filtering['primary']['components']
+        skip_components = priority_filtering['skip']['components']
+
+        for component, should_display in original_display.items():
+            if component in skip_components:
+                filtered_display[component] = False
+                logger.info(f"Skipping {component} due to intent priority")
+            elif component in primary_components:
+                filtered_display[component] = True
+                logger.info(f"Prioritizing {component} for intent {intent_match.intent_type}")
+            else:
+                filtered_display[component] = should_display
+
+        # Update classification with filtered components
+        classification['display_components'] = filtered_display
+        classification['intent_analysis'] = {
+            'detected_intent': intent_match.intent_type,
+            'confidence': intent_match.confidence,
+            'priority_filtering': priority_filtering
+        }
+
+        logger.info(f"Intent-based filtering applied: {filtered_display}")
+        return classification
+
+    except Exception as e:
+        logger.error(f"Intent-based filtering failed: {str(e)}, using original classification")
+        return classification
+
+
+# Alias for make_request to match http_sync usage in new code
+http_sync = make_request
+
+# Ensure these variables are available at module level for build_endpoint_tasks
+# (They are already defined in ask_copilot, so move their definition up)
+overview_base_url = os.getenv("OVERVIEW_BASE_URL", "https://quanvest.me/overview/company")
+charts_base_url = os.getenv("CHARTS_BASE_URL", "https://quanvest.me/charts")
+colab_url = os.getenv("COLAB_URL", "https://d446-35-186-162-107.ngrok-free.app")
+financials_base_url = os.getenv("FINANCIALS_BASE_URL", "https://quanvest.me/financials")
+ratio_base_url = os.getenv("RATIO_BASE_URL", "https://quanvest.me/ratios")
+shareholding_base_url = os.getenv("SHAREHOLDING_BASE_URL", "https://quanvest.me/shareholding_pattern")
+
+standard_headers = {'Content-Type': 'application/json'}
+ngrok_headers = {
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true'
+}
+
+
 @router.post("/ask")
 async def ask_copilot(request: CopilotRequest):
-    """Enhanced Copilot endpoint with intelligent routing and parameter filtering"""
+    """Enhanced copilot with multi-endpoint support"""
     request_start_time = time.time()
     logger.info("Copilot /ask endpoint called.")
-
-    # Environment URLs
-    overview_base_url = os.getenv("OVERVIEW_BASE_URL", "https://quanvest.me/overview/company")
-    charts_base_url = os.getenv("CHARTS_BASE_URL", "https://quanvest.me/charts")
-    colab_url = os.getenv("COLAB_URL", "https://d446-35-186-162-107.ngrok-free.app")
-    financials_base_url = os.getenv("FINANCIALS_BASE_URL", "https://quanvest.me/financials")
-    ratio_base_url = os.getenv("RATIO_BASE_URL", "https://quanvest.me/ratios")
-    shareholding_base_url = os.getenv("SHAREHOLDING_BASE_URL", "https://quanvest.me/shareholding_pattern")
-
-    standard_headers = {'Content-Type': 'application/json'}
-    ngrok_headers = {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
-    }
 
     # Step 1: Get enhanced context from Flask
     enhanced_context_data = {}
@@ -190,8 +312,8 @@ async def ask_copilot(request: CopilotRequest):
             f"{colab_url}/enhanced_retrieve",
             "POST",
             {"query": request.user_query},
-            ngrok_headers,        # ← async version
-        timeout=25
+            ngrok_headers,  # ← async version
+            timeout=25
         )
         colab_call_duration = time.time() - colab_call_start_time
         logger.info(f"Flask /enhanced_retrieve call completed in {colab_call_duration:.2f} seconds.")
@@ -227,6 +349,13 @@ async def ask_copilot(request: CopilotRequest):
             "endpoint_mode": "base"
         }
 
+        try:
+            classification = filter_data_fetching_by_intent(classification, request.user_query)
+            display_recommendations = classification.get('display_components', {})
+            logger.info(f"Updated display recommendations after intent filtering: {display_recommendations}")
+        except Exception as e:
+            logger.error(f"Intent filtering failed: {str(e)}")
+
     # Step 2: Extract classification details
     endpoint_type = classification.get('endpoint_type', 'financials')
     endpoint_mode = classification.get('endpoint_mode', 'base')
@@ -249,9 +378,9 @@ async def ask_copilot(request: CopilotRequest):
         display_recommendations['shareholding'] = True
         logger.info("Shareholding data fetch enabled based on query classification")
 
-    # Step 5: Prepare parallel tasks with intelligent routing
+    # Step 5: Build all required endpoint tasks
     all_tasks_lambdas = []
-    task_order = []  # Keep track of task types for proper segmentation
+    task_order = []
 
     # Company Overview tasks (conditional)
     if display_recommendations.get('company_overview', False) and company_ids_to_use:
@@ -259,7 +388,7 @@ async def ask_copilot(request: CopilotRequest):
             if isinstance(company_id, int) and company_id > 0:
                 current_overview_url = f"{overview_base_url}/{company_id}"
                 all_tasks_lambdas.append(
-                    lambda url=current_overview_url: make_request(url, "GET", headers=standard_headers)
+                    lambda url=current_overview_url: http_sync(url, "GET", headers=standard_headers)
                 )
                 task_order.append('overview')
         logger.info(f"Added {len(company_ids_to_use)} overview tasks")
@@ -281,69 +410,25 @@ async def ask_copilot(request: CopilotRequest):
         chart_payload = prepare_chart_request(chart_endpoint_type, company_ids_to_use, chart_parameters)
 
         all_tasks_lambdas.append(
-            lambda: make_request(chart_url, "POST", chart_payload, standard_headers)
+            lambda: http_sync(chart_url, "POST", chart_payload, standard_headers)
         )
         task_order.append('chart')
-        logger.info(f"Added chart task for {chart_endpoint_type} with parameters: {chart_parameters[:3]}")
+        logger.info(f"Added chart task for {chart_endpoint_type}")
     else:
-        all_tasks_lambdas.append(lambda: {})  # Empty placeholder
+        all_tasks_lambdas.append(lambda: {})
         task_order.append('chart')
 
-    # Financial/Ratio data tasks (conditional with parameter filtering)
+    # Multi-endpoint financial data tasks
     if display_recommendations.get('table', False) and company_ids_to_use:
-        if endpoint_type == 'ratios':
-            # Use ratios endpoint
-            ratio_url = build_ratios_url(ratio_base_url, endpoint_mode)
-            ratio_payload = prepare_ratios_payload(
-                endpoint_mode,
-                company_ids_to_use,
-                identified_parameters.get('financial_ratios', [])
-            )
+        endpoint_tasks = build_endpoint_tasks(classification, company_ids_to_use)
 
-            if endpoint_mode == "parameters" and ratio_payload:
-                # Capture url and payload in lambda to avoid scope issues
-                all_tasks_lambdas.append(
-                    lambda url=ratio_url, payload=ratio_payload: make_request(url, "POST", payload, standard_headers)
-                )
-                task_order.append('financial')
-                logger.info(f"Added filtered ratios task with parameters: {ratio_payload['parameters']}")
-            else:
-                # Use base ratios endpoint (full table)
-                for cid in company_ids_to_use:
-                    full_ratio_url = f"{ratio_base_url}?company_numbers={cid}&start_year=2021&end_year=2023"
-                    all_tasks_lambdas.append(
-                        lambda url=full_ratio_url: make_request(url, "GET", headers=standard_headers)
-                    )
-                    task_order.append('financial')
-                logger.info("Added full ratios table tasks")
+        for task_name, task_func in endpoint_tasks:
+            all_tasks_lambdas.append(task_func)
+            task_order.append(f'financial_{task_name}')
 
-        else:
-            # Use financials endpoint
-            for cid in company_ids_to_use:
-                for table in identified_parameters.keys():
-                    if table in ['balance_sheet', 'profit_and_loss', 'cashflow'] and identified_parameters[table]:
-                        fin_url = build_financials_url(
-                            financials_base_url, endpoint_mode, cid, table, identified_parameters[table]
-                        )
-                        fin_payload = prepare_financials_payload(
-                            endpoint_mode, cid, table, identified_parameters[table]
-                        )
-
-                        if endpoint_mode == "parameters" and fin_payload:
-                            # Correctly capture url and payload for the lambda
-                            all_tasks_lambdas.append(
-                                lambda url=fin_url, payload=fin_payload: make_request(url, "POST", payload, standard_headers)
-                            )
-                            task_order.append('financial')
-                            logger.info(f"Added filtered {table} task with parameters: {fin_payload['parameters']}")
-                        else:
-                            all_tasks_lambdas.append(
-                                lambda url=fin_url: make_request(url, "GET", headers=standard_headers)
-                            )
-                            task_order.append('financial')
-                            logger.info(f"Added full {table} table task")
+        logger.info(f"Added {len(endpoint_tasks)} financial endpoint tasks")
     else:
-        all_tasks_lambdas.append(lambda: {})  # Empty placeholder
+        all_tasks_lambdas.append(lambda: {})
         task_order.append('financial')
 
     # Step 6: Execute parallel tasks
@@ -355,7 +440,8 @@ async def ask_copilot(request: CopilotRequest):
             futures = [loop.run_in_executor(executor, task_lambda) for task_lambda in all_tasks_lambdas]
             results = await asyncio.gather(*futures, return_exceptions=True)
         parallel_fetch_duration = time.time() - parallel_fetch_start_time
-        logger.info(f"Parallel data fetch completed in {parallel_fetch_duration:.2f} seconds for {len(all_tasks_lambdas)} tasks.")
+        logger.info(
+            f"Parallel data fetch completed in {parallel_fetch_duration:.2f} seconds for {len(all_tasks_lambdas)} tasks.")
 
     # Step 7: Process results
     all_responses = []
@@ -390,6 +476,12 @@ async def ask_copilot(request: CopilotRequest):
         elif task_type == 'financial':
             financial_data.append(all_responses[response_idx])
             response_idx += 1
+    consolidated_financials = consolidate_financial_data(all_responses, task_order, classification)
+
+    # Then replace your existing financial_data with:
+    financial_data = consolidated_financials['financial_statements']
+    ratios_data = consolidated_financials['ratios']
+    shareholding_data = consolidated_financials['shareholding']  # Replaces your existing shareholding_data
 
     # Step 9: Return raw data if requested
     if request.raw_only:
@@ -398,6 +490,7 @@ async def ask_copilot(request: CopilotRequest):
             "enhanced_context_data": enhanced_context_data,
             "company_overviews": company_overviews,
             "shareholding_data": shareholding_data,
+            "ratios_data": ratios_data,
             "chart_data": chart_data,
             "financial_data": financial_data,
             "display_recommendations": display_recommendations,
@@ -412,12 +505,13 @@ async def ask_copilot(request: CopilotRequest):
         "required_sql_tables": required_sql_tables,
         "company_count": len(company_ids_to_use) if company_ids_to_use else 0,
         "has_charts": bool(chart_data and not chart_data.get('error')),
-        "has_financials": bool(
-            financial_data and not any(
-                isinstance(d, dict) and d.get('error') for d in financial_data
-            )
-        ),
-        "has_shareholding": bool(shareholding_data and not any(isinstance(d, dict) and d.get('error') for d in shareholding_data)),
+        "has_ratios": bool(ratios_data) and any(is_valid_response(d) for d in ratios_data.values()),
+        "has_financials": bool(financial_data) and any(
+            is_valid_response(d)
+            for table_data in financial_data.values()
+            for d in table_data),
+        "has_shareholding": bool(
+            shareholding_data and not any(isinstance(d, dict) and d.get('error') for d in shareholding_data)),
         "query_type": classification.get('query_type', 'comprehensive')
     }
 
@@ -438,6 +532,7 @@ async def ask_copilot(request: CopilotRequest):
             "enhanced_context_data": enhanced_context_data,
             "company_overviews": company_overviews,
             "shareholding_data": shareholding_data,
+            "ratios_data": ratios_data,
             "chart_data": chart_data,
             "financial_data": financial_data,
             "display_recommendations": display_recommendations,
@@ -452,6 +547,7 @@ async def ask_copilot(request: CopilotRequest):
         "enhanced_context_data": enhanced_context_data,
         "company_overviews": company_overviews,
         "shareholding_data": shareholding_data,
+        "ratios_data": ratios_data,
         "chart_data": chart_data,
         "financial_data": financial_data,
         "display_recommendations": display_recommendations,
@@ -468,8 +564,10 @@ async def ask_copilot(request: CopilotRequest):
                 "chart_parameters": chart_parameters
             },
             "data_availability": {
-                "company_overviews": len([d for d in company_overviews if not (isinstance(d, dict) and d.get('error'))]),
-                "shareholding_patterns": len([d for d in shareholding_data if not (isinstance(d, dict) and d.get('error'))]),
+                "company_overviews": len(
+                    [d for d in company_overviews if not (isinstance(d, dict) and d.get('error'))]),
+                "shareholding_patterns": len(
+                    [d for d in shareholding_data if not (isinstance(d, dict) and d.get('error'))]),
                 "charts": 1 if chart_data and not chart_data.get('error') else 0,
                 "financial_tables": len([d for d in financial_data if not (isinstance(d, dict) and d.get('error'))])
             },
@@ -479,192 +577,44 @@ async def ask_copilot(request: CopilotRequest):
     }
 
 
-@router.post("/ask_legacy")
-async def ask_legacy_copilot(request: CopilotRequest):
+def consolidate_financial_data(results: List, task_order: List[str], classification: Dict) -> Dict:
     """
-    Description:
-    This endpoint processes a user's query and optionally a list of company IDs. If no company
-    IDs are provided, it attempts to resolve them by calling a Colab-based resolution endpoint.
-    Once resolved, it retrieves:
-      1) Overview data for each company
-      2) Financial data (profit_and_loss) for each company
-      3) Chart data (parameters)
-      4) Refined context from Colab
-    Then calls Gemini API to generate an LLM response based on the refined context.
-
-    Parameters:
-    - user_query (str): The user's question
-    - company_ids (List[int], optional): Explicitly provided company numbers
-    - context (dict, optional): Any extra context
-    - raw_only (bool): If True, skip Gemini and just return the raw parallel fetch data
+    Consolidate data from multiple endpoints into organized structure
     """
-
-    # Updated to pull base URLs from environment variables and improved logging
-    overview_base_url = os.getenv(
-        "OVERVIEW_BASE_URL",
-        "https://quanvest.me/overview/company"
-    )
-    charts_url = os.getenv(
-        "CHARTS_URL",
-        "https://quanvest.me/charts/parameters"
-    )
-    colab_url = os.getenv(
-        "COLAB_URL",
-    )
-    financials_base_url = os.getenv(
-        "FINANCIALS_BASE_URL",
-        "https://quanvest.me/financials"
-    )
-
-    standard_headers = {'Content-Type': 'application/json'}
-    ngrok_headers = {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+    consolidated = {
+        'company_overviews': [],
+        'chart_data': {},
+        'financial_statements': {},
+        'ratios': {},
+        'shareholding': []
     }
 
-    company_ids_to_use = request.company_ids
+    response_idx = 0
+    for task_type in task_order:
+        if response_idx >= len(results):
+            break
 
-    if not company_ids_to_use:
-        logger.info("No company_ids provided; attempting auto-resolution via Colab.")
-        try:
-            resolve_response = make_request(
-                f"{colab_url}/resolve_companies",
-                "POST",
-                {"query": request.user_query},
-                ngrok_headers
-            )
-            resolved_companies = resolve_response.get('resolved_companies', [])
-            company_ids_to_use = get_company_numbers_from_db(resolved_companies)
-            logger.info(f"Auto-resolved company IDs: {company_ids_to_use}")
-        except Exception as e:
-            logger.error(f"Company resolution failed: {str(e)}")
-            company_ids_to_use = []
+        if task_type == 'overview':
+            consolidated['company_overviews'].append(results[response_idx])
+        elif task_type == 'chart':
+            consolidated['chart_data'] = results[response_idx]
+        elif task_type.startswith('financial_'):
+            # Parse the task name to categorize data
+            parts = task_type.split('_')
+            if len(parts) >= 3:
+                data_type = parts[1]  # financials, ratios, shareholding
+                table_or_id = parts[2]
 
-    all_tasks_lambdas = []
-    num_overview_tasks = 0
-    num_charts_tasks = 0
-    num_financials_tasks = 0
+                if data_type == 'financials':
+                    table_name = table_or_id
+                    if table_name not in consolidated['financial_statements']:
+                        consolidated['financial_statements'][table_name] = []
+                    consolidated['financial_statements'][table_name].append(results[response_idx])
+                elif data_type == 'ratios':
+                    consolidated['ratios'][table_or_id] = results[response_idx]
+                elif data_type == 'shareholding':
+                    consolidated['shareholding'].append(results[response_idx])
 
-    # Overview tasks
-    if company_ids_to_use:
-        for company_id in company_ids_to_use:
-            if not isinstance(company_id, int) or company_id <= 0:
-                logger.warning(f"Skipping invalid company_id: {company_id}")
-                continue
-            current_overview_url = f"{overview_base_url}/{company_id}"
-            all_tasks_lambdas.append(
-                lambda url=current_overview_url: make_request(url, "GET", headers=standard_headers)
-            )
-            num_overview_tasks += 1
+        response_idx += 1
 
-    # Charts task (single post request if we do have company IDs)
-    if company_ids_to_use:
-        chart_payload = {
-            "company_numbers": company_ids_to_use,  # as required
-            "parameters": ["sales"],
-            "chart_type": "line"
-        }
-        all_tasks_lambdas.append(
-            lambda: make_request(charts_url, "POST", chart_payload, standard_headers)
-        )
-        num_charts_tasks = 1
-    else:
-        all_tasks_lambdas.append(lambda: {})
-        num_charts_tasks = 1
-
-    # Financials tasks: example using "profit_and_loss" for each company
-    if company_ids_to_use:
-        for cid in company_ids_to_use:
-            if cid > 0:
-                fin_url = f"{financials_base_url}?company_number={cid}&statement_type=profit_and_loss&start_year=2021&end_year=2023"
-                all_tasks_lambdas.append(
-                    lambda url=fin_url: make_request(url, "GET", headers=standard_headers)
-                )
-                num_financials_tasks += 1
-    else:
-        # Return empty if no companies
-        all_tasks_lambdas.append(lambda: {})
-        num_financials_tasks = 1
-
-    # Colab retrieval
-    colab_payload = {"query": request.user_query}
-    all_tasks_lambdas.append(
-        lambda: make_request(f"{colab_url}/retrieve_context", "POST", colab_payload, ngrok_headers)
-    )
-
-    loop = asyncio.get_event_loop()
-    results = []
-    with ThreadPoolExecutor(max_workers=len(all_tasks_lambdas) or 1) as executor:
-        futures = [loop.run_in_executor(executor, task_lambda) for task_lambda in all_tasks_lambdas]
-        results = await asyncio.gather(*futures, return_exceptions=True)
-
-    all_responses: List[Dict[str, Any]] = []
-    for r in results:
-        if isinstance(r, Exception):
-            logger.error(f"Error in parallel fetch: {str(r)}", exc_info=True)
-            all_responses.append({"error": str(r)})
-        else:
-            all_responses.append(r)
-
-    # Segment out each type of data from the gathered responses
-    # 1) Overview
-    overview_data_list: List[Dict[str, Any]] = []
-    if num_overview_tasks > 0:
-        overview_data_list = all_responses[:num_overview_tasks]
-    logger.info(f"Fetched {num_overview_tasks} overview results")
-
-    # 2) Charts
-    chart_data_index = num_overview_tasks
-    chart_data = all_responses[chart_data_index] if len(all_responses) > chart_data_index else {}
-
-    # 3) Financial data
-    financials_data_start = num_overview_tasks + num_charts_tasks
-    financials_data_end = financials_data_start + num_financials_tasks
-    financial_data_list = all_responses[financials_data_start:financials_data_end]
-    logger.info(f"Fetched {num_financials_tasks} financial results")
-
-    # 4) Colab
-    colab_data_index = financials_data_end
-    colab_data = {}
-    if len(all_responses) > colab_data_index:
-        colab_data = all_responses[colab_data_index]
-
-    refined_context = colab_data.get("context", "")
-
-    if request.raw_only:
-        return {
-            "llm_response": None,
-            "company_overviews": overview_data_list,
-            "chart_data": chart_data,
-            "financial_data": financial_data_list,
-            "colab_data": colab_data
-        }
-
-    # Attempt Gemini call
-    try:
-        gemini_result = await get_copilot_response(
-            user_query=request.user_query,
-            refined_context=refined_context
-        )
-    except Exception as e:
-        logger.error(f"Gemini call failed: {str(e)}", exc_info=True)
-        return {
-            "error": f"Gemini call failed: {str(e)}",
-            "company_overviews": overview_data_list,
-            "chart_data": chart_data,
-            "financial_data": financial_data_list,
-            "colab_data": colab_data
-        }
-
-    return {
-        "llm_response": gemini_result.get("response"),
-        "company_overviews": overview_data_list,
-        "chart_data": chart_data,
-        "financial_data": financial_data_list,
-        "colab_data": colab_data,
-        "context_info": {
-            "ner_entities": colab_data.get("ner_entities", []),
-            "num_chunks": colab_data.get("num_chunks", 0),
-            "context_length": len(refined_context)
-        }
-    }
+    return consolidated
