@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from backend.services.dividend_service import get_dividend_file_id
+from backend.services.dividend_service import get_dividend_data
+from fastapi.concurrency import run_in_threadpool
 
 router = APIRouter()
 
@@ -9,7 +10,9 @@ async def get_dividend(company_number: int = Query(..., description="Company num
     Returns a string representing the file id for the given company_number.
     """
     try:
-        file_id = get_dividend_file_id(company_number)
-        return {"company_number": company_number, "dividend_file_id": file_id}
+        data = await run_in_threadpool(
+            get_dividend_data,
+            company_number)
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
