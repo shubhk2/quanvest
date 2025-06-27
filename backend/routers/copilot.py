@@ -216,7 +216,7 @@ def build_endpoint_tasks(classification: Dict, company_ids_to_use: List[int]) ->
             else:
                 # Use base ratios endpoint
                 for company_id in company_ids_to_use:
-                    url = f"{ratio_base_url}?company_number={company_id}&start_year=2021&end_year=2023"
+                    url = f"{ratio_base_url}?company_number={company_id}&start_year=2021&end_year=2025"
                     task = lambda u=url: http_sync(u, "GET", headers=standard_headers)
                     tasks.append((f'ratios_{company_id}', task))
 
