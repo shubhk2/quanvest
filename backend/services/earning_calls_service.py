@@ -34,7 +34,7 @@ def get_earning_call_file(company_number: int, quarter: int, year: int = 2025):
 
 if __name__ == "__main__":
     # Example usage
-    company_number = 1  # Replace with actual company number
+    company_number = 4  # Replace with actual company number
     quarter = 4  # Replace with actual quarter
     year = 2025  # Replace with actual year
     earning_call = get_earning_call_file(company_number, quarter, year)
