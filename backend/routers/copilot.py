@@ -282,7 +282,7 @@ http_sync = make_request
 # (They are already defined in ask_copilot, so move their definition up)
 overview_base_url = os.getenv("OVERVIEW_BASE_URL", "https://quanvest.me/overview/company")
 charts_base_url = os.getenv("CHARTS_BASE_URL", "https://quanvest.me/charts")
-colab_url = os.getenv("COLAB_URL", "https://d446-35-186-162-107.ngrok-free.app")
+colab_url = os.getenv("COLAB_URL", "https://f6c4-34-53-88-141.ngrok-free.app")
 financials_base_url = os.getenv("FINANCIALS_BASE_URL", "https://quanvest.me/financials")
 ratio_base_url = os.getenv("RATIO_BASE_URL", "https://quanvest.me/ratios")
 shareholding_base_url = os.getenv("SHAREHOLDING_BASE_URL", "https://quanvest.me/shareholding_pattern")
@@ -365,12 +365,11 @@ async def ask_copilot(request: CopilotRequest):
     required_sql_tables = classification.get('required_sql_tables', [])
 
     # Step 3: Determine company IDs
-    company_ids_to_use = request.company_ids
-    if not company_ids_to_use:
-        resolved_companies = enhanced_context_data.get('resolved_companies', [])
-        if resolved_companies:
-            company_ids_to_use = get_company_numbers_from_db(resolved_companies)
-            logger.info(f"Extracted company IDs: {company_ids_to_use}")
+    company_ids_to_use = []
+    resolved_companies = enhanced_context_data.get('resolved_companies', [])
+    if resolved_companies:
+        company_ids_to_use = get_company_numbers_from_db(resolved_companies)
+        logger.info(f"Extracted company IDs: {company_ids_to_use}")
 
     # Step 4: Check if shareholding data is needed based on classification
     fetch_shareholding = 'shareholder' in required_sql_tables
