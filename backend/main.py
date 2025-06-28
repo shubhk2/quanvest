@@ -22,7 +22,7 @@ load_dotenv()
 # Import routers
 from backend.routers import stock_data, home, financials, ratios, overview, charts, copilot
 from backend.routers import search, dividend, shareholding_pattern, sql_rag
-from backend.routers import annual_files, quarterly_files
+from backend.routers import annual_files, quarterly_files, earning_calls
 
 
 
@@ -92,6 +92,7 @@ app.include_router(dividend.router, prefix="/dividend")
 app.include_router(shareholding_pattern.router, prefix="/shareholding_pattern")
 app.include_router(annual_files.router, prefix="/annual_files")
 app.include_router(quarterly_files.router, prefix="/quarterly_files")
+app.include_router(earning_calls.router, prefix="/earning_calls")
 
 logger.info("All routers registered")
 
