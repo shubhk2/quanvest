@@ -20,28 +20,33 @@
     padding: 7px 10px;
 }
 
-.investor-info-container .pdf-viewer-container {
+.investor-info-container .pdf-viewer-container,
+.investor-info-container .markdown-container {
     display: grid;
     grid-template-columns: 15% 1fr;
 }
 
-.investor-info-container .pdf-viewer-container .pdf-side-menu {
+.investor-info-container .pdf-viewer-container .pdf-side-menu,
+.investor-info-container .markdown-container .markdown-side-menu {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.investor-info-container .pdf-viewer-container .pdf-side-menu span {
+.investor-info-container .pdf-viewer-container .pdf-side-menu span,
+.investor-info-container .markdown-container .markdown-side-menu span {
     padding: 5px 10px;
     border-radius: 8px 0px 0px 8px;
 }
 
-.investor-info-container .pdf-viewer-container .pdf-side-menu span:hover {
+.investor-info-container .pdf-viewer-container .pdf-side-menu span:hover,
+.investor-info-container .markdown-container .markdown-side-menu span:hover {
     cursor: pointer;
     background-color: var(--menu-item-hover);
 }
 
-.investor-info-container .pdf-viewer-container .pdf-side-menu span.active {
+.investor-info-container .pdf-viewer-container .pdf-side-menu span.active,
+.investor-info-container .markdown-container .markdown-side-menu span.active {
     background-color: var(--button-green);
 }
 
@@ -86,13 +91,13 @@
 
 .investor-info-container .markdown-viewer {
     border: 1px solid var(--border-input);
-    border-radius: 8px;
+    border-radius: 0px 8px 8px 0px;
     padding: 10px;
     text-align: justify;
-    overflow: hidden;
+    overflow-y: auto ;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     background-color: var(--surface-base);
-    height: 100%;
+    height: 70vh;
     width: 100%;
 }
 

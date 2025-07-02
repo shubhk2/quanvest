@@ -14,7 +14,7 @@ export const InvestorInfo = () => {
     const { isLoading, investorInfo } = useSelector(store => store.mainReducer);
     const [currentPageData, setCurrentPageData] = useState();
     const [selectedPDF, setSelectedPDF] = useState("");
-    const [selectedMarkdownQuarter, setSelectedMarkdownQuarter] = useState("");
+    const [selectedMarkdownQuarter, setSelectedMarkdownQuarter] = useState(1);
     const types = useMemo(() => [
         "dividend",
         "shareholding_pattern",
@@ -34,11 +34,21 @@ export const InvestorInfo = () => {
             navigate(`${newUrl.join("/")}/dividend`);
             return;
         }
-        dispatch(getInvertorInfoDataFunc(compId, type));
-    }, [type, types, compId, navigate, dispatch, location])
+        dispatch(getInvertorInfoDataFunc(compId, type, selectedMarkdownQuarter));
+    }, [type, types, compId, navigate, dispatch, location, selectedMarkdownQuarter])
     useEffect(() => {
         setCurrentPageData(investorInfo[type]);
     }, [investorInfo])
+    useEffect(() => {
+        if (currentPageData?.annual_file_ids?.length > 0) {
+            setSelectedPDF(currentPageData?.annual_file_ids[0]);
+        }
+    }, [currentPageData?.annual_file_ids]);
+    useEffect(() => {
+        if (currentPageData?.quarterly_file_ids?.length > 0) {
+            setSelectedPDF(currentPageData?.quarterly_file_ids[0]);
+        }
+    }, [currentPageData?.quarterly_file_ids]);
     if (!types.includes(type)) return null;
     return (
         <div className="investor-info-container">
@@ -54,15 +64,14 @@ export const InvestorInfo = () => {
                     type === "earning_calls" ?
                         <div className='markdown-container'>
                             <div className='markdown-side-menu'>
-                                <span onClick={() => setSelectedMarkdownQuarter('q1')} className={selectedMarkdownQuarter === 'q1' ? 'active' : ''}>Quarter 1</span>
-                                <span onClick={() => setSelectedMarkdownQuarter('q2')} className={selectedMarkdownQuarter === 'q2' ? 'active' : ''}>Quarter 2</span>
-                                <span onClick={() => setSelectedMarkdownQuarter('q3')} className={selectedMarkdownQuarter === 'q3' ? 'active' : ''}>Quarter 3</span>
-                                <span onClick={() => setSelectedMarkdownQuarter('q4')} className={selectedMarkdownQuarter === 'q4' ? 'active' : ''}>Quarter 4</span>
+                                <span onClick={() => setSelectedMarkdownQuarter(1)} className={selectedMarkdownQuarter === 1 ? 'active' : ''}>Quarter 1</span>
+                                <span onClick={() => setSelectedMarkdownQuarter(2)} className={selectedMarkdownQuarter === 2 ? 'active' : ''}>Quarter 2</span>
+                                <span onClick={() => setSelectedMarkdownQuarter(3)} className={selectedMarkdownQuarter === 3 ? 'active' : ''}>Quarter 3</span>
+                                <span onClick={() => setSelectedMarkdownQuarter(4)} className={selectedMarkdownQuarter === 4 ? 'active' : ''}>Quarter 4</span>
                             </div>
                             <div className='markdown-viewer'>
                                 <ReactMarkdown>{currentPageData?.text || ''}</ReactMarkdown>
                             </div>
-
                         </div>
                         : <></>
                 }
@@ -72,6 +81,7 @@ export const InvestorInfo = () => {
                             <div className='pdf-side-menu'>
                                 {
                                     currentPageData.annual_file_ids ? currentPageData.annual_file_ids.map((file, id) => {
+
                                         return (
                                             <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Data File {id + 1}</span>
                                         )
