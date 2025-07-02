@@ -94,7 +94,7 @@
     border-radius: 0px 8px 8px 0px;
     padding: 10px;
     text-align: justify;
-    overflow-y: auto ;
+    overflow-y: auto;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     background-color: var(--surface-base);
     height: 70vh;

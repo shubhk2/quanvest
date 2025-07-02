@@ -83,14 +83,14 @@ export const InvestorInfo = () => {
                                     currentPageData.annual_file_ids ? currentPageData.annual_file_ids.map((file, id) => {
 
                                         return (
-                                            <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Data File {id + 1}</span>
+                                            <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Year {(id === 0 && 2022) || (id === 1 && 2023) || (id === 2 && 2024)}</span>
                                         )
                                     }) : <></>
                                 }
                                 {
                                     currentPageData.quarterly_file_ids ? currentPageData.quarterly_file_ids.map((file, id) => {
                                         return (
-                                            <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Data File {id + 1}</span>
+                                            <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Quarter {id + 1}</span>
                                         )
                                     }) : <></>
                                 }
