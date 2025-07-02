@@ -5,6 +5,7 @@ from backend.db_setup import connect_to_db
 def get_dividend_data(company_number: int):
     """
     Returns dividend details for the given company_number, including company full_name and ticker.
+    Data is formatted and mapped to keys in headers, similar to shareholding_pattern_service.py.
     """
     conn = connect_to_db()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -35,11 +36,27 @@ def get_dividend_data(company_number: int):
         "Book Closure Start Date", "Book Closure End Date"
     ]
 
+    # Format data to map to headers
+    formatted_data = []
+    for row in dividend_rows:
+        formatted_data.append({
+            "Symbol": row["symbol"],
+            "Company Name": row["company_name"],
+            "Series": row["series"],
+            "Purpose": row["purpose"],
+            "Face Value": row["face_value"],
+            "Declaration Date": row["declaration_date"],
+            "Ex-Dividend Date": row["ex_dividend_date"],
+            "Record Date": row["record_date"],
+            "Book Closure Start Date": row["book_closure_start_date"],
+            "Book Closure End Date": row["book_closure_end_date"]
+        })
+
     return {
         "company_name": company["full_name"],
         "ticker": company["ticker"],
         "headers": headers,
-        "data": dividend_rows
+        "data": formatted_data
     }
 
 
