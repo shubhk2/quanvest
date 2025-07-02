@@ -121,7 +121,7 @@ export const Financial = () => {
                                                                 if (headIndex === 0 && (head === "Account" || head === "Ratio")) {
                                                                     return (
                                                                         <td key={headIndex}>
-                                                                            <span><input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {formatLabel(row[head])}</span>
+                                                                            <input className="table-row-checkbox" type="checkbox" style={{ '--checkbox-color': selectedParams.has(row[head]) && selectedParams.get(row[head])[0] }} checked={selectedParams.has(row[head])} readOnly /> {formatLabel(row[head])}
                                                                         </td>
                                                                     )
                                                                 } else {

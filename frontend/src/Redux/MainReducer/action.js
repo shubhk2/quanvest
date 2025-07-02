@@ -160,20 +160,24 @@ export const getFinancialDataFunc = (id, type, start = '', end = '') => dispatch
             dispatch(error());
         })
 }
-export const getInvertorInfoDataFunc = (id, type) => dispatch => {
+export const getInvertorInfoDataFunc = (id, type, quarter = 1) => dispatch => {
     dispatch(loading());
     const config = {
         method: 'get',
         url: `${process.env.REACT_APP_BACKEND_URL}/${type}?company_number=${id}`
     }
 
+    if (type === "earning_calls") {
+        config.url = `${process.env.REACT_APP_BACKEND_URL}/earning_calls/earning_calls_files?company_number=${id}&quarter=${quarter}`
+    } else if (type === "quarterly") {
+        config.url = `${process.env.REACT_APP_BACKEND_URL}/quarterly_files/all?company_number=${id}`
+    } else if (type === "annual") {
+        config.url = `${process.env.REACT_APP_BACKEND_URL}/annual_files/all?company_number=${id}`
+    }
+
     return axios(config)
         .then(res => {
-            if (type === "shareholding_pattern") {
-                dispatch(getInvertorInfoData({ type, data: res?.data }));
-                return;
-            }
-            dispatch(getInvertorInfoData({ type, data: res?.data[`${type}_file_id`] || 0 }));
+            dispatch(getInvertorInfoData({ type, data: res?.data }));
         })
         .catch(err => {
             console.error(err?.response?.data || err);

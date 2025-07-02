@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getInvertorInfoDataFunc } from '../../../Redux/MainReducer/action';
 import { formatLabel, shortifyDecimalValue } from '../../../Utils/utilities';
+import ReactMarkdown from 'react-markdown';
 
 export const InvestorInfo = () => {
     const { compId, type } = useParams();
@@ -12,10 +13,14 @@ export const InvestorInfo = () => {
     const dispatch = useDispatch();
     const { isLoading, investorInfo } = useSelector(store => store.mainReducer);
     const [currentPageData, setCurrentPageData] = useState();
-
+    const [selectedPDF, setSelectedPDF] = useState("");
+    const [selectedMarkdownQuarter, setSelectedMarkdownQuarter] = useState("");
     const types = useMemo(() => [
         "dividend",
         "shareholding_pattern",
+        "earning_calls",
+        "quarterly",
+        "annual"
     ], []);
 
     useEffect(() => {
@@ -35,7 +40,6 @@ export const InvestorInfo = () => {
         setCurrentPageData(investorInfo[type]);
     }, [investorInfo])
     if (!types.includes(type)) return null;
-    console.log(investorInfo[type])
     return (
         <div className="investor-info-container">
             <div className='body'>
@@ -47,24 +51,56 @@ export const InvestorInfo = () => {
                     ))}
                 </div>
                 {
-                    type === "dividend" && investorInfo[type] ?
-                        <div className="pdf-viewer-container">
-                            <iframe title='PDF Viewer' src={`https://drive.google.com/file/d/${investorInfo[type]}/preview`} allow="autoplay"></iframe>
-                            <a
-                                href={`https://drive.google.com/uc?export=download&id=${investorInfo[type]}`}
-                                download
-                                className="download-button"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Download File
-                            </a>
+                    type === "earning_calls" ?
+                        <div className='markdown-container'>
+                            <div className='markdown-side-menu'>
+                                <span onClick={() => setSelectedMarkdownQuarter('q1')} className={selectedMarkdownQuarter === 'q1' ? 'active' : ''}>Quarter 1</span>
+                                <span onClick={() => setSelectedMarkdownQuarter('q2')} className={selectedMarkdownQuarter === 'q2' ? 'active' : ''}>Quarter 2</span>
+                                <span onClick={() => setSelectedMarkdownQuarter('q3')} className={selectedMarkdownQuarter === 'q3' ? 'active' : ''}>Quarter 3</span>
+                                <span onClick={() => setSelectedMarkdownQuarter('q4')} className={selectedMarkdownQuarter === 'q4' ? 'active' : ''}>Quarter 4</span>
+                            </div>
+                            <div className='markdown-viewer'>
+                                <ReactMarkdown>{currentPageData?.text || ''}</ReactMarkdown>
+                            </div>
+
                         </div>
-                        :
-                        <></>
+                        : <></>
                 }
                 {
-                    type === "shareholding_pattern" && investorInfo[type] ?
+                    (type === "quarterly" || type === "annual") && investorInfo[type] ?
+                        <div className='pdf-viewer-container'>
+                            <div className='pdf-side-menu'>
+                                {
+                                    currentPageData.annual_file_ids ? currentPageData.annual_file_ids.map((file, id) => {
+                                        return (
+                                            <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Data File {id + 1}</span>
+                                        )
+                                    }) : <></>
+                                }
+                                {
+                                    currentPageData.quarterly_file_ids ? currentPageData.quarterly_file_ids.map((file, id) => {
+                                        return (
+                                            <span key={file + id} className={selectedPDF === file ? 'active' : ''} onClick={() => setSelectedPDF(file)}>Data File {id + 1}</span>
+                                        )
+                                    }) : <></>
+                                }
+                            </div>
+                            <div className="pdf-viewer">
+                                <iframe title='PDF Viewer' src={`https://drive.google.com/file/d/${selectedPDF}/preview`} allow="autoplay"></iframe>
+                                <a
+                                    href={`https://drive.google.com/uc?export=download&id=${selectedPDF}`}
+                                    download
+                                    className="download-button"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Download File
+                                </a>
+                            </div>
+                        </div> : <></>
+                }
+                {
+                    (type === "dividend" || type === "shareholding_pattern") && investorInfo[type] ?
                         <div className='table-container'>
                             <table className='table'>
                                 {
@@ -75,13 +111,16 @@ export const InvestorInfo = () => {
                                             </tr>
                                         </tbody>
                                         :
-                                        currentPageData.data && currentPageData.data.length ?
+                                        currentPageData?.data && currentPageData?.data.length ?
                                             <>
                                                 <thead>
                                                     <tr>
-                                                        {currentPageData?.headers?.map((date, index) => (
-                                                            <th key={index}>{date}</th>
-                                                        ))}
+                                                        {currentPageData?.headers?.map((date, index) => {
+                                                            if (date === "Symbol") return;
+                                                            return (
+                                                                <th key={index}>{date}</th>
+                                                            )
+                                                        })}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -90,10 +129,12 @@ export const InvestorInfo = () => {
                                                             <tr key={rowIndex}>
                                                                 {
                                                                     currentPageData?.headers?.map((head, headIndex) => {
+                                                                        if (head === "Symbol") return;
+                                                                        const value = row[head];
                                                                         return headIndex === 0 ?
-                                                                            <td title={row[head]} key={headIndex}>{shortifyDecimalValue(row[head]) ?? '-'}</td>
+                                                                            <td title={value} key={headIndex}>{shortifyDecimalValue(value) ?? '-'}</td>
                                                                             :
-                                                                            <td key={headIndex}>{shortifyDecimalValue(row[head]) ?? '-'}</td>
+                                                                            <td key={headIndex}>{shortifyDecimalValue(value) ?? '-'}</td>
                                                                     })
                                                                 }
                                                             </tr>
@@ -109,9 +150,7 @@ export const InvestorInfo = () => {
                                             </tbody>
                                 }
                             </table>
-                        </div>
-                        :
-                        <></>
+                        </div> : <></>
                 }
             </div>
         </div>

@@ -45,12 +45,6 @@ export const sendChatRequest = (query, chatId, historyLength, setSelectedChat) =
         },
         data: JSON.stringify({
             "user_query": query,
-            "company_ids": [
-                0
-            ],
-            "context": {
-                "additionalProp1": {}
-            },
             "raw_only": false
         }),
         url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/copilot/ask`

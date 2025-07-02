@@ -34,7 +34,7 @@ export const SearchCompanyInput = () => {
 
     return (
         <div className="search-company-input">
-            <input type='text' value={search} onChange={handleCompanySearch} placeholder='Search For Company' onFocus={() => setSearchFocused(true)} onBlur={() => setTimeout(() => setSearchFocused(false), 150)} />
+            <input type='text' value={search} onChange={handleCompanySearch} placeholder='Search For Company' onFocus={() => setSearchFocused(true)} onBlur={() => setTimeout(() => setSearchFocused(false), 350)} />
             {
                 searchFocused && <div className="searched-companies-container">
                     {

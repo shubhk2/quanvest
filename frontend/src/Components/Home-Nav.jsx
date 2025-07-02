@@ -15,7 +15,7 @@ export const HomeNav = () => {
             <div>
                 <NavLink tabIndex={-1} to={"dashboard"}><button className="button-secondary">Dashboard</button></NavLink>
                 <NavLink tabIndex={-1} to={"company"}><button className="button-secondary">Company</button></NavLink>
-                <NavLink tabIndex={-1} to={""}><button className="button-secondary logo-button">
+                <Link tabIndex={-1} to={"dashboard"}><button className="button-secondary logo-button">
                     <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" version="1.0" width="100%" height="100%" viewBox="30 175 440 150" preserveAspectRatio="xMidYMid meet">
                         <g transform="translate(0.000000,500.000000) scale(0.100000,-0.100000)" stroke="none">
                             <path d="M850 2987 c-251 -86 -396 -347 -335 -606 42 -178 181 -322 364 -378 54 -16 221 -16 274 0 l38 12 -41 55 -40 54 -83 2 c-233 6 -382 158 -382 389 1 109 27 176 101 255 160 171 441 156 579 -31 108 -147 96 -370 -27 -496 -45 -46 -45 -42 16 -114 l29 -34 47 53 c149 167 181 383 85 578 -62 128 -172 223 -304 264 -91 29 -234 27 -321 -3z" />
@@ -29,7 +29,7 @@ export const HomeNav = () => {
                             <path d="M2940 2643 c1 -4 29 -82 64 -173 l63 -165 69 -3 70 -3 66 176 66 175 -58 0 -58 0 -37 -112 c-21 -62 -41 -117 -45 -121 -4 -5 -25 45 -47 110 l-40 118 -56 3 c-31 2 -57 -1 -57 -5z" />
                         </g>
                     </svg>
-                </button></NavLink>
+                </button></Link>
                 <NavLink tabIndex={-1} to={"market"}><button className="button-secondary">Market</button></NavLink>
                 <NavLink tabIndex={-1} to={"news"}><button className="button-secondary">News</button></NavLink>
             </div>

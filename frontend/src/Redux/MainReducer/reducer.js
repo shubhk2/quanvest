@@ -15,8 +15,11 @@ const initState = {
         data: []
     },
     investorInfo: {
-        dividend: "",
-        shareholding_pattern: ""
+        dividend: {},
+        shareholding_pattern: {},
+        earning_calls: {},
+        quarterly: "",
+        annual: ""
     },
     searchedCompanies: [],
     selectedCompany: {},

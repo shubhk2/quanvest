@@ -33,7 +33,7 @@ export const ParameterChart = ({ selectedParams, headers, handleRowToggle }) => 
     }, [selectedParams]);
 
     // Generate chart data based on headers (excluding "Account")
-    const chartData = headers.slice(1).map((header) => {
+    const chartData = headers && headers.slice(1).map((header) => {
         const point = { date: header };
         for (const [param, [, data]] of selectedParams.entries()) {
             point[param] = data[header] !== undefined ? Number(data[header]) : null;
@@ -48,6 +48,9 @@ export const ParameterChart = ({ selectedParams, headers, handleRowToggle }) => 
         }));
     };
 
+    console.log("Headers", headers);
+    console.log("Selected Params", selectedParams);
+    console.log("Chart Data", chartData);
     return (
         <div className="chart-container">
             <div className="chart">
