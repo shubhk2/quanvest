@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 import os
 import asyncio
 from contextlib import asynccontextmanager
@@ -7,6 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import logging
 import uvloop
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from fastapi.responses import HTMLResponse
+
+# Import your security module
+from backend.services.security import get_api_key,get_api_key_docs
 
 # Configure logging
 logging.basicConfig(
@@ -55,20 +60,27 @@ app = FastAPI(
     title="Financial Data API",
     description="High-performance financial analysis API with async support",
     version="2.0.0",
-    lifespan=lifespan
+    lifespan=lifespan, docs_url=None, redoc_url=None
 )
 
 # Create FastAPI app with async optimizations
+origins = [
+    "https://quanvest.vercel.app",  # Your Vercel frontend URL
+    "http://localhost:3000",        # Your local frontend dev server
+    "http://127.0.0.1:8000",        # For direct local testing if needed
+    "https://api.quanvest.me"       # If your frontend also makes calls to itself, or if you access docs via domain
+]
 
-
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust in production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"], # Make sure to allow 'X-API-Key' if you use specific headers
 )
+
+# Add CORS middleware
+
 
 logger.debug("CORS middleware configured")
 
@@ -77,22 +89,53 @@ logger.debug("CORS middleware configured")
 
 
 
-# Include routers
+# --- Custom Docs URLs with API Key Protection ---
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html(api_key: str = Depends(get_api_key_docs)):
+    return get_swagger_ui_html(openapi_url=app.openapi_url, title=app.title)
+
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc_html(api_key: str = Depends(get_api_key_docs)):
+    return get_redoc_html(openapi_url=app.openapi_url, title=app.title)
+
+@app.get("/openapi.json", include_in_schema=False)
+async def get_openapi_json(api_key: str = Depends(get_api_key_docs)):
+    return app.openapi()
+
+# --- Example Protected Endpoint ---
+@app.get("/protected_data")
+async def get_protected_data(api_key: str = Depends(get_api_key)):
+    """
+    This endpoint requires a valid API key in the 'X-API-Key' header.
+    """
+    return {"message": "This is sensitive data, only accessible with a valid API key!"}
+
+# --- Example Unprotected Endpoint (if you have any) ---
+@app.get("/public_info")
+async def get_public_info():
+    """
+    This endpoint is publicly accessible without an API key.
+    """
+    return {"message": "This is public information."}
+
+
+# Include routers, optionally applying API key protection
+# Example: app.include_router(financials.router, prefix="/financials", dependencies=[Depends(get_api_key)])
 logger.debug("Registering routers")
-app.include_router(home.router, prefix='/home')
-app.include_router(financials.router, prefix="/financials")
-app.include_router(ratios.router, prefix="/ratios")
-app.include_router(stock_data.router, prefix="/stock_data")
-app.include_router(overview.router, prefix="/overview")
-app.include_router(charts.router, prefix="/charts")
-app.include_router(sql_rag.router)  # This includes /rag_flask endpoints
-app.include_router(copilot.router, prefix="/copilot")
-app.include_router(search.router)
-app.include_router(dividend.router, prefix="/dividend")
-app.include_router(shareholding_pattern.router, prefix="/shareholding_pattern")
-app.include_router(annual_files.router, prefix="/annual_files")
-app.include_router(quarterly_files.router, prefix="/quarterly_files")
-app.include_router(earning_calls.router, prefix="/earning_calls")
+app.include_router(home.router, prefix='/home', dependencies=[Depends(get_api_key)])
+app.include_router(financials.router, prefix="/financials", dependencies=[Depends(get_api_key)])
+app.include_router(ratios.router, prefix="/ratios", dependencies=[Depends(get_api_key)])
+app.include_router(stock_data.router, prefix="/stock_data", dependencies=[Depends(get_api_key)])
+app.include_router(overview.router, prefix="/overview", dependencies=[Depends(get_api_key)])
+app.include_router(charts.router, prefix="/charts", dependencies=[Depends(get_api_key)])
+app.include_router(sql_rag.router, dependencies=[Depends(get_api_key)])  # This includes /rag_flask endpoints
+app.include_router(copilot.router, prefix="/copilot", dependencies=[Depends(get_api_key)])
+app.include_router(search.router, dependencies=[Depends(get_api_key)])
+app.include_router(dividend.router, prefix="/dividend", dependencies=[Depends(get_api_key)])
+app.include_router(shareholding_pattern.router, prefix="/shareholding_pattern", dependencies=[Depends(get_api_key)])
+app.include_router(annual_files.router, prefix="/annual_files", dependencies=[Depends(get_api_key)])
+app.include_router(quarterly_files.router, prefix="/quarterly_files", dependencies=[Depends(get_api_key)])
+app.include_router(earning_calls.router, prefix="/earning_calls", dependencies=[Depends(get_api_key)])
 
 logger.info("All routers registered")
 

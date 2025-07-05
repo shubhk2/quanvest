@@ -122,7 +122,17 @@ def determine_template_type(user_query: str, context_data: dict = None) -> str:
 
 
 def get_template_content(template_type: str) -> str:
-    """Return enhanced Jinja2 template content with bullet-point enforcement"""
+    """Return enhanced Jinja2 template content with bullet-point enforcement and a system instruction."""
+
+    # System instruction to guide Gemini to not always respond, but to answer only if context is relevant and to follow rules/query type
+    system_instruction = (
+        "SYSTEM: Only answer the user's real query if the provided context is relevant and sufficient. "
+        "If the context is not relevant or does not contain the required information, do NOT fabricate or repeat the context. "
+        "Always follow the rules and formatting instructions for the current query type. "
+        "If the context is not needed for the query, ignore it and answer as per the rules. "
+        "Do not provide a response just because context is present; respond only if it is appropriate and required."
+        "\n\n"
+    )
 
     templates = {
         'news': """
@@ -290,7 +300,7 @@ User Query: "{{question}}"
 - Reference both visual and contextual data
 - Focus on trend interpretation
 - Present analysis in bullet point format
-- Ensure each point starts with a bullet (e.g., `-`)""",
+- Ensure each point starts with a bullet (e.g, `-`)""",
 
         'comparative_analysis': """{% set no_raw_tables = true %}
 IMPORTANT • Do **not** render any markdown tables. Only reference the placeholder(s) shown below — the real
@@ -685,6 +695,9 @@ Based on the available financial information and context provided:
 - Ensure each point starts with a bullet (e.g, `-`)."""
     }
 
+    # Prepend the system instruction to every template
+    templates = {k: system_instruction + v for k, v in templates.items()}
+
     return templates.get(template_type, templates['default_financial'])
 
 
@@ -706,7 +719,6 @@ async def get_copilot_response(
 
     # Get template content
     template_content = get_template_content(template_type)
-
     # For edge cases, return immediately without calling Gemini
     if template_type in ['news', 'forecasting', 'stock_market', 'non_finance']:
         return {
