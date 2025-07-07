@@ -23,12 +23,19 @@ class CopilotRequest(BaseModel):
     raw_only: bool = False
 
 
+# Get API key for internal requests
+API_KEY = os.environ.get("API_ACCESS_KEY", "YOUR_GENERATED_API_KEY_HERE")
+
+
 async def make_request_async(url: str, method: str = "POST", json_data: dict = None, headers: dict = None,
                              timeout: int = 20) -> Dict[
     str, Any]:
     """Async HTTP request to prevent thread pool starvation"""
     try:
         timeout = aiohttp.ClientTimeout(total=20)
+        # Always add X-API-Key header
+        headers = headers or {}
+        headers['X-API-Key'] = API_KEY
 
         async with aiohttp.ClientSession(timeout=timeout) as session:
             if method.upper() == "GET":
@@ -46,6 +53,10 @@ async def make_request_async(url: str, method: str = "POST", json_data: dict = N
 def make_request(url: str, method: str = "GET", json_data: dict = None, headers: dict = None) -> Dict[str, Any]:
     """Synchronous HTTP request - your original function"""
     try:
+        # Always add X-API-Key header
+        headers = headers or {}
+        headers['X-API-Key'] = API_KEY
+
         if method.upper() == "GET":
             response = requests.get(url, headers=headers, timeout=30)
         else:
@@ -287,10 +298,14 @@ financials_base_url = os.getenv("FINANCIALS_BASE_URL", "https://quanvest.me/fina
 ratio_base_url = os.getenv("RATIO_BASE_URL", "https://quanvest.me/ratios")
 shareholding_base_url = os.getenv("SHAREHOLDING_BASE_URL", "https://quanvest.me/shareholding_pattern")
 
-standard_headers = {'Content-Type': 'application/json'}
+standard_headers = {
+    'Content-Type': 'application/json',
+    'X-API-Key': API_KEY
+}
 ngrok_headers = {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true'
+    'ngrok-skip-browser-warning': 'true',
+    'X-API-Key': API_KEY
 }
 
 
