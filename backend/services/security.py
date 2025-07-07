@@ -2,7 +2,12 @@
 import os
 from fastapi import  Request, Query
 from fastapi import Header, HTTPException, status
+import logging
+from dotenv import load_dotenv
 
+load_dotenv()
+logger = logging.getLogger(__name__)
+logger.info(f"Loaded API_ACCESS_KEY:{os.environ.get('API_ACCESS_KEY')}")
 # IMPORTANT: Store your actual API key securely, e.g., in an environment variable.
 # For now, you can hardcode it for testing, but CHANGE THIS FOR PRODUCTION.
 # It's better to load from .env or AWS Secrets Manager.

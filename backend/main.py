@@ -1,3 +1,8 @@
+import logging
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 from fastapi import FastAPI, Depends
 import os
 import asyncio
@@ -5,7 +10,7 @@ from contextlib import asynccontextmanager
 from concurrent.futures import ThreadPoolExecutor
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-import logging
+
 import uvloop
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.responses import HTMLResponse
@@ -14,10 +19,7 @@ from fastapi.responses import HTMLResponse
 from backend.services.security import get_api_key,get_api_key_docs
 
 # Configure logging
-logging.basicConfig(
-    level=logging.DEBUG if os.environ.get('DEBUG') else logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+
 
 logger = logging.getLogger(__name__)
 
