@@ -291,12 +291,12 @@ http_sync = make_request
 
 # Ensure these variables are available at module level for build_endpoint_tasks
 # (They are already defined in ask_copilot, so move their definition up)
-overview_base_url = os.getenv("OVERVIEW_BASE_URL", "https://quanvest.me/overview/company")
-charts_base_url = os.getenv("CHARTS_BASE_URL", "https://quanvest.me/charts")
+overview_base_url = os.getenv("OVERVIEW_BASE_URL", "https://api.quanvest.me/overview/company")
+charts_base_url = os.getenv("CHARTS_BASE_URL", "https://api.quanvest.me/charts")
 colab_url = os.getenv("COLAB_URL", "https://f6c4-34-53-88-141.ngrok-free.app")
-financials_base_url = os.getenv("FINANCIALS_BASE_URL", "https://quanvest.me/financials")
-ratio_base_url = os.getenv("RATIO_BASE_URL", "https://quanvest.me/ratios")
-shareholding_base_url = os.getenv("SHAREHOLDING_BASE_URL", "https://quanvest.me/shareholding_pattern")
+financials_base_url = os.getenv("FINANCIALS_BASE_URL", "https://api.quanvest.me/financials")
+ratio_base_url = os.getenv("RATIO_BASE_URL", "https://api.quanvest.me/ratios")
+shareholding_base_url = os.getenv("SHAREHOLDING_BASE_URL", "https://api.quanvest.me/shareholding_pattern")
 
 standard_headers = {
     'Content-Type': 'application/json',
