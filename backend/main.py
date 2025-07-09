@@ -70,7 +70,8 @@ origins = [
     "https://quanvest.vercel.app",  # Your Vercel frontend URL
     "http://localhost:3000",        # Your local frontend dev server
     "http://127.0.0.1:8000",        # For direct local testing if needed
-    "https://api.quanvest.me"       # If your frontend also makes calls to itself, or if you access docs via domain
+    "https://api.quanvest.me" ,
+    "https://www.quanvest.me"# If your frontend also makes calls to itself, or if you access docs via domain
 ]
 
 app.add_middleware(
