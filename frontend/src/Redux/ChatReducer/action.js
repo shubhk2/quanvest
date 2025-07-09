@@ -42,6 +42,7 @@ export const sendChatRequest = (query, chatId, historyLength, setSelectedChat) =
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            "X-API-Key": process.env.REACT_APP_CODE
         },
         data: JSON.stringify({
             "user_query": query,

@@ -79,7 +79,10 @@ export const searchCompanyFunc = (searchString, limit = 10) => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/companies?q=${searchString}&limit=${limit}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/companies?q=${searchString}&limit=${limit}`,
+        headers: {
+            "X-API-Key": process.env.REACT_APP_CODE
+        }
     }
     return axios(request)
         .then((res) => {
@@ -94,7 +97,10 @@ export const getCompanyDetailsById = id => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/company/${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/search/company/${id}`,
+        headers: {
+            "X-API-Key": process.env.REACT_APP_CODE
+        }
     }
     return axios(request)
         .then(res => {
@@ -110,7 +116,10 @@ export const getOverviewDataFunc = id => dispatch => {
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/overview/company/${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/overview/company/${id}`,
+        headers: {
+            "X-API-Key": process.env.REACT_APP_CODE
+        }
     }
     return axios(request)
         .then((res) => {
@@ -125,7 +134,10 @@ export const getOverviewGraphDataFunc = (id, type = "price", period = "10yr") =>
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/stock_data/${type}/${period}/chart?company_number=${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/stock_data/${type}/${period}/chart?company_number=${id}`,
+        headers: {
+            "X-API-Key": process.env.REACT_APP_CODE
+        }
     }
     return axios(request)
         .then((res) => {
@@ -140,7 +152,10 @@ export const getFinancialDataFunc = (id, type, start = '', end = '') => dispatch
     dispatch(loading());
     const request = {
         method: "get",
-        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`
+        url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/financials?company_number=${id}&statement_type=${type}`,
+        headers: {
+            "X-API-Key": process.env.REACT_APP_CODE
+        }
     }
     if (type === 'ratio') {
         request.url = `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/ratios?company_numbers=${id}`
@@ -164,7 +179,10 @@ export const getInvertorInfoDataFunc = (id, type, quarter = 1) => dispatch => {
     dispatch(loading());
     const config = {
         method: 'get',
-        url: `${process.env.REACT_APP_BACKEND_URL}/${type}?company_number=${id}`
+        url: `${process.env.REACT_APP_BACKEND_URL}/${type}?company_number=${id}`,
+        headers: {
+            "X-API-Key": process.env.REACT_APP_CODE
+        }
     }
 
     if (type === "earning_calls") {

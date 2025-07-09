@@ -2,7 +2,6 @@ import { useLocation } from 'react-router-dom';
 import { HomeNav } from '../Components/Home-Nav';
 import { MainNav } from '../Components/Main-Nav';
 import { TabFoot } from '../Components/Tab-Foot';
-import { ChatAI } from '../Components/Copilot/ChatAI';
 
 export const Layout = ({ children }) => {
     const location = useLocation();
@@ -20,7 +19,6 @@ export const Layout = ({ children }) => {
             <HomeNav />
             {isCompanyPath && <MainNav />}
             {children}
-            <ChatAI />
             {(isCompanyPath || location.pathname === "/company") && <TabFoot />}
         </>
     );

@@ -169,9 +169,7 @@ a:focus {
 }
 
 /* Buttons */
-button,
-button[type="button"],
-button[type="submit"] {
+button {
     font-size: .9rem;
     padding: 3px 10px;
     background-color: var(--button-green);
