@@ -11,6 +11,16 @@ export const ChatAI = () => {
     const { isLoading, chatHistory, chatHistoryMap } = useSelector((state) => state.chatReducer);
     const [selectedChat, setSelectedChat] = useState(0);
     const [chatQuery, setChatQuery] = useState('');
+    const [placeholders, setPlaceholders] = useState({
+        '~OVERVIEW_STATS_TABLE~': '',
+        '~COMPARISON_TABLE~': '',
+        '~SHAREHOLDING_TABLE~': '',
+        '~RATIOS_TABLE~': '',
+        '~COMPREHENSIVE_RATIOS_TABLE~': '',
+        '~FINANCIAL_PARAMETERS_TABLE~': '',
+        '~CHARTS_SECTION~': '',
+        '~FINANCIAL_DATA_TABLE~': ''
+    });
 
     const textareaRef = useRef(null);
 
