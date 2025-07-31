@@ -6,37 +6,38 @@ export const ChatMessageScreen = ({ chatId }) => {
     const { history } = useSelector(state => state?.chatReducer?.chatHistoryMap[chatId] || []);
 
     const renderLLMResponse = (llmResponse, ratiosData) => {
-        return llmResponse.map((segment, index) => {
-            if (typeof segment === 'string') {
-                return <ReactMarkdown key={index}>{segment}</ReactMarkdown>;
-            } else if (segment.placeholder === '~COMPREHENSIVE_RATIOS_TABLE~' && segment.type === 'table') {
-                return (
-                    <div key={index} className="company-stats-table">
-                        <h3>Comprehensive Ratios Table</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    {ratiosData.headers.map((header, i) => (
-                                        <th key={i}>{header}</th>
+    const responseArray = Array.isArray(llmResponse) ? llmResponse : [];
+    return responseArray.map((segment, index) => {
+        if (typeof segment === 'string') {
+            return <ReactMarkdown key={index}>{segment}</ReactMarkdown>;
+        } else if (segment.placeholder === '~COMPREHENSIVE_RATIOS_TABLE~' && segment.type === 'table') {
+            return (
+                <div key={index} className="company-stats-table">
+                    <h3>Comprehensive Ratios Table</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {ratiosData.headers.map((header, i) => (
+                                    <th key={i}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {ratiosData.data.map((row, i) => (
+                                <tr key={i}>
+                                    {ratiosData.headers.map((header, j) => (
+                                        <td key={j}>{row[header] || ''}</td>
                                     ))}
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {ratiosData.data.map((row, i) => (
-                                    <tr key={i}>
-                                        {ratiosData.headers.map((header, j) => (
-                                            <td key={j}>{row[header] || ''}</td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                );
-            }
-            return null;
-        });
-    };
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+        return null;
+    });
+};
 
     return (
         <>
@@ -45,6 +46,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                     const graph = (response?.chart_data?.plotly_json && JSON.parse(response?.chart_data?.plotly_json)) || {};
                     const llmResponse = response?.llm_response || [];
                     const ratiosData = response?.ratios_data?.filtered?.[0] || {};
+                    console.log(llmResponse);
 
                     return (
                         <div className="query-response-container" key={i}>
