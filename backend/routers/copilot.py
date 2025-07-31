@@ -2,7 +2,6 @@
 import os
 import logging
 import time  # Import time module
-import re
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any, Tuple
@@ -372,7 +371,6 @@ async def ask_copilot(request: CopilotRequest):
         except Exception as e:
             logger.error(f"Intent filtering failed: {str(e)}")
 
-    
     # Step 2: Extract classification details
     endpoint_type = classification.get('endpoint_type', 'financials')
     endpoint_mode = classification.get('endpoint_mode', 'base')
@@ -555,23 +553,11 @@ async def ask_copilot(request: CopilotRequest):
             "classification": classification
         }
 
-    # Step 12: Process LLM response for structured output
-    processed_llm_response = process_llm_response(
-        llm_response_text=gemini_result.get("response", ""),
-        display_recommendations=display_recommendations,
-        classification=classification,
-        company_overviews=company_overviews,
-        shareholding_data=shareholding_data,
-        ratios_data=ratios_data,
-        chart_data=chart_data,
-        financial_data=financial_data
-    )
-
-    # Step 13: Return comprehensive response
+    # Step 12: Return comprehensive response
     total_request_duration = time.time() - request_start_time
     logger.info(f"Total copilot request processed in {total_request_duration:.2f} seconds.")
     return {
-        "llm_response": processed_llm_response,
+        "llm_response": gemini_result.get("response"),
         "enhanced_context_data": enhanced_context_data,
         "company_overviews": company_overviews,
         "shareholding_data": shareholding_data,
@@ -603,92 +589,6 @@ async def ask_copilot(request: CopilotRequest):
             "total_context_length": len(combined_context)
         }
     }
-
-
-def process_llm_response(
-    llm_response_text: str,
-    display_recommendations: Dict,
-    classification: Dict,
-    company_overviews: List,
-    shareholding_data: List,
-    ratios_data: Dict,
-    chart_data: Dict,
-    financial_data: Dict
-) -> List[Any]:
-    """
-    Process the LLM response to split it by placeholders and inject metadata.
-    """
-    placeholder_patterns = [
-        '~OVERVIEW_STATS_TABLE~', '~COMPARISON_TABLE~', '~SHAREHOLDING_TABLE~',
-        '~RATIOS_TABLE~', '~COMPREHENSIVE_RATIOS_TABLE~', '~FINANCIAL_PARAMETERS_TABLE~',
-        '~CHARTS_SECTION~', '~FINANCIAL_DATA_TABLE~'
-    ]
-
-    # Create a regex to find any of the placeholders
-    regex = re.compile(f"({'|'.join(re.escape(p) for p in placeholder_patterns)})")
-    parts = regex.split(llm_response_text)
-
-    output = []
-    for part in parts:
-        if not part:
-            continue
-
-        if part in placeholder_patterns:
-            placeholder = part
-            metadata = {"placeholder": placeholder, "type": "error", "data": "Error loading table/chart"}
-
-            # Determine the type and check for data availability
-            if placeholder == '~CHARTS_SECTION~':
-                if display_recommendations.get('chart', False) and chart_data and not chart_data.get('error'):
-                    metadata = {
-                        "placeholder": placeholder,
-                        "type": "chart",
-                        "chart_type": classification.get('chart_endpoint_type', 'parameters'),
-                        "parameters": classification.get('chart_parameters', [])
-                    }
-                else:
-                    metadata["data"] = "Chart data is not available or not recommended for display."
-
-            else: # It's a table
-                table_type = "unknown"
-                data_available = False
-
-                if placeholder == '~OVERVIEW_STATS_TABLE~':
-                    table_type = "company_overview"
-                    if display_recommendations.get('company_overview', False) and any(is_valid_response(d) for d in company_overviews):
-                        data_available = True
-
-                elif placeholder == '~SHAREHOLDING_TABLE~':
-                    table_type = "shareholding"
-                    if display_recommendations.get('shareholding', False) and any(is_valid_response(d) for d in shareholding_data):
-                        data_available = True
-
-                elif placeholder in ['~RATIOS_TABLE~', '~COMPREHENSIVE_RATIOS_TABLE~', '~COMPARISON_TABLE~']:
-                    table_type = "ratios"
-                    if display_recommendations.get('table', False) and any(is_valid_response(d) for d in ratios_data.values()):
-                        data_available = True
-
-                elif placeholder in ['~FINANCIAL_PARAMETERS_TABLE~', '~FINANCIAL_DATA_TABLE~']:
-                    table_type = "financials"
-                    if display_recommendations.get('table', False) and any(is_valid_response(d) for table_data in financial_data.values() for d in table_data):
-                        data_available = True
-
-                if data_available:
-                    metadata = {
-                        "placeholder": placeholder,
-                        "type": "table",
-                        "table_type": table_type,
-                        "parameters": classification.get('identified_parameters', {})
-                    }
-                else:
-                    metadata["data"] = f"Table data for '{table_type}' is not available or not recommended for display."
-
-            output.append(metadata)
-        else:
-            output.append(part.strip())
-
-    # Filter out empty strings that may result from splitting
-    return [item for item in output if item]
 
 
 def consolidate_financial_data(results: List, task_order: List[str], classification: Dict) -> Dict:
