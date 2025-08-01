@@ -5,9 +5,17 @@ import {useSelector} from "react-redux";
 export const ChatMessageScreen = ({ chatId }) => {
     const { history } = useSelector(state => state?.chatReducer?.chatHistoryMap[chatId] || []);
 
-    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData) => {
+    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData) => {
     const responseArray = Array.isArray(llmResponse) ? llmResponse : [];
-    return responseArray.map((segment, index) => {
+    if (overviewData) {
+        return (
+            <ReactMarkdown>
+                <h2>Company Overview</h2>
+                {overviewData.overview_text}
+            </ReactMarkdown>
+        )
+    }
+        return responseArray.map((segment, index) => {
         if (typeof segment === 'string') {
             return <ReactMarkdown key={index}>{segment}</ReactMarkdown>;
         } else if (segment.placeholder === '~COMPREHENSIVE_RATIOS_TABLE~' || segment.placeholder === '~RATIOS_TABLE~' && segment.type === 'table') {
@@ -96,6 +104,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                     const ratiosData = response?.ratios_data?.filtered?.[0] || {};
                     const financialsData = response?.financial_data.balance?.[0] || {};
                     const shareholdingData = response?.shareholding_data?.[0] || {};
+                    const overviewData = response?.company_overviews?.overview?.[0] || {};
                     console.log(llmResponse);
 
                     return (
@@ -107,7 +116,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                                 {query}
                             </div>
                             <div className="chat-response">
-                                {renderLLMResponse(llmResponse, ratiosData, financialsData, shareholdingData)}
+                                {renderLLMResponse(llmResponse, ratiosData, financialsData, shareholdingData, overviewData)}
                                 {Object.keys(graph).length > 0 && (
                                     <div className="chart-plot">
                                         <PlotlyGraph graphData={graph} />
