@@ -8,14 +8,6 @@ export const ChatMessageScreen = ({ chatId }) => {
     const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData) => {
     const responseArray = Array.isArray(llmResponse) ? llmResponse : [];
         return responseArray.map((segment, index) => {
-             if (overviewData) {
-                return (
-                    <div key={`overview-${index}`} className="company-overview">
-                        <h2>Company Overview</h2>
-                        <ReactMarkdown>{overviewData}</ReactMarkdown>
-                    </div>
-                );
-            }
         if (typeof segment === 'string') {
              if (overviewData && index=== 0) {
                 return (
