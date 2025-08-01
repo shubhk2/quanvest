@@ -119,7 +119,7 @@ def create_stock_chart(company_number: int, data_type: str, period: str):
             x=main_dates,
             y=main_values,
             mode='lines+markers',
-            name=data_type.capitalize(),
+            name=data_type.capitalize()+'Rs.',
             line=dict(color='blue')
         )
     )
