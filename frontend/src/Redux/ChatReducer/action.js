@@ -38,6 +38,24 @@ export const setCurrentLLMResponse = (payload) => {
 
 export const sendChatRequest = (query, chatId, historyLength, setSelectedChat) => dispatch => {
     dispatch(loading());
+
+    // Create a new chat history immediately
+    if (!chatId) {
+        const placeholderPayload = {
+            chatId: historyLength,
+            title: query || `Chat ${historyLength}`,
+            historyData: {
+                query: query,
+                response: {
+                    llm_response: "Loading response...",
+                },
+                timestamp: new Date().toISOString()
+            }
+        };
+        dispatch(createChatHistory(placeholderPayload));
+        setSelectedChat(historyLength);
+    }
+
     const config = {
         method: 'POST',
         headers: {
@@ -49,37 +67,24 @@ export const sendChatRequest = (query, chatId, historyLength, setSelectedChat) =
             "raw_only": false
         }),
         url: `${process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL_LOCAL}/copilot/ask`
-    }
+    };
+
     return axios(config)
         .then(res => {
             dispatch(setCurrentLLMResponse(res.data));
-            if (chatId) {
-                const payload = {
-                    chatId,
-                    historyData: {
-                        query: query,
-                        response: res.data,
-                        timestamp: new Date().toISOString()
-                    }
+            const payload = {
+                chatId: chatId || historyLength,
+                historyData: {
+                    query: query,
+                    response: res.data,
+                    timestamp: new Date().toISOString()
                 }
-                dispatch(setChatHistory(payload))
-            } else {
-                const payload = {
-                    chatId: historyLength,
-                    title: query || `Chat ${chatId}`,
-                    historyData: {
-                        query: query,
-                        response: res.data,
-                        timestamp: new Date().toISOString()
-                    }
-                }
-                dispatch(createChatHistory(payload))
-                setSelectedChat(historyLength);
-            }
+            };
+            dispatch(setChatHistory(payload));
             return true;
         })
         .catch(err => {
             console.error(err?.response?.data || err);
             dispatch(error());
-        })
-}
+        });
+};
