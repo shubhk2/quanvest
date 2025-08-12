@@ -87,4 +87,4 @@ export const sendChatRequest = (query, chatId, historyLength, setSelectedChat) =
             console.error(err?.response?.data || err);
             dispatch(error());
         });
-};
+}
