@@ -6,7 +6,7 @@ import {Overview} from "../../Pages/Main-Pages/Company/Overview";
 export const ChatMessageScreen = ({ chatId }) => {
     const { history } = useSelector(state => state?.chatReducer?.chatHistoryMap[chatId] || []);
 
-    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData) => {
+    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData, compID) => {
     const responseArray = Array.isArray(llmResponse) ? llmResponse : ["Server is currently unavailable"];
     return responseArray.map((segment, index) => {
         if (typeof segment === 'string') {
