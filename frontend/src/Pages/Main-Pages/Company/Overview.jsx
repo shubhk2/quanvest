@@ -6,9 +6,11 @@ import { getOverviewDataFunc, getOverviewGraphDataFunc } from '../../../Redux/Ma
 import { useParams } from 'react-router-dom';
 import { splitOverview } from '../../../Utils/utilities';
 import { PlotlyGraph } from '../../../Components/PlotlyGraph';
-
-export const Overview = () => {
-    const { compId } = useParams();
+export const Overview = ({ID = ""}) => {
+    let { compId } = useParams() || {};
+    if (ID !== "") {
+        compId = ID;
+    }
     const [fullOverview, setFullOverview] = useState(false);
     const { overview: { data: { overview, stats }, graph } } = useSelector(store => store.mainReducer);
     const dispatch = useDispatch();

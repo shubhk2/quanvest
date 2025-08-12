@@ -1,11 +1,12 @@
 import ReactMarkdown from 'react-markdown';
 import { PlotlyGraph } from "../PlotlyGraph";
 import {useSelector} from "react-redux";
+import {Overview} from "../../Pages/Main-Pages/Company/Overview";
 
 export const ChatMessageScreen = ({ chatId }) => {
     const { history } = useSelector(state => state?.chatReducer?.chatHistoryMap[chatId] || []);
 
-    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData) => {
+    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData, compID) => {
     const responseArray = Array.isArray(llmResponse) ? llmResponse : [];
         return responseArray.map((segment, index) => {
         if (typeof segment === 'string') {
@@ -94,6 +95,10 @@ export const ChatMessageScreen = ({ chatId }) => {
                     </table>
                 </div>
             );
+        } else if (segment.placeholder === '~OVERVIEW_STATS_TABLE~' && segment.type === 'table') {
+            return (
+                <Overview ID={compID} />
+            );
         }
         return null;
     });
@@ -109,6 +114,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                     const financialsData = response?.financial_data.balance?.[0] || {};
                     const shareholdingData = response?.shareholding_data?.[0] || {};
                     const overviewData = response?.company_overviews[0]?.overview?.overview_text || "no overview text available";
+                    const compID = response?.company_id || "";
                     console.log(llmResponse);
 
                     return (
@@ -120,7 +126,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                                 {query}
                             </div>
                             <div className="chat-response">
-                                {renderLLMResponse(llmResponse, ratiosData, financialsData, shareholdingData, overviewData)}
+                                {renderLLMResponse(llmResponse, ratiosData, financialsData, shareholdingData, overviewData, compID)}
                                 {Object.keys(graph).length > 0 && (
                                     <div className="chart-plot">
                                         <PlotlyGraph graphData={graph} />
