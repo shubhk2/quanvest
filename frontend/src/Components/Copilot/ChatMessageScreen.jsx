@@ -117,6 +117,10 @@ export const ChatMessageScreen = ({ chatId }) => {
                     const compID = response?.company_id || "";
                     console.log(llmResponse);
 
+                    if(llmResponse === "Loading response...") {
+                        return;
+                    }
+
                     return (
                         <div className="query-response-container" key={i}>
                             <div className="chat-timestamp">
