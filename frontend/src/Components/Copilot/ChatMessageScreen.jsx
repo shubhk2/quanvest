@@ -113,7 +113,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                     const ratiosData = response?.ratios_data?.filtered?.[0] || {};
                     const financialsData = response?.financial_data?.balance?.[0] || {};
                     const shareholdingData = response?.shareholding_data?.[0] || {};
-                    const overviewData = response?.company_overviews?.[0].overview?.overview_text || "no overview text available";
+                    const overviewData = response?.company_overviews?.[0]?.overview?.overview_text || "no overview text available";
                     const compID = response?.company_id || "";
                     console.log(llmResponse);
 
