@@ -2,6 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import { PlotlyGraph } from "../PlotlyGraph";
 import {useSelector} from "react-redux";
 import {Overview} from "../../Pages/Main-Pages/Company/Overview";
+import {splitOverview} from "../../Utils/utilities";
 
 export const ChatMessageScreen = ({ chatId }) => {
     const { history } = useSelector(state => state?.chatReducer?.chatHistoryMap[chatId] || []);
@@ -15,7 +16,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                     <>
                         <div key={`overview-${index}`} className="company-overview">
                             <h2>Company Overview</h2>
-                            <ReactMarkdown>{overviewData}</ReactMarkdown>
+                            <ReactMarkdown>{splitOverview(overviewData).overview}</ReactMarkdown>
                         </div>
                         <ReactMarkdown key={index}>{segment}</ReactMarkdown>
                     </>
