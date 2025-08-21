@@ -121,8 +121,18 @@ export const InvestorInfo = () => {
                         type === "cg_board_composition" || type === "cg_committee_composition" || type === "cg_board_meetings"
                         || type === "rpt" || type ==="cg_committee_meetings") && investorInfo[type] ?
 
-                        <div className='table-container'>
-                            <table className='table'>
+                        <div className='table-container'
+                            style={{
+                            overflowX: 'auto',
+                            maxWidth: '100%'
+                            }}
+                        >
+                            <table className='table'
+                                   style={{
+                                    width: '100%',
+                                    borderCollapse: 'collapse'
+                                }}
+                            >
                                 {
                                     isLoading ?
                                         <tbody>
