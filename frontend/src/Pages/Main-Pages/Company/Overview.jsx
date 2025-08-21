@@ -8,11 +8,10 @@ import { splitOverview } from '../../../Utils/utilities';
 import { PlotlyGraph } from '../../../Components/PlotlyGraph';
 
 export const Overview = ({ID=""}) => {
-    const { compId } = useParams();
-    /*let { compId } = useParams() || {};
+    let { compId } = useParams() || {};
     if (ID !== "") {
         compId = ID;
-    }*/
+    }
     const [fullOverview, setFullOverview] = useState(false);
     const { overview: { data: { overview, stats }, graph } } = useSelector(store => store.mainReducer);
     const dispatch = useDispatch();

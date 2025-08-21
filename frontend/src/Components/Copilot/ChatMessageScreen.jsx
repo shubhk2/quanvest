@@ -115,7 +115,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                     const financialsData = response?.financial_data?.balance?.[0] || {};
                     const shareholdingData = response?.shareholding_data?.[0] || {};
                     const overviewData = response?.company_overviews?.[0]?.overview?.overview_text || "no overview text available";
-                    const compID = response?.company_id || "";
+                    const compID = response?.company_ids?.[0]?.toString() || "";
                     console.log(llmResponse);
 
                     if(llmResponse === "Loading response...") {
