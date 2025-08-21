@@ -18,6 +18,13 @@ export const InvestorInfo = () => {
     const types = useMemo(() => [
         "dividend",
         "shareholding_pattern",
+        "insider_trading",
+        "pledged_data",
+        "cg_board_composition",
+        "cg_committee_composition",
+        "cg_board_meetings",
+        "cg_committee_meetings",
+        "rpt",
         "earning_calls",
         "quarterly",
         "annual"
@@ -110,7 +117,10 @@ export const InvestorInfo = () => {
                         </div> : <></>
                 }
                 {
-                    (type === "dividend" || type === "shareholding_pattern") && investorInfo[type] ?
+                    (type === "dividend" || type === "shareholding_pattern" || type === "insider_trading" || type === "pledged_data" ||
+                        type === "cg_board_composition" || type === "cg_committee_composition" || type === "cg_board_meetings"
+                        || type === "rpt" || type ==="cg_committee_meetings") && investorInfo[type] ?
+
                         <div className='table-container'>
                             <table className='table'>
                                 {
