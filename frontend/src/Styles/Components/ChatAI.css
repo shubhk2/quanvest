@@ -109,20 +109,38 @@
 }
 
 .chat-ai-message-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     position: sticky;
     bottom: 0;
     width: 100%;
 }
 
 #message-input {
+    flex: 1;
     resize: none;
     overflow: hidden;
     min-height: 1.5em;
     max-height: 200px;
     line-height: 1.5em;
     padding: 8px;
-    width: 100%;
     box-sizing: border-box;
+}
+
+.chat-send-button {
+    padding: 10px 25px;
+    background-color: #40c057;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.chat-send-button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
 }
 
 .chat-ai-copilot-container .query-response-container {

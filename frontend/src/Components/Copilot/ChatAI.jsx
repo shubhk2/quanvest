@@ -95,7 +95,18 @@ export const ChatAI = () => {
                                 }
                             </div>
                             <div className="chat-ai-message-input">
-                                <textarea disable={isLoading} ref={textareaRef} id='message-input' rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery} placeholder="Type your prompt here..." ></textarea>
+                                <textarea
+                                    disable={isLoading} ref={textareaRef} id='message-input'
+                                    rows={1} onKeyDown={handleKeyDown} onInput={handleInput} value={chatQuery}
+                                    placeholder="Type your prompt here...">
+                                </textarea>
+                                <button
+                                    className="chat-send-button"
+                                    onClick={() => dispatch(sendChatRequest(chatQuery, selectedChat, chatHistory.length + 1, setSelectedChat))}
+                                    disabled={isLoading || !chatQuery.trim()}
+                                >
+                                    Send
+                                </button>
                             </div>
                         </div>
                     </div>
