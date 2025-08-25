@@ -7,7 +7,7 @@ import {splitOverview} from "../../Utils/utilities";
 export const ChatMessageScreen = ({ chatId }) => {
     const { history } = useSelector(state => state?.chatReducer?.chatHistoryMap[chatId] || []);
 
-    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData, compID) => {
+    const renderLLMResponse = (llmResponse, ratiosData, financialData, shareholdingData, overviewData, compID, dividendData, insiderData, rptData, pledgedData, corporateData) => {
     const responseArray = Array.isArray(llmResponse) ? llmResponse : ["Server is currently unavailable"];
     return responseArray.map((segment, index) => {
         if (typeof segment === 'string') {
@@ -100,7 +100,127 @@ export const ChatMessageScreen = ({ chatId }) => {
             return (
                 <Overview ID={compID} />
             );
-        }
+        } else if (segment.placeholder === '~dividend_TABLE~' && segment.type === 'table') {
+            return (
+                <div key={index} className="dividend-data-table">
+                    <h3>Dividend Table</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {dividendData?.headers?.map((header, i) => (
+                                    <th key={i}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {dividendData?.data?.map((row, i) => (
+                                <tr key={i}>
+                                    {dividendData?.headers?.map((header, j) => (
+                                        <td key={j}>{row[header] || ''}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        } else if (segment.placeholder === '~RPT_TABLE~' && segment.type === 'table') {
+            return (
+                <div key={index} className="rpt-data-table">
+                    <h3>Rpt Table</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {rptData?.headers?.map((header, i) => (
+                                    <th key={i}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rptData?.data?.map((row, i) => (
+                                <tr key={i}>
+                                    {rptData?.headers?.map((header, j) => (
+                                        <td key={j}>{row[header] || ''}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        } else if (segment.placeholder === '~PLEDGED_DATA_TABLE~' && segment.type === 'table') {
+            return (
+                <div key={index} className="pledged-data-table">
+                    <h3>Pledged Data Table</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {pledgedData?.headers?.map((header, i) => (
+                                    <th key={i}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pledgedData?.data?.map((row, i) => (
+                                <tr key={i}>
+                                    {pledgedData?.headers?.map((header, j) => (
+                                        <td key={j}>{row[header] || ''}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        } else if (segment.placeholder === '~CORPORATE_GOVERNANCE_TABLE~' && segment.type === 'table') {
+            return (
+                <div key={index} className="corporate-data-table">
+                    <h3>Corporate Governance Table</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {corporateData?.headers?.map((header, i) => (
+                                    <th key={i}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {corporateData?.data?.map((row, i) => (
+                                <tr key={i}>
+                                    {corporateData?.headers?.map((header, j) => (
+                                        <td key={j}>{row[header] || ''}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        } else if (segment.placeholder === '~INSIDER_TRADING_TABLE~' && segment.type === 'table') {
+            return (
+                <div key={index} className="insider-data-table">
+                    <h3>Insider Trading Table</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {insiderData?.headers?.map((header, i) => (
+                                    <th key={i}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {insiderData?.data?.map((row, i) => (
+                                <tr key={i}>
+                                    {insiderData?.headers?.map((header, j) => (
+                                        <td key={j}>{row[header] || ''}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }   
         return null;
     });
 };
@@ -111,9 +231,14 @@ export const ChatMessageScreen = ({ chatId }) => {
                 history.map(({ query, response, timestamp }, i) => {
                     const graph = (response?.chart_data?.plotly_json && JSON.parse(response?.chart_data?.plotly_json)) || {};
                     const llmResponse = response?.llm_response || [];
-                    const ratiosData = response?.ratios_data?.filtered?.[0] || {};
-                    const financialsData = response?.financial_data?.balance?.[0] || {};
-                    const shareholdingData = response?.shareholding_data?.[0] || {};
+                    const ratiosData = response?.ratios?.filtered?.[0] || {};
+                    const financialsData = response?.financial_statements?.balance?.[0] || {};
+                    const shareholdingData = response?.shareholding?.[0] || {};
+                    const dividendData = response?.dividend?.[0] || {};
+                    const insiderData = response?.insider_trading?.[0] || {};
+                    const rptData = response?.rpt?.[0] || {};
+                    const pledgedData = response?.pledged_data?.[0] || {};
+                    const corporateData = response?.corporate_governance?.[0] || {};
                     const overviewData = response?.company_overviews?.[0]?.overview?.overview_text || "no overview text available";
                     const compID = response?.company_ids?.[0]?.toString() || "";
                     console.log(llmResponse);
@@ -131,7 +256,7 @@ export const ChatMessageScreen = ({ chatId }) => {
                                 {query}
                             </div>
                             <div className="chat-response">
-                                {renderLLMResponse(llmResponse, ratiosData, financialsData, shareholdingData, overviewData, compID)}
+                                {renderLLMResponse(llmResponse, ratiosData, financialsData, shareholdingData, overviewData, compID, dividendData, insiderData, rptData, pledgedData, corporateData)}
                                 {Object.keys(graph).length > 0 && (
                                     <div className="chart-plot">
                                         <PlotlyGraph graphData={graph} />
