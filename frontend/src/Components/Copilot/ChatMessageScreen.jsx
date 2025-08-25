@@ -231,14 +231,14 @@ export const ChatMessageScreen = ({ chatId }) => {
                 history.map(({ query, response, timestamp }, i) => {
                     const graph = (response?.chart_data?.plotly_json && JSON.parse(response?.chart_data?.plotly_json)) || {};
                     const llmResponse = response?.llm_response || [];
-                    const ratiosData = response?.ratios?.filtered?.[0] || {};
-                    const financialsData = response?.financial_statements?.balance?.[0] || {};
-                    const shareholdingData = response?.shareholding?.[0] || {};
-                    const dividendData = response?.dividend?.[0] || {};
-                    const insiderData = response?.insider_trading?.[0] || {};
-                    const rptData = response?.rpt?.[0] || {};
-                    const pledgedData = response?.pledged_data?.[0] || {};
-                    const corporateData = response?.corporate_governance?.[0] || {};
+                    const ratiosData = response?.consolidated_data?.ratios?.filtered?.[0] || {};
+                    const financialsData = response?.consolidated_data?.financial_statements?.balance?.[0] || {};
+                    const shareholdingData = response?.consolidated_data?.shareholding?.[0] || {};
+                    const dividendData = response?.consolidated_data?.dividend?.[0] || {};
+                    const insiderData = response?.consolidated_data?.insider_trading?.[0] || {};
+                    const rptData = response?.consolidated_data?.rpt?.[0] || {};
+                    const pledgedData = response?.consolidated_data?.pledged_data?.[0] || {};
+                    const corporateData = response?.consolidated_data?.corporate_governance?.[0] || {};
                     const overviewData = response?.company_overviews?.[0]?.overview?.overview_text || "no overview text available";
                     const compID = response?.company_ids?.[0]?.toString() || "";
                     console.log(llmResponse);
